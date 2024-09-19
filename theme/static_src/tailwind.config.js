@@ -42,7 +42,12 @@ module.exports = {
         // '../../**/*.py'
     ],
     theme: {
-        extend: {},
+        extend: {
+                fontFamily: {
+                palanquin: ['Palanquin', 'sans-serif'],
+                montserrat: ['Montserrat', 'sans-serif'],
+            },
+        },
     },
     plugins: [
         /**

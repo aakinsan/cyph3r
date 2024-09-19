@@ -2,12 +2,26 @@
 {% load static %}
 {% block content %}
 <section class="flex justify-around items-center p-8">
-    <div class="w-full max-w-lg text-nowrap self-center">
-        <h1 class="text-4xl font-semibold text-slate-900">Your Cryptography Toolkit, <span class="text-orange-600">Simplified.</span></h1>
-        <p class="text-slate-500 text-xl pt-3">Key generation, secure split sharing, storage etc. — all in one place!</p>
+    <div class="w-2/5 flex flex-col max-w-lg">
+        <h1 class="text-4xl font-semibold text-nowrap self-center text-slate-900">Your Cryptography Toolkit, <span class="text-orange-600">Simplified.</span></h1>
+        <p class="text-slate-500 text-xl text-nowrap self-center pt-3">Key generation, secure split sharing, storage etc. — all in one place!</p>
+        <div class="flex justify-start self-center item-start font-sans mt-20 gap-16">
+                <div>
+                    <p class="text-lg text-center font-semibold">1K+</p>
+                    <p class="text-slate-500 text-base text-center">Keys <br />Generated</p>
+                </div>
+                <div>
+                    <p class="text-lg text-center font-semibold">500+</p>
+                    <p class="text-slate-500 text-base">Keys <br />Split</p>
+                </div>
+                <div>
+                    <p class="text-lg font-semibold text-center">250K+</p>
+                    <p class="text-slate-500 text-base text-center">Files <br />encrypted</p>
+                </div>
+        </div>
     </div>
 
-    <div class="w-full max-w-xl grid grid-rows-5 justify-between items-center gap-4">
+    <div class="w-2/5 max-w-xl grid grid-rows-5 justify-between items-center gap-4">
         <a href="#" class="group block w-full mx-auto rounded-lg p-6 bg-white ring-1 ring-slate-900/5 shadow-lg space-y-3 hover:bg-orange-500 hover:ring-orange-500">
             <div class="flex items-center space-x-3">
                 <h3 class="text-slate-900 group-hover:text-white text-sm text-center font-semibold">Key Generation</h3>
