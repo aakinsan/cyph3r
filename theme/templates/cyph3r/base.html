@@ -1,0 +1,31 @@
+{% load static %}
+{% load static tailwind_tags %}
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+    	<title>Cyph3r</title>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+		<link rel="icon" href="{% static 'images/image.png' %}" type="image/icon-x" />
+		{% tailwind_css %}
+	</head>
+
+	<body class="relative min-h-screen">
+		<header class="w-full">
+			<nav class="flex justify-between items-center py-8 px-8">
+				<a href="{% url 'index' %}" target="_blank" class="flex justify-start items-center gap-2">
+					<img src="{% static 'images/image1.svg' %}" alt="cyph3r logo" width="50" height="20" />
+					<div class="text-orange-500 text-xl font-thin">Cyph3r</div>
+				</a>
+				<div class="flex justify-between items-center gap-24">
+					<a href="{% url 'index' %}" class="rounded-full w-12 h-12 hover:bg-gray-200 grid place-content-center"><img src="{% static 'icons/cog.svg' %}" alt="cog logo" width="30" height="30" title="settings"/></a>
+					<a href="{% url 'index' %}" class="rounded-full w-12 h-12 hover:bg-gray-200 grid place-content-center"><img src="{% static 'icons/user.svg' %}" alt="cog logo" width="30" height="30" title="login"/></a>
+				</div>
+			</nav>
+		</header>
+			{% block content %}
+			{% endblock %}
+	</body>
+</html>
