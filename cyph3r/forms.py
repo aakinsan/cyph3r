@@ -133,7 +133,7 @@ class WirelessKeyInfoForm(forms.Form):
     )
 
 
-class WirelessPGPFileUploadForm(forms.Form):
+class WirelessProtectionStorageForm(forms.Form):
     provider_public_keys = MultipleFileField(
         required=True, help_text="Upload 3 SIM Provider PGP Public Key files."
     )

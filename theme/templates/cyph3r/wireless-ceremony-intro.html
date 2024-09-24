@@ -1,0 +1,22 @@
+{% load widget_tweaks %}
+
+<div id="container" class="bg-white shadow-md rounded-lg px-8 py-8 max-w-4xl w-full min-h-[655px] max-h-[655px]">
+    <div class="w-full p-6">
+            <h1 class="text-2xl font-semibold text-center leading-8 font-roboto text-gray-600">Wireless Key Ceremony</h1>
+            <div class="text-gray-500 font-roboto text-sm mt-2">
+                <p>This module will guide you through the process of securely generating, storing and distributing cryptographic
+                keys. To mitigate the risk of exposure before distribution, these keys will be encrypted with the PGP public key of the recepient. </p> <br />
+                <p>This app only accepts PGP public keys that are less than 5KB and are in the "ASCII Armored format" i.e. public keys with the begin and end headers of 
+                    <span class="bg-gray-200 px-1 py-0.5 text-sm font-mono rounded shadow-md text-gray-800">-----BEGIN PGP PUBLIC KEY BLOCK-----</span> and <span class="bg-gray-200 px-1 py-0.5 text-sm font-mono rounded shadow-md text-gray-800"">-----END PGP PUBLIC KEY BLOCK-----</span> respectively.</p> <br />
+                <p>While strong measures have been taken to secure the key generation and distribution process, it is important that you follow best practices
+                    for securing the keys. At a minimum, ensure that the devices receiving the keys are trusted and that no unauthorized individuals have access to your environment.</p>
+                
+            </div>
+             <!-- Submit Button -->
+            <div class="mt-56 flex justify-end">
+                <button type="button" hx-get="{% url 'wireless_key_info_form' %}" hx-trigger="click" hx-swap="outerHTML" hx-target="#container" class="bg-orange-500 hover:bg-orange-400 text-white mt-4 px-6 py-2 rounded-lg transition">
+                    Get Started
+                </button>
+            </div>
+    </div>
+</div>

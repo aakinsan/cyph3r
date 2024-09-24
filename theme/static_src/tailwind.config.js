@@ -43,9 +43,10 @@ module.exports = {
     ],
     theme: {
         extend: {
-                fontFamily: {
+            fontFamily: {
                 palanquin: ['Palanquin', 'sans-serif'],
                 montserrat: ['Montserrat', 'sans-serif'],
+                roboto: ['Roboto', 'sans-serif'],
             },
         },
     },

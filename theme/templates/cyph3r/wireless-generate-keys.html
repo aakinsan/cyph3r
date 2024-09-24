@@ -1,14 +1,15 @@
 {% load widget_tweaks %}
 
 <div id="container" class="bg-white shadow-md rounded-lg px-8 py-8 max-w-4xl w-full min-h-[655px] max-h-[655px]">
-    <div class="text-center">Map</div>
+    <div class="text-center">Downloads</div>
     <div class="w-full justify-center items-center grid grid-cols-2 p-8">
-        <!-- Form Header -->
-        <div class="max-w-sm justify-self-center self-center">
-            <h1 class="text-2xl font-semibold text-gray-900">Generating Keys</h1>
-            <p class="text-gray-600 mt-2">
-                Provide Identifier to describe Key <br> Select Key Type and Key Size.
-            </p>
+        <div class="bg-gray-100 flex items-center justify-center min-h-screen">
+            <div class="text-center p-6 bg-white shadow-md rounded-lg">
+                <h1 class="text-2xl font-bold text-gray-700 mb-4">Provider Keys</h1>
+                <a href="{{ file_url }}" download class="inline-block px-6 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-700 transition">
+                    Download File
+                </a>
+            </div>
         </div>
 
     </div>

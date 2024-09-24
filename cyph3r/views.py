@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.conf import settings
 import os
 from django.contrib import messages
-from .forms import WirelessKeyInfoForm, WirelessPGPFileUploadForm
+from .forms import WirelessKeyInfoForm, WirelessProtectionStorageForm
 from .crypto import CryptoManager
 from pprint import pprint
 
@@ -13,13 +13,16 @@ def index(request):
 
 
 def wireless(request):
-    form = WirelessKeyInfoForm()
-    return render(request, "cyph3r/wireless-forms.html", {"form": form})
+    return render(request, "cyph3r/wireless.html")
 
 
 ##############
 # HTMX Views #
 ##############
+
+
+def wireless_ceremony_intro(request):
+    return render(request, "cyph3r/wireless-ceremony-intro.html")
 
 
 def wireless_key_info_form(request):
@@ -31,7 +34,7 @@ def wireless_key_info_form(request):
     )
 
 
-def wireless_pgp_upload_form(request):
+def wireless_key_protection_storage_form(request):
     """
     Stores key information into session and renders the PGP file upload form.
     """
@@ -59,8 +62,8 @@ def wireless_pgp_upload_form(request):
             # Render the PGP file upload form on successful form submission
             return render(
                 request,
-                "cyph3r/wireless-pgp-upload.html",
-                {"form": WirelessPGPFileUploadForm()},
+                "cyph3r/wireless-key-protection-storage.html",
+                {"form": WirelessProtectionStorageForm()},
             )
         else:
             # Render the key info form if form validation fails
@@ -73,12 +76,12 @@ def wireless_generate_keys(request):
     """
 
     # Initialize the form for file upload
-    form = WirelessPGPFileUploadForm()
+    form = WirelessProtectionStorageForm()
 
     # Check if the request is a POST request and includes HTMX headers
     if request.method == "POST" and request.htmx:
         # Populate the form with POST data and PGP public key files
-        form = WirelessPGPFileUploadForm(request.POST, request.FILES)
+        form = WirelessProtectionStorageForm(request.POST, request.FILES)
 
         # Validate the form data
         if form.is_valid():
@@ -120,7 +123,7 @@ def wireless_generate_keys(request):
                 key_share_hex = cm.bytes_to_hex(shares[key_index - 1])
 
                 # Create the filename for the encrypted key component
-                file_name = f"Key Component {key_index}-{keyid}.txt.gpg"
+                file_name = f"Provider-Key-Component-{key_index}-{keyid}.txt.gpg"
                 save_path = os.path.join(settings.MEDIA_ROOT, file_name)
 
                 # Format the key share, KCV, key type, and size into a structured text format for provider
