@@ -101,6 +101,10 @@ def wireless_generate_keys(request):
             print(f"secret key: {secret_key}")
             print(f"shares = {shares}")
 
+            # Initialize the lists to store the filenames of the encrypted keys (or shares) for download
+            provider_files = []
+            security_officer_files = []
+
             # Loop through each uploaded provider's public key file
             for key_index, file in enumerate(
                 form.cleaned_data["provider_public_keys"], start=1
@@ -122,11 +126,12 @@ def wireless_generate_keys(request):
                 # Convert the key share to a hex string format
                 key_share_hex = cm.bytes_to_hex(shares[key_index - 1])
 
-                # Create the filename for the encrypted key component
-                provider_files = []
-                file_name = f"Provider-Key-Component-{key_index}-{keyid}.txt.gpg"
-                save_path = os.path.join(settings.MEDIA_ROOT, file_name)
-                provider_files.append(file_name)
+                # Create the filename for the encrypted key component and append filename to provider_files list for download
+                provider_file_name = (
+                    f"provider-{key_type}-key-component-{key_index}-{keyid}.txt.gpg"
+                )
+                save_path = os.path.join(settings.MEDIA_ROOT, provider_file_name)
+                provider_files.append(provider_file_name)
 
                 # Format the key share, KCV, key type, and size into a structured text format for provider
                 key_share_data = cm.gd_text_format(
@@ -160,9 +165,14 @@ def wireless_generate_keys(request):
                 # Convert the secret key to a hex string format
                 secret_key_hex = cm.bytes_to_hex(secret_key)
 
-                # Create the filename for the encrypted key
-                file_name = f"{key_type} Key-{keyid}.txt.gpg"
-                save_path = os.path.join(settings.MEDIA_ROOT, file_name)
+                # Create the filename for the encrypted key and append filename to security_officer_files list for download
+                security_officer_file_name = (
+                    f"security-officer-{key_type}-key-{keyid}.txt.gpg"
+                )
+                save_path = os.path.join(
+                    settings.MEDIA_ROOT, security_officer_file_name
+                )
+                security_officer_files.append(security_officer_file_name)
 
                 # Encrypt the key share data using the provider's public key
                 encrypted_data = cm.gpg.encrypt(
@@ -177,7 +187,10 @@ def wireless_generate_keys(request):
             return render(
                 request,
                 "cyph3r/wireless-generate-keys.html",
-                {"provider_files": provider_files},
+                {
+                    "provider_files": provider_files,
+                    "security_officer_files": security_officer_files,
+                },
             )
         else:
             # Render the PGP Upload form again with validation errors if the form is invalid
