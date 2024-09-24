@@ -123,8 +123,10 @@ def wireless_generate_keys(request):
                 key_share_hex = cm.bytes_to_hex(shares[key_index - 1])
 
                 # Create the filename for the encrypted key component
+                provider_files = []
                 file_name = f"Provider-Key-Component-{key_index}-{keyid}.txt.gpg"
                 save_path = os.path.join(settings.MEDIA_ROOT, file_name)
+                provider_files.append(file_name)
 
                 # Format the key share, KCV, key type, and size into a structured text format for provider
                 key_share_data = cm.gd_text_format(
@@ -172,7 +174,11 @@ def wireless_generate_keys(request):
                     fp.write(encrypted_data.data)
 
             # Render the success page upon successful key generation and encryption
-            return render(request, "cyph3r/wireless-generate-keys.html")
+            return render(
+                request,
+                "cyph3r/wireless-generate-keys.html",
+                {"provider_files": provider_files},
+            )
         else:
             # Render the PGP Upload form again with validation errors if the form is invalid
             return render(request, "cyph3r/wireless-pgp-upload.html", {"form": form})
