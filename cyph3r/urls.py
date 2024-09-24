@@ -27,6 +27,10 @@ htmx_urlpatterns = [
         views.wireless_ceremony_intro,
         name="wireless_ceremony_intro",
     ),
+    path(
+        "wireless-test/",
+        views.wireless_test,
+    ),
 ]
 
 urlpatterns += htmx_urlpatterns

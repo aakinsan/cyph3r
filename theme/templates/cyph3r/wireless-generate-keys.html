@@ -1,23 +1,20 @@
 {% load widget_tweaks %}
 
 <div id="container" class="bg-white shadow-md rounded-lg px-8 py-8 max-w-4xl w-full min-h-[655px] max-h-[655px]">
-    <div class="text-center font-semibold text-xl font-roboto text-gray-600">Downloads</div>
-    <div class="w-full justify-center items-center grid-cols-2 gap-5 grid p-8">
-            <div class="text-center p-6 bg-white shadow-md mt-2 rounded-lg max-w-xs">
-                <h1 class="text-gray-500 font-roboto text-sm">Provider Keys</h1>
-                {% for provider_file in provider_files %}
-                    <a href="{{ MEDIA_URL }}{{ provider_file }}" download="{{ provider_file }}" class="inline-block px-6 py-2 bg-orange-500 text-white rounded-lg shadow hover:bg-orange-400 transition">
-                        Download Provider Key
-                    </a>
-                {% endfor %}
-            </div>
-            <div class="text-center p-6 bg-white shadow-md mt-2 rounded-lg max-w-xs">
-                <h1 class="text-gray-500 font-roboto text-sm">Security Officer Keys</h1>
-                {% for security_officer_file in security_officer_files %}
-                    <a href="{{ MEDIA_URL }}{{ security_officer_file }}" download="{{ security_officer_file }}" class="inline-block px-6 py-2 bg-orange-500 text-white rounded-lg shadow hover:bg-orange-400 transition">
-                        Download Security Officer Key
-                    </a>
-                {% endfor %}
+    <div class="text-center font-semibold text-xl font-roboto text-gray-500">Downloads</div>
+    <div class="w-full justify-center items-center flex">
+        <div class="w-full p-8 shadow-md rounded-lg">
+            {% for provider_file in provider_files %}
+                <a href="{{ MEDIA_URL }}{{ provider_file }}" download="{{ provider_file }}" class="inline-block w-full px-6 py-2 mt-4 bg-orange-500 text-white text-sm text-center rounded-lg shadow hover:bg-orange-400 transition">
+                    {{ provider_file }}
+                </a>
+            {% endfor %}
+
+            {% for security_officer_file in security_officer_files %}
+                <a href="{{ MEDIA_URL }}{{ security_officer_file }}" download="{{ security_officer_file }}" class="inline-block w-full px-6 py-2 mt-4 bg-orange-500 text-white text-sm text-center rounded-lg shadow hover:bg-orange-400 transition">
+                    {{ security_officer_file }}
+                </a>
+            {% endfor %}
             </div>
     </div>
 </div>
