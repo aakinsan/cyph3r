@@ -13,11 +13,13 @@
       type="image/icon-x"
     />
     {% tailwind_css %}
+    <script src="https://unpkg.com/htmx.org@1.9.3" defer></script>
+    
   </head>
 
   <body class="relative min-h-screen">
-    <header class="w-full">
-      <nav class="flex justify-between items-center py-8 px-8">
+    <header class="w-full absolute z-10 bg-white">
+      <nav class="flex justify-between items-center py-4 px-8">
         <a
           href="{% url 'index' %}"
           target="_blank"
