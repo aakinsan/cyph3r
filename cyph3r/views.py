@@ -7,6 +7,7 @@ from .forms import (
     WirelessGCPStorageForm,
     WirelessPGPUploadForm,
 )
+from .files import create_provider_encrypted_key_files, create_milenage_encrypted_file
 from .crypto import CryptoManager
 from pprint import pprint
 
@@ -133,97 +134,28 @@ def wireless_generate_keys(request):
             # Retrieve key size and type from the session
             key_size = int(request.session["key_size"])
             key_type = request.session["key_type"]
+            protocol = request.session["protocol"]
 
             # Generate the secret key as a random byte string of the given key size
             secret_key = cm.generate_random_key_bytes(key_size)
 
-            # Split the secret key into shares using XOR splitting, creating 3 shares
-            shares = cm.xor_split_secret(secret_key, key_size, 3)
+            provider_files = create_provider_encrypted_key_files(
+                form,
+                cm,
+                secret_key,
+                key_size,
+                key_type,
+                protocol,
+                number_of_shares=3,
+            )
 
-            print(f"secret key: {secret_key}")
-            print(f"shares = {shares}")
+            # Check if an Engineer's PGP public key to encrypt milenage keys was uploaded
+            if form.cleaned_data["milenage_public_key"]:
 
-            # Initialize the lists to store the filenames of the encrypted keys (or shares) for download
-            provider_files = []
-            security_officer_files = []
-
-            # Loop through each uploaded provider's public key file
-            for key_index, file in enumerate(
-                form.cleaned_data["provider_public_keys"], start=1
-            ):
-                # Reset the file pointer to the beginning of the file
-                file.seek(0)
-
-                # Import the Provider's PGP public keys from the uploaded file
-                cm.gpg.import_keys(file.read())
-
-                # Retrieve the latest imported key's fingerprint and keyid
-                imported_key = cm.gpg.list_keys()[-1]
-                fingerprint = imported_key["fingerprint"]
-                keyid = imported_key["keyid"]
-
-                # Generate Key Check Value (KCV) for the current key share
-                kcv = cm.generate_kcv(shares[key_index - 1])
-
-                # Convert the key share to a hex string format
-                key_share_hex = cm.bytes_to_hex(shares[key_index - 1])
-
-                # Create the filename for the encrypted key component and append filename to provider_files list for download
-                provider_file_name = (
-                    f"provider-{key_type}-key-component-{key_index}-{keyid}.txt.gpg"
+                # Create the encrypted milenage key file
+                milenage_file = create_milenage_encrypted_file(
+                    form, cm, secret_key, key_type
                 )
-                save_path = os.path.join(settings.MEDIA_ROOT, provider_file_name)
-                provider_files.append(provider_file_name)
-
-                # Format the key share, KCV, key type, and size into a structured text format for provider
-                key_share_data = cm.gd_text_format(
-                    key_share_hex, kcv, key_type, key_size, key_index
-                )
-
-                # Encrypt the key share data using the provider's public key
-                encrypted_data = cm.gpg.encrypt(
-                    key_share_data, fingerprint, always_trust=True, armor=False
-                )
-
-                # Save the encrypted key share to the designated file
-                with open(save_path, "wb") as fp:
-                    fp.write(encrypted_data.data)
-
-            # Check if an Engineer's public key was uploaded
-            if form.cleaned_data["engineer_public_key"]:
-                file = form.cleaned_data["engineer_public_key"]
-
-                # Reset the file pointer to the beginning of the file
-                file.seek(0)
-
-                # Import the engineer's PGP public keys from the uploaded file
-                cm.gpg.import_keys(file.read())
-
-                # Retrieve the latest imported key's fingerprint and keyid
-                imported_key = cm.gpg.list_keys()[-1]
-                fingerprint = imported_key["fingerprint"]
-                keyid = imported_key["keyid"]
-
-                # Convert the secret key to a hex string format
-                secret_key_hex = cm.bytes_to_hex(secret_key)
-
-                # Create the filename for the encrypted key and append filename to security_officer_files list for download
-                security_officer_file_name = (
-                    f"security-officer-{key_type}-key-{keyid}.txt.gpg"
-                )
-                save_path = os.path.join(
-                    settings.MEDIA_ROOT, security_officer_file_name
-                )
-                security_officer_files.append(security_officer_file_name)
-
-                # Encrypt the key share data using the provider's public key
-                encrypted_data = cm.gpg.encrypt(
-                    secret_key_hex, fingerprint, always_trust=True, armor=False
-                )
-
-                # Save the encrypted secret key to the designated file
-                with open(save_path, "wb") as fp:
-                    fp.write(encrypted_data.data)
 
             # Render the success page upon successful key generation and encryption
             return render(
@@ -231,7 +163,7 @@ def wireless_generate_keys(request):
                 "cyph3r/wireless-generate-keys.html",
                 {
                     "provider_files": provider_files,
-                    "security_officer_files": security_officer_files,
+                    "milenage_file": milenage_file,
                 },
             )
         else:

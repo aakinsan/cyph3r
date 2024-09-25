@@ -1,20 +1,24 @@
 {% load widget_tweaks %}
-
-<div id="container" class="bg-white shadow-md rounded-lg px-8 py-8 max-w-4xl w-full min-h-[655px] max-h-[655px]">
-    <div class="text-center font-semibold text-xl font-roboto text-gray-500">Downloads</div>
-    <div class="w-full justify-center items-center flex">
-        <div class="w-full p-8 shadow-md rounded-lg">
-            {% for provider_file in provider_files %}
-                <a href="{{ MEDIA_URL }}{{ provider_file }}" download="{{ provider_file }}" class="inline-block w-full px-6 py-2 mt-4 bg-orange-500 text-white text-sm text-center rounded-lg shadow hover:bg-orange-400 transition">
-                    {{ provider_file }}
-                </a>
-            {% endfor %}
-
-            {% for security_officer_file in security_officer_files %}
-                <a href="{{ MEDIA_URL }}{{ security_officer_file }}" download="{{ security_officer_file }}" class="inline-block w-full px-6 py-2 mt-4 bg-orange-500 text-white text-sm text-center rounded-lg shadow hover:bg-orange-400 transition">
-                    {{ security_officer_file }}
-                </a>
-            {% endfor %}
+    
+    <div class="w-full justify-center items-start flex flex-col gap-4 max-w-md p-8 shadow-md bg-white rounded-lg">
+            <div>
+                <p class="text-start font-palanquin text-xs">Provider Keys</p>
+                <ul>
+                {% for provider_file in provider_files %}
+                    <li>
+                    <a href="{{ MEDIA_URL }}{{ provider_file }}" download="{{ provider_file }}" class="w-full mt-4 underline underline-offset-4 font-palanquin  decoration-blue-600 text-blue-600 text-xs">
+                        {{ provider_file|capfirst }}
+                    </a>
+                    </li>
+                {% endfor %}
+                </ul>
             </div>
+            {% if milenage_file %}
+            <div>
+                <p class="text-start font-palanquin text-xs">Milenage Keys</p>
+                <a href="{{ MEDIA_URL }}{{ milenage_file }}" download="{{ milenage_file }}" class="w-full mt-1 underline font-palanquin underline-offset-4 decoration-blue-600 text-blue-600 text-xs">
+                    {{ milenage_file|capfirst }}
+                </a>
+            </div>
+            {% endif %}
     </div>
-</div>
