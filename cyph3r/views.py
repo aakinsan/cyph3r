@@ -5,7 +5,7 @@ from django.contrib import messages
 from .forms import (
     WirelessKeyInfoForm,
     WirelessGCPStorageForm,
-    WirelessProtectionStorageForm,
+    WirelessPGPUploadForm,
 )
 from .crypto import CryptoManager
 from pprint import pprint
@@ -82,7 +82,7 @@ def wireless_gcp_storage_form(request):
         )
 
 
-def wireless_key_protection_storage_form(request):
+def wireless_pgp_upload_form(request):
     """
     Stores key information into session and renders the PGP file upload form.
     """
@@ -107,8 +107,8 @@ def wireless_key_protection_storage_form(request):
             # Render the PGP file upload form on successful form submission
             return render(
                 request,
-                "cyph3r/wireless-key-protection-storage.html",
-                {"form": WirelessProtectionStorageForm()},
+                "cyph3r/wireless-pgp-upload.html",
+                {"form": WirelessPGPUploadForm()},
             )
         else:
             # Render the key info form if form validation fails
@@ -120,13 +120,10 @@ def wireless_generate_keys(request):
     Validates PGP public keys, generates secrets/shares, encrypts with PGP key.
     """
 
-    # Initialize the form for file upload
-    form = WirelessProtectionStorageForm()
-
     # Check if the request is a POST request and includes HTMX headers
     if request.method == "POST" and request.htmx:
         # Populate the form with POST data and PGP public key files
-        form = WirelessProtectionStorageForm(request.POST, request.FILES)
+        form = WirelessPGPUploadForm(request.POST, request.FILES)
 
         # Validate the form data
         if form.is_valid():

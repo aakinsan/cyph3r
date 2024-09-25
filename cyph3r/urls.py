@@ -23,9 +23,9 @@ htmx_urlpatterns = [
         name="wireless_gcp_storage_form",
     ),
     path(
-        "wireless-key-protection-storage/",
-        views.wireless_key_protection_storage_form,
-        name="wireless_key_protection_storage_form",
+        "wireless-pgp-upload/",
+        views.wireless_pgp_upload_form,
+        name="wireless_pgp_upload_form",
     ),
     path(
         "wireless-generate-keys/",

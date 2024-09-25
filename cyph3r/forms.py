@@ -86,7 +86,7 @@ class WirelessGCPStorageForm(forms.Form):
     )
 
 
-class WirelessProtectionStorageForm(forms.Form):
+class WirelessPGPUploadForm(forms.Form):
     security_officer_public_keys = MultipleFileField(
         required=False, help_text="Upload 5 PGP Public keys for shamir secret sharing"
     )
