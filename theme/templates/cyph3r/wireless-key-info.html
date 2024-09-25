@@ -1,7 +1,7 @@
 {% load widget_tweaks %}
     <div id="form" class="w-full flex justify-center p-2 items-center">
         <!-- Form Start -->
-        <form method="POST" hx-post="{% url 'wireless_key_protection_storage_form' %}" hx-trigger="submit" hx-swap="outerHTML" hx-target="#form" enctype="multipart/form-data" class="w-full max-w-sm  bg-white shadow-md rounded-lg px-4 pt-4 pb-4 flex-1 overflow-auto">
+        <form method="POST" hx-post="{% url 'wireless_gcp_storage_form' %}" hx-trigger="submit" hx-swap="outerHTML" hx-target="#form" class="w-full max-w-sm  bg-white shadow-md rounded-lg px-4 pt-4 pb-4 flex-1 overflow-auto">
             <div class="mb-2">
                 {% csrf_token %}
                 <!-- Hidden Fields -->

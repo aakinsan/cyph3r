@@ -2,7 +2,11 @@ from django.shortcuts import render, redirect
 from django.conf import settings
 import os
 from django.contrib import messages
-from .forms import WirelessKeyInfoForm, WirelessProtectionStorageForm
+from .forms import (
+    WirelessKeyInfoForm,
+    WirelessGCPStorageForm,
+    WirelessProtectionStorageForm,
+)
 from .crypto import CryptoManager
 from pprint import pprint
 
@@ -38,12 +42,10 @@ def wireless_key_info_form(request):
     )
 
 
-def wireless_key_protection_storage_form(request):
+def wireless_gcp_storage_form(request):
     """
-    Stores key information into session and renders the PGP file upload form.
+    Renders GCP Storage form
     """
-    form = WirelessKeyInfoForm()
-
     # Check if the request is a POST request and includes HTMX headers
     if request.method == "POST" and request.htmx:
         print(request.POST)
@@ -63,6 +65,45 @@ def wireless_key_protection_storage_form(request):
                 }
             )
 
+            # Render the GCP Storage form on successful form submission
+            return render(
+                request,
+                "cyph3r/wireless-gcp-storage.html",
+                {"form": WirelessGCPStorageForm()},
+            )
+        else:
+            # Render the key info form if form validation fails
+            return render(request, "cyph3r/wireless-key-info.html", {"form": form})
+    else:
+        return render(
+            request,
+            "cyph3r/wireless-gcp-storage.html",
+            {"form": WirelessGCPStorageForm()},
+        )
+
+
+def wireless_key_protection_storage_form(request):
+    """
+    Stores key information into session and renders the PGP file upload form.
+    """
+    # Check if the request is a POST request and includes HTMX headers
+    if request.method == "POST" and request.htmx:
+        print(request.POST)
+
+        # Bind the form with POST data for the key information
+        form = WirelessGCPStorageForm(request.POST)
+
+        # Validate the form data
+        if form.is_valid():
+            # Store key information into the session
+            request.session.update(
+                {
+                    "gcp_project_id": form.cleaned_data["gcp_project_id"],
+                    "gcp_kms_keyring": form.cleaned_data["gcp_kms_keyring"],
+                    "gcp_kms_key": form.cleaned_data["gcp_kms_key"],
+                }
+            )
+
             # Render the PGP file upload form on successful form submission
             return render(
                 request,
@@ -71,7 +112,7 @@ def wireless_key_protection_storage_form(request):
             )
         else:
             # Render the key info form if form validation fails
-            return render(request, "cyph3r/wireless-key-info.html", {"form": form})
+            return render(request, "cyph3r/wireless-gcp-storage.html", {"form": form})
 
 
 def wireless_generate_keys(request):

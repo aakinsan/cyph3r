@@ -8,9 +8,9 @@ urlpatterns = [
 
 htmx_urlpatterns = [
     path(
-        "wireless-key-protection-storage/",
-        views.wireless_key_protection_storage_form,
-        name="wireless_key_protection_storage_form",
+        "wireless-ceremony-intro/",
+        views.wireless_ceremony_intro,
+        name="wireless_ceremony_intro",
     ),
     path(
         "wireless-key-info/",
@@ -18,18 +18,19 @@ htmx_urlpatterns = [
         name="wireless_key_info_form",
     ),
     path(
+        "wireless-gcp-storage/",
+        views.wireless_gcp_storage_form,
+        name="wireless_gcp_storage_form",
+    ),
+    path(
+        "wireless-key-protection-storage/",
+        views.wireless_key_protection_storage_form,
+        name="wireless_key_protection_storage_form",
+    ),
+    path(
         "wireless-generate-keys/",
         views.wireless_generate_keys,
         name="wireless_generate_keys",
-    ),
-    path(
-        "wireless-ceremony-intro/",
-        views.wireless_ceremony_intro,
-        name="wireless_ceremony_intro",
-    ),
-    path(
-        "wireless-test/",
-        views.wireless_test,
     ),
 ]
 
