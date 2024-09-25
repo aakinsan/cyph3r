@@ -3,6 +3,7 @@ import tempfile
 import gnupg
 import binascii
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes, aead
+from cryptography import exceptions as crypto_exceptions
 from Crypto.Protocol.SecretSharing import Shamir
 
 
@@ -39,6 +40,26 @@ class CryptoManager:
     def decrypt_with_pgp(self, encrypted_data, passphrase):
         return self.gpg.decrypt(encrypted_data, passphrase=passphrase)
 
+    def encrypt_with_aes_gcm(self, key, nonce, plaintext, aad=None):
+        """Encrypts data using AES-GCM."""
+        aesgcm = aead.AESGCM(key)
+        try:
+            ct = aesgcm.encrypt(nonce, plaintext, aad)
+            return ct
+        except crypto_exceptions.OverflowError as err:
+            print("Encryption failed: {}".format(err))
+            return None
+
+    def decrypt_with_aes_gcm(self, key, nonce, ciphertext, aad=None):
+        """Encrypts data using AES-GCM."""
+        aesgcm = aead.AESGCM(key)
+        try:
+            pt = aesgcm.decrypt(nonce, ciphertext, aad)
+            return pt
+        except crypto_exceptions.InvalidTag as err:
+            print("Decryption failed: {}".format(err))
+            return None
+
     def encrypt_with_aes(self, key, data):
         iv = secrets.token_bytes(16)
         cipher = Cipher(algorithms.AES(key), modes.CFB(iv))
@@ -51,12 +72,15 @@ class CryptoManager:
         decryptor = cipher.decryptor()
         return decryptor.update(encrypted_data[16:]) + decryptor.finalize()
 
-    def shamir_split_secret(self, secret, total_shares, threshold_shares):
-        # Convert secret to hexadecimal for compatibility with Shamir's Secret Sharing
-        pass
+    def shamir_split_secret(
+        self, threshold_shares: int, total_shares: int, secret: bytes
+    ) -> list:
+        """Splits 128 bits secret into shares using Shamir's Secret Sharing."""
+        return Shamir.split(threshold_shares, total_shares, secret)
 
-    def shamir_reconstruct_secret(self, shares):
-        pass
+    def shamir_reconstruct_secret(self, shares: list) -> bytes:
+        """Reconstructs the secret from shares using Shamir's Secret Sharing."""
+        return Shamir.combine(shares)
 
     def xor_split_secret(self, secret_key, key_size, num_shares):
         """
@@ -112,114 +136,3 @@ class CryptoManager:
     def gd_text_format(self, key_share, kcv, key_type, key_size, key_index):
         data = f"Key Name: {key_type.title()}\n\nKey ID/Index: {key_index}\n\nKey Component {key_index} ({int(key_size/8)} bytes):\n{key_share.upper()}\n\nKey Component {key_index} KCV (AES ECB):\n{kcv.upper()}"
         return data.encode("utf-8")
-
-
-# Large prime number (for 256-bit security level)
-_PRIME = 2**256 - 189
-
-
-def _secure_random_int(prime):
-    """Generates a secure random integer in the range [0, prime-1]"""
-    return secrets.randbelow(prime)
-
-
-def _eval_at(poly, x, prime):
-    """Evaluates the polynomial (represented as a list of coefficients) at x modulo prime."""
-    result = 0
-    for coefficient in reversed(poly):
-        result = (result * x + coefficient) % prime
-    return result
-
-
-def make_random_shares(secret, minimum, shares, prime=_PRIME):
-    """
-    Generates a Shamir's Secret Sharing scheme for the given secret.
-    Returns share points (x, y).
-    """
-    if minimum > shares:
-        raise ValueError(
-            "The number of shares must be greater than or equal to the threshold."
-        )
-
-    # Secret is the constant term of the polynomial
-    poly = [secret] + [_secure_random_int(prime) for _ in range(minimum - 1)]
-
-    points = [(i, _eval_at(poly, i, prime)) for i in range(1, shares + 1)]
-    return points
-
-
-def _extended_gcd(a, b):
-    """Extended Euclidean Algorithm to find modular inverse"""
-    x, last_x = 0, 1
-    y, last_y = 1, 0
-    while b:
-        q = a // b
-        a, b = b, a % b
-        x, last_x = last_x - q * x, x
-        y, last_y = last_y - q * y, y
-    return last_x
-
-
-def _mod_inverse(x, prime):
-    """Returns modular inverse of x under prime using the extended Euclidean algorithm"""
-    return _extended_gcd(x, prime) % prime
-
-
-def _lagrange_interpolate(x, x_s, y_s, prime):
-    """
-    Lagrange interpolation to reconstruct the secret from shares (x_s, y_s).
-    Returns the polynomial evaluated at x.
-    """
-    k = len(x_s)
-    assert k == len(set(x_s)), "Share x-coordinates must be distinct."
-
-    def product(vals):
-        result = 1
-        for v in vals:
-            result *= v
-        return result
-
-    numerator = 0
-    for i in range(k):
-        others = list(x_s)
-        current = others.pop(i)
-
-        # Numerator: (x - x_j) for all j != i
-        num_product = product(x - o for o in others) % prime
-
-        # Denominator: (x_i - x_j) for all j != i
-        den_product = product(current - o for o in others) % prime
-
-        # Add the contribution from y_i
-        numerator += y_s[i] * num_product * _mod_inverse(den_product, prime)
-        numerator %= prime
-
-    return numerator
-
-
-def recover_secret(shares, prime=_PRIME):
-    """
-    Recovers the secret from share points (x, y).
-    """
-    if len(shares) < 2:
-        raise ValueError("At least two shares are needed to recover the secret.")
-
-    x_s, y_s = zip(*shares)
-    return _lagrange_interpolate(0, x_s, y_s, prime)
-
-
-# Example usage:
-if __name__ == "__main__":
-    # Secret to share (as an integer)
-    secret = _secure_random_int(_PRIME)
-
-    # Generate 5 shares with a threshold of 3
-    shares = make_random_shares(secret, 3, 5)
-    print("Generated Shares:", shares)
-
-    # Recover the secret using 3 shares
-    recovered_secret = recover_secret(shares[:3])
-    print("Recovered Secret:", recovered_secret)
-
-    # Verify that the original and recovered secrets are the same
-    assert secret == recovered_secret, "The secret was not recovered correctly!"
