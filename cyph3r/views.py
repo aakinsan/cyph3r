@@ -17,7 +17,7 @@ from .gcp import GCPManager
 
 
 def index(request):
-    return render(request, "cyph3r/index2.html")
+    return render(request, "cyph3r/index.html")
 
 
 def wireless(request):
@@ -127,7 +127,8 @@ def wireless_generate_keys(request):
         # Populate the form with POST data and PGP public key files
         form = WirelessPGPUploadForm(request.POST, request.FILES)
 
-        # Retrieve key size, protocol and type from the session
+        # Retrieve key identifier, size, protocol and type from the session
+        key_identifier = request.session["key_identifier"]
         key_size = int(request.session["key_size"])
         key_type = request.session["key_type"]
         protocol = request.session["protocol"]
@@ -189,21 +190,21 @@ def wireless_generate_keys(request):
                     protocol,
                     shares,
                 )
-                          
+
                 # Initialize GCP Manager for GCP operations
                 gcp_project_id = request.session["gcp_project_id"]
                 gcp_kms_keyring = request.session["gcp_kms_keyring"]
                 gcp_kms_key = request.session["gcp_kms_key"]
-                secret_id = f"{protocol}-{key_type}-{request.session["key_identifier"]}"
-                
+                secret_id = f"{protocol}-{key_type}-{key_identifier}"
+
                 if gcp_kms_keyring == "":
                     gm = GCPManager(gcp_project_id)
                 else:
                     gm = GCPManager(gcp_project_id, gcp_kms_keyring, gcp_kms_key)
-                
+
                 # Store Encrypted data (nonce + key) in GCP Secrets Manager
                 gm.create_secret(secret_id=secret_id, payload=encrypted_data)
-                
+
                 # Write Encrypted data to file for test.
                 save_path = os.path.join(settings.MEDIA_ROOT, "encrypted_data")
                 with open(save_path, "wb") as fp:

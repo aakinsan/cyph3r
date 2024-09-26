@@ -64,6 +64,15 @@ class WirelessKeyInfoForm(forms.Form):
         help_text="Select the key size.",
     )
 
+    def clean(self):
+        cleaned_data = super().clean()
+        if (
+            cleaned_data.get("protocol") == "milenage"
+            and cleaned_data.get("key_type") == "op"
+            and cleaned_data.get("key_size") == "256"
+        ):
+            self.add_error(None, "The Milenage protocol only supports 128-bit OP keys.")
+
 
 class WirelessGCPStorageForm(forms.Form):
     gcp_project_id = forms.CharField(
