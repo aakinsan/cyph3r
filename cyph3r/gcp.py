@@ -1,9 +1,12 @@
 from google.cloud import kms_v1
 from google.cloud import secretmanager
+from google.api_core.exceptions import AlreadyExists, PermissionDenied, DeadlineExceeded
 
 
 class GCPManager:
-    def __init__(self, project_id: str, kms_keyring_name: str, kms_key_name: str):
+    def __init__(
+        self, project_id: str, kms_keyring_name: str = None, kms_key_name: str = None
+    ):
         # initialize attributes
         self.project_id = project_id
         self.kms_keyring_name = kms_keyring_name
@@ -21,7 +24,7 @@ class GCPManager:
             self.project_id, self.location, self.kms_keyring_name, self.kms_key_name
         )
 
-    def create_secret(self, secret_id: str) -> None:
+    def create_secret(self, secret_id: str, payload: bytes) -> None:
         """Creates a secret in Secret Manager."""
 
         # Build parent resource name.
@@ -33,7 +36,26 @@ class GCPManager:
             "secret_id": secret_id,
             "secret": {"replication": {"automatic": {}}},
         }
-        self.secret_manager_client.create_secret(request=parent_request)
+        # Create secret.
+        try:
+            self.secret_manager_client.create_secret(request=parent_request)
+            self.add_secret_version(secret_id, payload)
+
+        # If secret already exists, add secret version.
+        except AlreadyExists:
+            self.add_secret_version(secret_id, payload)
+
+        # If permission denied, print error message.
+        except PermissionDenied as err:
+            print(f"Permission denied: {err}")
+
+        # If deadline exceeded, print error message.
+        except DeadlineExceeded as err:
+            print(f"communication failure on server side: {err}")
+
+        # If any other error occurs, print error message.
+        except Exception as err:
+            print(f"An error occurred: {err}")
 
     def add_secret_version(self, secret_id: str, payload: bytes) -> None:
         """Add secret version to secrets manager."""
@@ -43,7 +65,20 @@ class GCPManager:
 
         # Add secret version.
         request = {"parent": parent, "payload": {"data": payload}}
-        response = self.secret_manager_client.add_secret_version(request=request)
+        try:
+            self.secret_manager_client.add_secret_version(request=request)
+
+        # If permission denied, print error message.
+        except PermissionDenied as err:
+            print(f"Permission denied: {err}")
+
+        # If deadline exceeded, print error message.
+        except DeadlineExceeded as err:
+            print(f"communication failure on server side: {err}")
+
+        # If any other error occurs, print error message.
+        except Exception as err:
+            print(f"An error occurred: {err}")
 
     def get_secret(self, secret_id: str, version_id="latest") -> bytes:
         # Get secret (private key or passphrase) from secrets manager.
@@ -55,30 +90,70 @@ class GCPManager:
         request = {"name": name}
 
         # Access the secret version.
-        response = self.secret_manager_client.access_secret_version(request)
+        try:
+            response = self.secret_manager_client.access_secret_version(request)
 
-        # Get secret.
-        payload = response.payload.data
+            # Get secret.
+            payload = response.payload.data
 
-        # return payload.
-        return payload
+            # return payload.
+            return payload
+
+        # If permission denied, print error message.
+        except PermissionDenied as err:
+            print(f"Permission denied: {err}")
+
+        # If deadline exceeded, print error message.
+        except DeadlineExceeded as err:
+            print(f"communication failure on server side: {err}")
+
+        # If any other error occurs, print error message.
+        except Exception as err:
+            print(f"An error occurred: {err}")
 
     def encrypt_secret(self, payload: bytes) -> bytes:
         """Encrypts a secret using Cloud KMS key."""
 
         # Encrypt payload
         request = {"name": self.key_path, "plaintext": payload}
-        response = self.kms_client.encrypt(request=request)
+        try:
+            response = self.kms_client.encrypt(request=request)
 
-        # Return encrypted secret.
-        return response.ciphertext
+            # Return encrypted secret.
+            return response.ciphertext
+
+        # If permission denied, print error message.
+        except PermissionDenied as err:
+            print(f"Permission denied: {err}")
+
+        # If deadline exceeded, print error message.
+        except DeadlineExceeded as err:
+            print(f"communication failure on server side: {err}")
+
+        # If any other error occurs, print error message.
+        except Exception as err:
+            print(f"An error occurred: {err}")
 
     def decrypt_secret(self, encrypted_payload: bytes) -> bytes:
         """Decrypts a secret using Cloud KMS key."""
 
         # Decrypt secret
         request = {"name": self.key_path, "ciphertext": encrypted_payload}
-        response = self.kms_client.decrypt(request=request)
 
-        # Return decrypted secret.
-        return response.plaintext
+        try:
+            response = self.kms_client.decrypt(request=request)
+
+            # Return decrypted secret.
+            return response.plaintext
+
+        # If permission denied, print error message.
+        except PermissionDenied as err:
+            print(f"Permission denied: {err}")
+
+        # If deadline exceeded, print error message.
+        except DeadlineExceeded as err:
+            print(f"communication failure on server side: {err}")
+
+        # If any other error occurs, print error message.
+        except Exception as err:
+            print(f"An error occurred: {err}")
