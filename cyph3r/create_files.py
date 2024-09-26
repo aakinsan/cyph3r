@@ -40,23 +40,23 @@ def create_provider_encrypted_key_files(
         kcv = cm.generate_kcv(shares[key_index - 1])
 
         # Convert the key share to a hex string format
-        key_share_hex = cm.bytes_to_hex(shares[key_index - 1])
+        xor_key_share_hex = cm.bytes_to_hex(shares[key_index - 1])
 
         # Create the filename for the encrypted key component and append filename to provider_files list for download
         provider_file_name = (
-            f"provider-{protocol}-{key_type}-key-{key_index}-{keyid}.txt.gpg"
+            f"G+D-{protocol}-{key_type}-key-{key_index}-{keyid}.txt.gpg"
         )
         save_path = os.path.join(settings.MEDIA_ROOT, provider_file_name)
         provider_files.append(provider_file_name)
 
-        # Format the key share, KCV, key type, and size into a structured text format for provider
-        key_share_data = cm.gd_text_format(
-            key_share_hex, kcv, key_type, key_size, key_index
+        # Prepare provider key share data in the requested text format
+        gd_key_share_data = cm.gd_text_format(
+            xor_key_share_hex, kcv, key_type, key_size, key_index
         )
 
         # Encrypt the key share data using the provider's public key
         encrypted_data = cm.gpg.encrypt(
-            key_share_data, fingerprint, always_trust=True, armor=False
+            gd_key_share_data, fingerprint, always_trust=True, armor=False
         )
 
         # Save the encrypted key share to the designated file
@@ -65,6 +65,60 @@ def create_provider_encrypted_key_files(
 
     # Return Provider files list for download
     return provider_files
+
+
+def create_security_officers_encrypted_key_files(
+    form: forms.Form,
+    cm: CryptoManager,
+    key_type: str,
+    protocol: str,
+    shares: list,
+) -> list:
+    """Creates shamir key shares encrypted with security officer PGP keys and saves them to files."""
+    # Initialize the list to store the filenames of the encrypted shares for download
+    security_officer_files = []
+
+    # Loop through each uploaded provider's public key file
+    for key_index, file in enumerate(
+        form.cleaned_data["security_officers_public_keys"], start=1
+    ):
+        # Reset the file pointer to the beginning of the file
+        file.seek(0)
+
+        # Import the Provider's PGP public keys from the uploaded file
+        cm.gpg.import_keys(file.read())
+
+        # Retrieve the latest imported key's fingerprint and keyid
+        imported_key = cm.gpg.list_keys()[-1]
+        fingerprint = imported_key["fingerprint"]
+        keyid = imported_key["keyid"]
+
+        # Create the filename for the encrypted key component and append filename to security_officer_files list for download
+        security_officer_file_name = (
+            f"SO-{protocol}-{key_type}-wrap-key-{key_index}-{keyid}.txt.gpg"
+        )
+        save_path = os.path.join(settings.MEDIA_ROOT, security_officer_file_name)
+        security_officer_files.append(security_officer_file_name)
+
+        # Convert share index (integer) to bytes and concatenate it with its associated key share
+        shamir_key_share_hex = cm.bytes_to_hex(shares[key_index - 1][1])
+
+        # Prepare security officer file content
+        so_key_share_data = cm.so_text_format(
+            shamir_key_share_hex, protocol, key_type, key_index
+        )
+
+        # Encrypt the key share data using the provider's public key
+        encrypted_data = cm.gpg.encrypt(
+            so_key_share_data, fingerprint, always_trust=True, armor=False
+        )
+
+        # Save the encrypted key share to the designated file
+        with open(save_path, "wb") as fp:
+            fp.write(encrypted_data.data)
+
+    # Return Provider files list for download
+    return security_officer_files
 
 
 def create_milenage_encrypted_file(

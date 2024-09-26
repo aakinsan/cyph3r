@@ -2,12 +2,24 @@
     
     <div class="w-full justify-center items-start flex flex-col gap-4 max-w-md p-8 shadow-md bg-white rounded-lg">
             <div>
+                <p class="text-start font-palanquin text-xs">Security Officer Keys</p>
+                <ul>
+                {% for security_officer_file in security_officer_files %}
+                    <li>
+                    <a href="{{ MEDIA_URL }}{{ security_officer_file }}" download="{{ security_officer_file }}" class="w-full mt-4 underline underline-offset-4 font-palanquin  decoration-blue-600 text-blue-600 text-xs">
+                        {{ security_officer_file }}
+                    </a>
+                    </li>
+                {% endfor %}
+                </ul>
+            </div>
+            <div>
                 <p class="text-start font-palanquin text-xs">Provider Keys</p>
                 <ul>
                 {% for provider_file in provider_files %}
                     <li>
                     <a href="{{ MEDIA_URL }}{{ provider_file }}" download="{{ provider_file }}" class="w-full mt-4 underline underline-offset-4 font-palanquin  decoration-blue-600 text-blue-600 text-xs">
-                        {{ provider_file|capfirst }}
+                        {{ provider_file}}
                     </a>
                     </li>
                 {% endfor %}

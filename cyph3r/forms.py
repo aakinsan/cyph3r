@@ -87,8 +87,8 @@ class WirelessGCPStorageForm(forms.Form):
 
 
 class WirelessPGPUploadForm(forms.Form):
-    security_officer_public_keys = MultipleFileField(
-        required=False,
+    security_officers_public_keys = MultipleFileField(
+        required=True,
         help_text="Upload 5 PGP Public keys for 3 of 5 shamir secret sharing",
     )
 
@@ -101,12 +101,12 @@ class WirelessPGPUploadForm(forms.Form):
     )
 
     def clean_security_officer_public_keys(self):
-        files = self.cleaned_data.get("security_officer_public_keys")
+        files = self.cleaned_data.get("security_officers_public_keys")
         if files:
-            # Check if 3 files are uploaded
+            # Check if 5 files are uploaded
             if len(files) != 5:
                 self.add_error(
-                    "security_officer_public_keys",
+                    "security_officers_public_keys",
                     "5 PGP public key files must be uploaded.",
                 )
             for file in files:
@@ -114,7 +114,7 @@ class WirelessPGPUploadForm(forms.Form):
                 file_size = file.size
                 if file_size > 5120:
                     self.add_error(
-                        "security_officer_public_keys",
+                        "security_officers_public_keys",
                         f"{file.name} must be less than 5KB.",
                     )
                 # Check file type is PGP public key
@@ -123,7 +123,7 @@ class WirelessPGPUploadForm(forms.Form):
                     ("PGP public key block", "OpenPGP Public Key")
                 ):
                     self.add_error(
-                        "security_officer_public_keys",
+                        "security_officers_public_keys",
                         f"{file.name} is not a PGP public key file.",
                     )
                 # Check if the PGP key is ASCII armored
@@ -131,7 +131,7 @@ class WirelessPGPUploadForm(forms.Form):
                 first_line = file.readline().strip()
                 if first_line != b"-----BEGIN PGP PUBLIC KEY BLOCK-----":
                     self.add_error(
-                        "security_officer_public_keys",
+                        "security_officers_public_keys",
                         f"{file.name} must be an ASCII armored PGP public key file.",
                     )
 

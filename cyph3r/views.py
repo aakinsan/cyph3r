@@ -10,13 +10,12 @@ from .forms import (
 from .create_files import (
     create_provider_encrypted_key_files,
     create_milenage_encrypted_file,
+    create_security_officers_encrypted_key_files,
 )
 from .crypto import CryptoManager
-from pprint import pprint
 
 
 def index(request):
-    print(request.session)
     return render(request, "cyph3r/index.html")
 
 
@@ -52,7 +51,6 @@ def wireless_gcp_storage_form(request):
     """
     # Check if the request is a POST request and includes HTMX headers
     if request.method == "POST" and request.htmx:
-        print(request.POST)
 
         # Bind the form with POST data for the key information
         form = WirelessKeyInfoForm(request.POST)
@@ -92,7 +90,6 @@ def wireless_pgp_upload_form(request):
     """
     # Check if the request is a POST request and includes HTMX headers
     if request.method == "POST" and request.htmx:
-        print(request.POST)
 
         # Bind the form with POST data for the key information
         form = WirelessGCPStorageForm(request.POST)
@@ -129,18 +126,19 @@ def wireless_generate_keys(request):
         # Populate the form with POST data and PGP public key files
         form = WirelessPGPUploadForm(request.POST, request.FILES)
 
+        # Retrieve key size, protocol and type from the session
+        key_size = int(request.session["key_size"])
+        key_type = request.session["key_type"]
+        protocol = request.session["protocol"]
+
         # Validate the form data
         if form.is_valid():
             # Initialize CryptoManager for cryptographic operations
             cm = CryptoManager()
 
-            # Retrieve key size and type from the session
-            key_size = int(request.session["key_size"])
-            key_type = request.session["key_type"]
-            protocol = request.session["protocol"]
-
             # Generate the secret key as a random byte string of the given key size
             secret_key = cm.generate_random_key_bytes(key_size)
+            print(f"secret key = {secret_key}")
 
             provider_files = create_provider_encrypted_key_files(
                 form,
@@ -152,23 +150,70 @@ def wireless_generate_keys(request):
                 number_of_shares=3,
             )
 
-            # Check if an Engineer's PGP public key to encrypt milenage keys was uploaded
-            if form.cleaned_data["milenage_public_key"]:
-
+            # Check if protocol is milenage and an Engineer's PGP public key was uploaded
+            if form.cleaned_data["milenage_public_key"] and protocol == "milenage":
                 # Create the encrypted milenage key file
                 milenage_file = create_milenage_encrypted_file(
                     form, cm, secret_key, key_type
                 )
 
-            # Render the success page upon successful key generation and encryption
-            return render(
-                request,
-                "cyph3r/wireless-generate-keys.html",
-                {
-                    "provider_files": provider_files,
-                    "milenage_file": milenage_file,
-                },
-            )
+            # Check if security officers' PGP public keys were uploaded
+            if form.cleaned_data["security_officers_public_keys"]:
+
+                # Generate key that will be shared among security officers
+                sss_key = cm.generate_random_key_bytes(128)
+                print(f"sss_key = {sss_key}")
+
+                # Generate 12 bytes nonce for secret encryption using AES-GCM
+                nonce = cm.generate_random_key_bytes(96)
+                print(f"nonce = {nonce}")
+
+                # Split the secret key into shares using shamir secret sharing
+                shares = cm.shamir_split_secret(3, 5, sss_key)
+
+                # Encrypt the secret key with using the sss key and nonce
+                encrypted_secret_key = cm.encrypt_with_aes_gcm(
+                    sss_key, nonce, secret_key
+                )
+
+                # Append 12 bytes nonce to encrypted secret key
+                encrypted_data = nonce + encrypted_secret_key
+                print(f"data = {encrypted_data}")
+
+                # Create security officers encrypted key files
+                security_officer_files = create_security_officers_encrypted_key_files(
+                    form,
+                    cm,
+                    key_type,
+                    protocol,
+                    shares,
+                )
+                # Write Encrypted data to file for test.
+                save_path = os.path.join(settings.MEDIA_ROOT, "encrypted_data")
+                with open(save_path, "wb") as fp:
+                    fp.write(encrypted_data)
+
+            # Render the success page upon successful key generation and encryption if protocol is milenage
+            if milenage_file:
+                return render(
+                    request,
+                    "cyph3r/wireless-generate-keys.html",
+                    {
+                        "provider_files": provider_files,
+                        "milenage_file": milenage_file,
+                        "security_officer_files": security_officer_files,
+                    },
+                )
+            else:
+                # Render the success page upon successful key generation and encryption if protocol is tuak
+                return render(
+                    request,
+                    "cyph3r/wireless-generate-keys.html",
+                    {
+                        "provider_files": provider_files,
+                        "security_officer_files": security_officer_files,
+                    },
+                )
         else:
             # Render the PGP Upload form again with validation errors if the form is invalid
             return render(request, "cyph3r/wireless-pgp-upload.html", {"form": form})

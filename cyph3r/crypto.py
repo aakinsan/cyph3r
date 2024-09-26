@@ -12,22 +12,22 @@ class CryptoManager:
         temp_dir = tempfile.mkdtemp()
         self.gpg = gnupg.GPG(gnupghome=temp_dir)
 
-    def generate_random_key_bytes(self, key_size):
+    def generate_random_key_bytes(self, key_size: int) -> bytes:
         if key_size % 8 != 0:
             raise ValueError("Number of bits must be a multiple of 8")
         bytes = int(key_size / 8)
         return secrets.token_bytes(bytes)
 
-    def generate_random_key_hex(self, key_size):
+    def generate_random_key_hex(self, key_size: int) -> str:
         if key_size % 8 != 0:
             raise ValueError("Number of bits must be a multiple of 8")
         bytes = int(key_size / 8)
         return secrets.token_hex(bytes)
 
-    def bytes_to_hex(self, byte_data):
+    def bytes_to_hex(self, byte_data: bytes) -> str:
         return binascii.hexlify(byte_data).decode("utf-8")
 
-    def hex_to_bytes(self, hex_string):
+    def hex_to_bytes(self, hex_string: str) -> bytes:
         return binascii.unhexlify(hex_string)
 
     def generate_pgp_key(self, name_email):
@@ -40,7 +40,9 @@ class CryptoManager:
     def decrypt_with_pgp(self, encrypted_data, passphrase):
         return self.gpg.decrypt(encrypted_data, passphrase=passphrase)
 
-    def encrypt_with_aes_gcm(self, key, nonce, plaintext, aad=None):
+    def encrypt_with_aes_gcm(
+        self, key: bytes, nonce: bytes, plaintext: bytes, aad: bytes = None
+    ) -> bytes:
         """Encrypts data using AES-GCM."""
         aesgcm = aead.AESGCM(key)
         try:
@@ -50,7 +52,9 @@ class CryptoManager:
             print("Encryption failed: {}".format(err))
             return None
 
-    def decrypt_with_aes_gcm(self, key, nonce, ciphertext, aad=None):
+    def decrypt_with_aes_gcm(
+        self, key: bytes, nonce: bytes, ciphertext: bytes, aad: bytes = None
+    ) -> bytes:
         """Encrypts data using AES-GCM."""
         aesgcm = aead.AESGCM(key)
         try:
@@ -79,7 +83,9 @@ class CryptoManager:
         return Shamir.split(threshold_shares, total_shares, secret)
 
     def shamir_reconstruct_secret(self, shares: list) -> bytes:
-        """Reconstructs the secret from shares using Shamir's Secret Sharing."""
+        """Reconstructs the secret from shares using Shamir's Secret Sharing.
+        :param shares: A list of tuples (key share number, key share in bytes) to reconstruct the secret
+        """
         return Shamir.combine(shares)
 
     def xor_split_secret(self, secret_key, key_size, num_shares):
@@ -111,7 +117,7 @@ class CryptoManager:
         if len(shares) < 2:
             raise ValueError("At least two shares are required to reconstruct the key")
         secret_key = shares[0]
-        for share in shares[:1]:
+        for share in shares[1:]:
             secret_key = bytes(a ^ b for a, b in zip(secret_key, share))
         return secret_key
 
@@ -135,4 +141,8 @@ class CryptoManager:
 
     def gd_text_format(self, key_share, kcv, key_type, key_size, key_index):
         data = f"Key Name: {key_type.title()}\n\nKey ID/Index: {key_index}\n\nKey Component {key_index} ({int(key_size/8)} bytes):\n{key_share.upper()}\n\nKey Component {key_index} KCV (AES ECB):\n{kcv.upper()}"
+        return data.encode("utf-8")
+
+    def so_text_format(self, key_share, protocol, key_type, key_index):
+        data = f"Protocol: {protocol.title()}\n\nKey Type: {key_type.title()}\n\nKey ID/Index: {key_index}\n\nShamir Key Share:\n{key_share.upper()}"
         return data.encode("utf-8")
