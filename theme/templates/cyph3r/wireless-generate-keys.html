@@ -25,6 +25,12 @@
                 {% endfor %}
                 </ul>
             </div>
+            <div>
+                <p class="text-start font-palanquin text-xs">Wrapped Key File</p>
+                    <a href="{{ MEDIA_URL }}{{ wrapped_data_file }}" download="{{ wrapped_data_file }}" class="w-full mt-4 underline underline-offset-4 font-palanquin  decoration-blue-600 text-blue-600 text-xs">
+                        {{ wrapped_data_file }}
+                    </a>
+            </div>
             {% if milenage_file %}
             <div>
                 <p class="text-start font-palanquin text-xs">Milenage Keys</p>

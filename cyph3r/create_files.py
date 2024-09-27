@@ -4,6 +4,21 @@ from django import forms
 import os
 
 
+def create_wrapped_secret_key_file(
+    cm: CryptoManager, wrapped_data: bytes, protocol: str, key_type: str
+) -> str:
+    # Write Encrypted key to file for download.
+    wrapped_data_file_name = f"{protocol}-{key_type}-wrapped-secret.txt"
+
+    save_path = os.path.join(settings.MEDIA_ROOT, wrapped_data_file_name)
+    with open(save_path, "wb") as fp:
+        data = cm.wrapped_key_text_format(
+            protocol, key_type, cm.bytes_to_hex(wrapped_data)
+        )
+        fp.write(data)
+    return wrapped_data_file_name
+
+
 def create_provider_encrypted_key_files(
     form: forms.Form,
     cm: CryptoManager,
@@ -13,7 +28,7 @@ def create_provider_encrypted_key_files(
     protocol: str,
     number_of_shares: int,
 ) -> list:
-    """Creates key shares encrypted with Provider PGP keys and saves them to files."""
+    """Creates XOR key shares encrypted with Provider PGP keys and saves them to files."""
 
     # Split the secret key into shares using XOR splitting
     shares = cm.xor_split_secret(secret_key, key_size, number_of_shares)
@@ -74,18 +89,18 @@ def create_security_officers_encrypted_key_files(
     protocol: str,
     shares: list,
 ) -> list:
-    """Creates shamir key shares encrypted with security officer PGP keys and saves them to files."""
-    # Initialize the list to store the filenames of the encrypted shares for download
-    security_officer_files = []
+    """Encrypts files containing the Shamir wrap key share with security officer (SO) PGP keys."""
+    # Initialize the list to store the file names of the encrypted shares for download
+    security_officer_file_names = []
 
-    # Loop through each uploaded provider's public key file
+    # Loop through each uploaded SO's public key file
     for key_index, file in enumerate(
         form.cleaned_data["security_officers_public_keys"], start=1
     ):
         # Reset the file pointer to the beginning of the file
         file.seek(0)
 
-        # Import the Provider's PGP public keys from the uploaded file
+        # Import the SO's PGP public keys from the uploaded file
         cm.gpg.import_keys(file.read())
 
         # Retrieve the latest imported key's fingerprint and keyid
@@ -98,27 +113,28 @@ def create_security_officers_encrypted_key_files(
             f"SO-{protocol}-{key_type}-wrap-key-{key_index}-{keyid}.txt.gpg"
         )
         save_path = os.path.join(settings.MEDIA_ROOT, security_officer_file_name)
-        security_officer_files.append(security_officer_file_name)
+        security_officer_file_names.append(security_officer_file_name)
 
-        # Convert share index (integer) to bytes and concatenate it with its associated key share
-        shamir_key_share_hex = cm.bytes_to_hex(shares[key_index - 1][1])
+        # Extract wrap key share from the list of shares and convert share from bytes to human readable hex string
+        # Allows Security officer to easily reconstruct the wrap key but may slightly weaken security since the key is stored in hex format
+        wrap_key_share_hex = cm.bytes_to_hex(shares[key_index - 1][1])
 
         # Prepare security officer file content
-        so_key_share_data = cm.so_text_format(
-            shamir_key_share_hex, protocol, key_type, key_index
+        so_wrap_key_share_data = cm.so_text_format(
+            wrap_key_share_hex, protocol, key_type, key_index
         )
 
         # Encrypt the key share data using the provider's public key
-        encrypted_data = cm.gpg.encrypt(
-            so_key_share_data, fingerprint, always_trust=True, armor=False
+        encrypted_so_wrap_key_share_data = cm.gpg.encrypt(
+            so_wrap_key_share_data, fingerprint, always_trust=True, armor=False
         )
 
         # Save the encrypted key share to the designated file
         with open(save_path, "wb") as fp:
-            fp.write(encrypted_data.data)
+            fp.write(encrypted_so_wrap_key_share_data.data)
 
     # Return Provider files list for download
-    return security_officer_files
+    return security_officer_file_names
 
 
 def create_milenage_encrypted_file(

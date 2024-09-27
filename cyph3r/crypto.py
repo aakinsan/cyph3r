@@ -143,9 +143,16 @@ class CryptoManager:
         pass
 
     def gd_text_format(self, key_share, kcv, key_type, key_size, key_index):
+        # Prepare the data in the requested text format
         data = f"Key Name: {key_type.title()}\n\nKey ID/Index: {key_index}\n\nKey Component {key_index} ({int(key_size/8)} bytes):\n{key_share.upper()}\n\nKey Component {key_index} KCV (AES ECB):\n{kcv.upper()}"
         return data.encode("utf-8")
 
     def so_text_format(self, key_share, protocol, key_type, key_index):
-        data = f"Protocol: {protocol.title()}\n\nKey Type: {key_type.title()}\n\nKey ID/Index: {key_index}\n\nShamir Key Share:\n{key_share.upper()}"
+        # Prepare the data in the requested text format
+        data = f"Protocol: {protocol.title()}\n\nKey Type: {key_type.title()}\n\nKey ID/Index: {key_index}\n\nWrap Key Share:\n{key_share.upper()}"
+        return data.encode("utf-8")
+
+    def wrapped_key_text_format(self, protocol, key_type, wrapped_key):
+        # Prepare the data in the requested text format
+        data = f"Protocol: {protocol.title()}\n\nKey Type: {key_type.title()}\n\nWrapped Key:\n{wrapped_key.upper()}"
         return data.encode("utf-8")
