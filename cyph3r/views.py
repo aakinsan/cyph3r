@@ -24,10 +24,6 @@ def wireless(request):
     return render(request, "cyph3r/wireless.html")
 
 
-def wireless_test(request):
-    return render(request, "cyph3r/wirelessx.html")
-
-
 ##############
 # HTMX Views #
 ##############

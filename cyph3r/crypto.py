@@ -1,6 +1,7 @@
 import secrets
 import tempfile
 import gnupg
+import os
 import binascii
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes, aead
 from cryptography import exceptions as crypto_exceptions
@@ -8,9 +9,11 @@ from Crypto.Protocol.SecretSharing import Shamir
 
 
 class CryptoManager:
-    def __init__(self):
-        temp_dir = tempfile.mkdtemp()
-        self.gpg = gnupg.GPG(gnupghome=temp_dir)
+    def __init__(self, dir=None):
+        if dir is None:
+            dir = tempfile.mkdtemp()
+        self.dir = dir
+        self.gpg = gnupg.GPG(gnupghome=self.dir)
 
     def generate_random_key_bytes(self, key_size: int) -> bytes:
         if key_size % 8 != 0:
