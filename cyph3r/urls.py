@@ -1,6 +1,11 @@
 from django.urls import path
 from . import views
 
+"""
+This module contains the URL patterns for the cyph3r app.
+
+"""
+
 urlpatterns = [
     path("", views.index, name="index"),
     path("wireless/", views.wireless, name="wireless"),

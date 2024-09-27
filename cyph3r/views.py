@@ -17,11 +17,23 @@ from .crypto import CryptoManager
 from .gcp import GCPManager
 
 
+"""
+This module contains the views for the cyph3r app.
+
+"""
+
+
 def index(request):
+    """
+    Returns the Home Page
+    """
     return render(request, "cyph3r/index.html")
 
 
 def wireless(request):
+    """
+    Returns Wireless Key Ceremony Page
+    """
     return render(request, "cyph3r/wireless.html")
 
 
@@ -31,12 +43,15 @@ def wireless(request):
 
 
 def wireless_ceremony_intro(request):
+    """
+    Returns partial template for the Wireless Key Ceremony Introduction
+    """
     return render(request, "cyph3r/wireless-ceremony-intro.html")
 
 
 def wireless_key_info_form(request):
     """
-    Renders Key Information form
+    Returns partial template for the Wireless Key Information form
     """
     return render(
         request, "cyph3r/wireless-key-info.html", {"form": WirelessKeyInfoForm()}
@@ -45,7 +60,8 @@ def wireless_key_info_form(request):
 
 def wireless_gcp_storage_form(request):
     """
-    Renders GCP Storage form
+    Validates form POST data from /wireless-key-info.html
+    Returns partial template for the GCP Storage info form
     """
     # Check if the request is a POST request and includes HTMX headers
     if request.method == "POST" and request.htmx:
@@ -65,7 +81,7 @@ def wireless_gcp_storage_form(request):
                 }
             )
 
-            # Render the GCP Storage form on successful form submission
+            # Render the GCP Storage form on successful form validation
             return render(
                 request,
                 "cyph3r/wireless-gcp-storage.html",
@@ -75,6 +91,7 @@ def wireless_gcp_storage_form(request):
             # Render the key info form if form validation fails
             return render(request, "cyph3r/wireless-key-info.html", {"form": form})
     else:
+        # Render the GCP Storage form if the request is not a POST request
         return render(
             request,
             "cyph3r/wireless-gcp-storage.html",
@@ -84,7 +101,8 @@ def wireless_gcp_storage_form(request):
 
 def wireless_pgp_upload_form(request):
     """
-    Stores key information into session and renders the PGP file upload form.
+    Validates form POST data from /wireless-pgp-upload.html
+    Returns partial template for the PGP Upload form
     """
     # Check if the request is a POST request and includes HTMX headers
     if request.method == "POST" and request.htmx:
@@ -102,7 +120,6 @@ def wireless_pgp_upload_form(request):
                     "gcp_kms_key": form.cleaned_data["gcp_kms_key"],
                 }
             )
-
             # Render the PGP file upload form on successful form submission
             return render(
                 request,
@@ -110,7 +127,7 @@ def wireless_pgp_upload_form(request):
                 {"form": WirelessPGPUploadForm()},
             )
         else:
-            # Render the key info form if form validation fails
+            # Render the gcp stprage form if form validation fails
             return render(request, "cyph3r/wireless-gcp-storage.html", {"form": form})
 
 
@@ -195,6 +212,8 @@ def wireless_generate_keys(request):
             # Check that the PGP key of the engineer that will be at the terminal was uploaded
             # This check is done to prevent tuak keys from being written using the PGP key of the engineer
             # Tuak keys will not be entered at a terminal and do not need to be exposed by a single person
+
+            milenage_file = None  # Initialize the milenage file name to None
             if form.cleaned_data["milenage_public_key"] and protocol == "milenage":
 
                 # Calling helper function to create the encrypted milenage key file

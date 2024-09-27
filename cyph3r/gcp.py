@@ -3,6 +3,12 @@ from google.cloud import secretmanager
 from google.api_core.exceptions import AlreadyExists, PermissionDenied, DeadlineExceeded
 
 
+"""
+This module provides a class for managing Google Cloud Platform (GCP) Secrets.
+
+"""
+
+
 class GCPManager:
     def __init__(
         self, project_id: str, kms_keyring_name: str = None, kms_key_name: str = None

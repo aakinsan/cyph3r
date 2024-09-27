@@ -3,6 +3,11 @@ from django.conf import settings
 from django import forms
 import os
 
+"""
+Helper functions to create files containing encrypted secret keys and key shares.
+
+"""
+
 
 def create_wrapped_secret_key_file(
     cm: CryptoManager, wrapped_data: bytes, protocol: str, key_type: str
@@ -116,7 +121,7 @@ def create_security_officers_encrypted_key_files(
         security_officer_file_names.append(security_officer_file_name)
 
         # Extract wrap key share from the list of shares and convert share from bytes to human readable hex string
-        # Allows Security officer to easily reconstruct the wrap key but may slightly weaken security since the key is stored in hex format
+        # Allows Security officer to easily reconstruct the wrap key but care should be taken as it is human readable
         wrap_key_share_hex = cm.bytes_to_hex(shares[key_index - 1][1])
 
         # Prepare security officer file content

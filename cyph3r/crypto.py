@@ -7,6 +7,11 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes, ae
 from cryptography import exceptions as crypto_exceptions
 from Crypto.Protocol.SecretSharing import Shamir
 
+"""
+This module provides a CryptoManager class that encapsulates cryptographic operations.
+The class provides methods to generate random keys, encrypt and decrypt data using AES-GCM and AES-CFB, key splitting etc.
+"""
+
 
 class CryptoManager:
     def __init__(self, dir=None):

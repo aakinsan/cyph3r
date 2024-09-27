@@ -1,6 +1,11 @@
 from django import forms
 import magic
 
+"""
+This module contains the forms used in the Cyph3r application.
+
+"""
+
 
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True
