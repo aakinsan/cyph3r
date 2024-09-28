@@ -49,6 +49,7 @@ module.exports = {
                 roboto: ['Roboto', 'sans-serif'],
             },
             screens: {
+                'dl': '892px', // Custom
                 '3xl': '1600px', // Custom
                 '4xl': '1920px', // Custom
                 '5xl': '2560px', // Custom
