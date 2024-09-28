@@ -1,10 +1,13 @@
 import pytest
 from django.urls import reverse
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.conf import settings
-from cyph3r.crypto import CryptoManager
-import random
-import os
+from testing_helpers import (
+    validate_post_response,
+    validate_response_context,
+    process_provider_keys,
+    process_milenage_keys,
+    process_security_officer_wrap_keys,
+    get_wrapped_secret_key,
+)
 
 
 def test_index_view(client):
@@ -28,7 +31,7 @@ def test_wireless_view(client):
 
 
 @pytest.mark.django_db
-def test_wireless_key_generation_op_milenage(
+def test_wireless_key_generation_milenage_op_keys(
     cleanup_generated_files,
     cm,
     client,
@@ -43,11 +46,13 @@ def test_wireless_key_generation_op_milenage(
     generate_keys_html_page,
 ):
     """
+    Test for milenage op keys
     Test that the wireless_gcp_storage_form view renders correctly and validates data.
     Test that the wireless_pgp_upload_form view renders correctly and validates data.
     Test that all session data is stored correctly.
     Test that the secret key is the same for the provider, security officers and the terminal engineer.
     """
+
     # Post the key information data to the view and validate the response
     validate_post_response(
         client, gcp_storage_url, key_info_milenage_op_post_data, gcp_storage_html_page
@@ -67,38 +72,218 @@ def test_wireless_key_generation_op_milenage(
     # Check that the response context is passed correctly
     validate_response_context(client, response)
 
+    # Process the provider keys
+    provider_secret_key = process_provider_keys(cm, response)
 
-def validate_post_response(
-    client, url, post_data, html_page, validate_session_data=True
+    # Process the Milenage keys
+    milenage_secret_key = process_milenage_keys(cm, response)
+
+    # Assert the milenage and provider secret keys are the same
+    assert milenage_secret_key == provider_secret_key
+
+    # Process the security officer wrap keys
+    wrap_key = process_security_officer_wrap_keys(cm, response)
+
+    # Get nonce and wrapped secret key
+    nonce, ciphertext = get_wrapped_secret_key(cm, response)
+
+    # Decrypt the wrapped secret key with the wrap key
+    decrypted_secret_key = cm.decrypt_with_aes_gcm(wrap_key, nonce, ciphertext)
+
+    # Assert the decrypted secret key is the same as the provider secret key and mileange secret key
+    assert (
+        decrypted_secret_key
+        == cm.hex_to_bytes(provider_secret_key)
+        == cm.hex_to_bytes(milenage_secret_key)
+    )
+
+
+@pytest.mark.django_db
+def test_wireless_key_generation_milenage_transport_keys(
+    cleanup_generated_files,
+    cm,
+    client,
+    pgp_public_keys,
+    key_info_milenage_transport_post_data,
+    key_gcp_storage_post_data,
+    gcp_storage_url,
+    pgp_upload_url,
+    generate_keys_url,
+    gcp_storage_html_page,
+    pgp_upload_html_page,
+    generate_keys_html_page,
 ):
     """
-    Helper function to validate response and client session after posting form data to a view.
+    Test for milenage transport keys
+    Test that the wireless_gcp_storage_form view renders correctly and validates data.
+    Test that the wireless_pgp_upload_form view renders correctly and validates data.
+    Test that all session data is stored correctly.
+    Test that the secret key is the same for the provider, security officers and the terminal engineer.
     """
-    response = client.post(url, post_data, HTTP_HX_REQUEST="true", format="multipart")
-    assert response.status_code == 200
-    assert html_page in [t.name for t in response.templates]
-    if validate_session_data:
-        for key, value in post_data.items():
-            assert client.session[key] == value
-    return response
+
+    # Post the key information data to the view and validate the response
+    validate_post_response(
+        client,
+        gcp_storage_url,
+        key_info_milenage_transport_post_data,
+        gcp_storage_html_page,
+    )
+    # Post the GCP storage key details to the view and validate the response
+    validate_post_response(
+        client, pgp_upload_url, key_gcp_storage_post_data, pgp_upload_html_page
+    )
+    # Post/upload the public keys to the view and validate the response
+    response = validate_post_response(
+        client,
+        generate_keys_url,
+        pgp_public_keys,
+        generate_keys_html_page,
+        validate_session_data=False,
+    )
+    # Check that the response context is passed correctly
+    validate_response_context(client, response)
+
+    # Process the provider keys
+    provider_secret_key = process_provider_keys(cm, response)
+
+    # Process the Milenage keys
+    milenage_secret_key = process_milenage_keys(cm, response)
+
+    # Assert the milenage and provider secret keys are the same
+    assert milenage_secret_key == provider_secret_key
+
+    # Process the security officer wrap keys
+    wrap_key = process_security_officer_wrap_keys(cm, response)
+
+    # Get nonce and wrapped secret key
+    nonce, ciphertext = get_wrapped_secret_key(cm, response)
+
+    # Decrypt the wrapped secret key with the wrap key
+    decrypted_secret_key = cm.decrypt_with_aes_gcm(wrap_key, nonce, ciphertext)
+
+    # Assert the decrypted secret key is the same as the provider secret key and mileange secret key
+    assert (
+        decrypted_secret_key
+        == cm.hex_to_bytes(provider_secret_key)
+        == cm.hex_to_bytes(milenage_secret_key)
+    )
 
 
-def validate_response_context(client, response):
+@pytest.mark.django_db
+def test_wireless_key_generation_tuak_transport_keys(
+    cleanup_generated_files,
+    cm,
+    client,
+    pgp_public_keys,
+    key_info_tuak_transport_post_data,
+    key_gcp_storage_post_data,
+    gcp_storage_url,
+    pgp_upload_url,
+    generate_keys_url,
+    gcp_storage_html_page,
+    pgp_upload_html_page,
+    generate_keys_html_page,
+):
     """
-    Helper function to validate the context of a response.
+    Test for tuak transport keys
+    Test that the wireless_gcp_storage_form view renders correctly and validates data.
+    Test that the wireless_pgp_upload_form view renders correctly and validates data.
+    Test that all session data is stored correctly.
+    Test that the secret key is the same for the provider and the security officers.
     """
-    assert len(response.context["provider_files"]) == 3
-    assert len(response.context["security_officer_files"]) == 5
-    assert response.context["wrapped_secret_key_file"] is not None
-    if client.session["protocol"] == "milenage":
-        assert response.context["milenage_file"] is not None
-        assert len(os.listdir(settings.MEDIA_ROOT)) == 10
-    else:
-        assert response.context["milenage_file"] is None
-        assert len(os.listdir(settings.MEDIA_ROOT)) == 9
+    # Post the key information data to the view and validate the response
+    validate_post_response(
+        client,
+        gcp_storage_url,
+        key_info_tuak_transport_post_data,
+        gcp_storage_html_page,
+    )
+    # Post the GCP storage key details to the view and validate the response
+    validate_post_response(
+        client, pgp_upload_url, key_gcp_storage_post_data, pgp_upload_html_page
+    )
+    # Post/upload the public keys to the view and validate the response
+    response = validate_post_response(
+        client,
+        generate_keys_url,
+        pgp_public_keys,
+        generate_keys_html_page,
+        validate_session_data=False,
+    )
+    # Check that the response context is passed correctly
+    validate_response_context(client, response)
+
+    # Process the provider keys
+    provider_secret_key = process_provider_keys(cm, response)
+
+    # Process the security officer wrap keys
+    wrap_key = process_security_officer_wrap_keys(cm, response)
+
+    # Get nonce and wrapped secret key
+    nonce, ciphertext = get_wrapped_secret_key(cm, response)
+
+    # Decrypt the wrapped secret key with the wrap key
+    decrypted_secret_key = cm.decrypt_with_aes_gcm(wrap_key, nonce, ciphertext)
+
+    # Assert the decrypted secret key is the same as the provider secret key
+    assert decrypted_secret_key == cm.hex_to_bytes(provider_secret_key)
 
 
-def process_provider_keys(cm, response):
+@pytest.mark.django_db
+def test_wireless_key_generation_tuak_op_keys(
+    cleanup_generated_files,
+    cm,
+    client,
+    pgp_public_keys,
+    key_info_tuak_op_post_data,
+    key_gcp_storage_post_data,
+    gcp_storage_url,
+    pgp_upload_url,
+    generate_keys_url,
+    gcp_storage_html_page,
+    pgp_upload_html_page,
+    generate_keys_html_page,
+):
     """
-    Helper function to process the provider keys.
+    Test for tuak op keys
+    Test that the wireless_gcp_storage_form view renders correctly and validates data.
+    Test that the wireless_pgp_upload_form view renders correctly and validates data.
+    Test that all session data is stored correctly.
+    Test that the secret key is the same for the provider and the security officers.
     """
+    # Post the key information data to the view and validate the response
+    validate_post_response(
+        client,
+        gcp_storage_url,
+        key_info_tuak_op_post_data,
+        gcp_storage_html_page,
+    )
+    # Post the GCP storage key details to the view and validate the response
+    validate_post_response(
+        client, pgp_upload_url, key_gcp_storage_post_data, pgp_upload_html_page
+    )
+    # Post/upload the public keys to the view and validate the response
+    response = validate_post_response(
+        client,
+        generate_keys_url,
+        pgp_public_keys,
+        generate_keys_html_page,
+        validate_session_data=False,
+    )
+    # Check that the response context is passed correctly
+    validate_response_context(client, response)
+
+    # Process the provider keys
+    provider_secret_key = process_provider_keys(cm, response)
+
+    # Process the security officer wrap keys
+    wrap_key = process_security_officer_wrap_keys(cm, response)
+
+    # Get nonce and wrapped secret key
+    nonce, ciphertext = get_wrapped_secret_key(cm, response)
+
+    # Decrypt the wrapped secret key with the wrap key
+    decrypted_secret_key = cm.decrypt_with_aes_gcm(wrap_key, nonce, ciphertext)
+
+    # Assert the decrypted secret key is the same as the provider secret key
+    assert decrypted_secret_key == cm.hex_to_bytes(provider_secret_key)

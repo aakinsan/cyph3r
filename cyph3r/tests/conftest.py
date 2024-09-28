@@ -30,6 +30,19 @@ def key_info_milenage_op_post_data():
 
 
 @pytest.fixture
+def key_info_milenage_transport_post_data():
+    """
+    Fixture to return key information data for Milenage OP key generation.
+    """
+    return {
+        "key_identifier": "test_op_key_identifier",
+        "key_type": "transport",
+        "protocol": "milenage",
+        "key_size": "128",
+    }
+
+
+@pytest.fixture
 def key_info_tuak_transport_post_data():
     """
     Fixture to return key information data for Tuak Transport key generation.
@@ -37,6 +50,19 @@ def key_info_tuak_transport_post_data():
     return {
         "key_identifier": "test_transport_key_identifier",
         "key_type": "transport",
+        "protocol": "tuak",
+        "key_size": "256",
+    }
+
+
+@pytest.fixture
+def key_info_tuak_op_post_data():
+    """
+    Fixture to return key information data for Tuak Transport key generation.
+    """
+    return {
+        "key_identifier": "test_transport_key_identifier",
+        "key_type": "op",
         "protocol": "tuak",
         "key_size": "256",
     }
@@ -113,7 +139,7 @@ def cleanup_generated_files():
         os.remove(os.path.join(settings.MEDIA_ROOT, file))
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def pgp_public_keys():
     """
     Fixture to return PGP public key files for testing.
