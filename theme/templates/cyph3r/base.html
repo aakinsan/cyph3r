@@ -14,46 +14,21 @@
     />
     {% tailwind_css %}
     <script src="https://unpkg.com/htmx.org@1.9.3" defer></script>
-    
   </head>
 
   <body class="relative min-h-screen">
     <header class="w-full absolute z-10 bg-white">
-      <nav class="flex justify-between items-center py-4 px-8">
-        <a
-          href="{% url 'index' %}"
-          target="_blank"
-          class="flex justify-start items-center gap-2"
-        >
-          <img
-            src="{% static 'images/image1.svg' %}"
-            alt="cyph3r logo"
-            width="50"
-            height="20"
-          />
+      <nav class="flex justify-between items-center py-1 px-8">
+        <a href="{% url 'index' %}" target="_blank" class="flex justify-start items-center gap-2">
+          <img src="{% static 'images/image1.svg' %}" alt="cyph3r logo" width="50" height="20"/>
           <div class="text-orange-500 text-xl font-montserrat">Cyph3r</div>
         </a>
-        <div class="flex justify-between items-center gap-24">
-          <a
-            href="{% url 'index' %}"
-            class="rounded-full w-12 h-12 hover:bg-gray-200 grid place-content-center"
-            ><img
-              src="{% static 'icons/cog.svg' %}"
-              alt="cog logo"
-              width="30"
-              height="30"
-              title="settings"
-          /></a>
-          <a
-            href="{% url 'index' %}"
-            class="rounded-full w-12 h-12 hover:bg-gray-200 grid place-content-center"
-            ><img
-              src="{% static 'icons/user.svg' %}"
-              alt="cog logo"
-              width="30"
-              height="30"
-              title="login"
-          /></a>
+        <div class="flex justify-between items-center gap-12 md:gap-24">
+          <a href="{% url 'index' %}" class="rounded-full w-12 h-12 hover:bg-gray-200 grid place-content-center">
+            <img src="{% static 'icons/cog.svg' %}" alt="cog logo" width="30" height="30" title="settings" />
+          </a><a href="{% url 'index' %}" class="rounded-full w-12 h-12 hover:bg-gray-200 grid place-content-center">
+            <img src="{% static 'icons/user.svg' %}" alt="cog logo" width="30" height="30" title="login" />
+          </a>
         </div>
       </nav>
     </header>

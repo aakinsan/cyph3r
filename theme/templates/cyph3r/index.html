@@ -1,27 +1,27 @@
 {% extends 'cyph3r/base.html' %}
 {% load static %}
 {% block content %}
-<section class="flex justify-around items-center pt-40">
-    <div class="w-2/5 flex flex-col max-w-lg">
-        <h1 class="text-4xl font-semibold text-nowrap self-center text-slate-900">Your Cryptography Toolkit, <span class="text-orange-600">Simplified.</span></h1>
-        <p class="text-slate-500 text-xl text-nowrap font-sans self-center pt-3">Key generation, secure split sharing, storage etc. — all in one place!</p>
-        <div class="flex justify-start self-center item-start font-pal mt-20 gap-16">
+<section id="homepage" class="flex flex-col md:flex-row 2xl:justify-center justify-around items-center px-4 min-h-screen">
+    <div class="w-3/5 max-xl:max-w-md max-2xl:max-w-lg 2xl:max-w-2xl flex justify-center items-center flex-col text-center">
+        <h1 class="text-3xl 2xl:text-4xl w-full max-xl:w-96 font-semibold xl:text-nowrap text-slate-900">Your Cryptography Toolkit, <span class="text-orange-600 max-xl:flex justify-center max-xl:text-center">Simplified.</span></h1><br />
+        <p class="text-slate-500 text-lg w-full 2xl:text-xl 2xl: xl:text-nowrap text-center max-xl:w-96 font-sans pt-3">Key generation, key splitting and storage — all in one place!</p>
+        <div class="flex justify-center self-center item-center font-pal max-xl:w-96 mt-12 gap-16">
             <div>
-                <p class="text-lg text-center font-semibold">1K+</p>
-                <p class="text-slate-500 text-base text-center">Keys <br />generated</p>
+                <p class="text-lg text-center max-2xl:text-sm font-serif font-semibold">1K+</p>
+                <p class="text-slate-500 max-2xl:text-sm text-base font-serif text-center">Keys <br />generated</p>
             </div>
             <div>
-                <p class="text-lg text-center font-semibold">500+</p>
-                <p class="text-slate-500 text-base">Keys <br />split</p>
+                <p class="text-lg text-center max-2xl:text-sm font-serif font-semibold">500+</p>
+                <p class="text-slate-500 max-2xl:text-sm font-serif text-base">Keys <br />split</p>
             </div>
             <div>
-                <p class="text-lg font-semibold text-center">250K+</p>
-                <p class="text-slate-500 text-base text-center">Files <br />encrypted</p>
+                <p class="text-lg font-semibold max-2xl:text-sm font-serif text-center">250K+</p>
+                <p class="text-slate-500 max-2xl:text-sm text-base font-serif text-center">Files <br />encrypted</p>
             </div>
         </div>
     </div>
 
-    <div class="w-2/5 max-w-xl grid grid-rows-5 justify-between items-center gap-4">
+    <div class="w-3/5 max-w-xl grid grid-rows-5 justify-center items-center gap-4">
         <a href="#" class="group block w-full mx-auto rounded-lg p-6 bg-white ring-1 ring-slate-900/5 shadow-lg space-y-3 hover:bg-orange-500 hover:ring-orange-500">
             <div class="flex items-center space-x-3">
                 <h3 class="text-slate-900 group-hover:text-white text-sm text-center font-semibold">Key Generation</h3>

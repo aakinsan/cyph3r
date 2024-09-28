@@ -48,6 +48,11 @@ module.exports = {
                 montserrat: ['Montserrat', 'sans-serif'],
                 roboto: ['Roboto', 'sans-serif'],
             },
+            screens: {
+                '3xl': '1600px', // Custom
+                '4xl': '1920px', // Custom
+                '5xl': '2560px', // Custom
+              },
         },
     },
     plugins: [
