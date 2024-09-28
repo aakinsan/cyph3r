@@ -7,7 +7,6 @@ import random
 import os
 
 
-@pytest.mark.django_db
 def test_index_view(client):
     """
     Test that the index view renders correctly.
@@ -18,7 +17,6 @@ def test_index_view(client):
     assert "cyph3r/index.html" in [t.name for t in response.templates]
 
 
-@pytest.mark.django_db
 def test_wireless_view(client):
     """
     Test that the wireless intro view renders correctly.
@@ -31,7 +29,11 @@ def test_wireless_view(client):
 
 @pytest.mark.django_db
 def test_wireless_key_generation(
-    client, pgp_public_keys, key_info_milenage_op, key_gcp_storage_data
+    cleanup_generated_files,
+    client,
+    pgp_public_keys,
+    key_info_milenage_op,
+    key_gcp_storage_data,
 ):
     """
     Test that the wireless_gcp_storage_form view renders correctly and validates data.
@@ -180,7 +182,3 @@ def test_wireless_key_generation(
 
     assert decrypted_secret_key == cm.hex_to_bytes(provider_secret_key)
     assert decrypted_secret_key == cm.hex_to_bytes(milenage_secret_key)
-
-    # Remove all files in the media directory
-    for file in os.listdir(settings.MEDIA_ROOT):
-        os.remove(os.path.join(settings.MEDIA_ROOT, file))

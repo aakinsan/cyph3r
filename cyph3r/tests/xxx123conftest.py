@@ -1,23 +1,11 @@
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
-from cyph3r.crypto import CryptoManager
-from django.urls import reverse
 from django.conf import settings
 import os
 
 
 @pytest.fixture
-def cm():
-    """
-    Fixture to return a CryptoManager instance.
-    """
-    # Get the path to the test PGP keys
-    gnupghome = settings.BASE_DIR / "cyph3r" / "tests" / "pgp_test_keys"
-    return CryptoManager(gnupghome)
-
-
-@pytest.fixture
-def key_info_milenage_op_post_data():
+def key_info_milenage_op():
     """
     Fixture to return key information data for Milenage OP key generation.
     """
@@ -30,7 +18,7 @@ def key_info_milenage_op_post_data():
 
 
 @pytest.fixture
-def key_info_tuak_transport_post_data():
+def key_info_tuak_transport():
     """
     Fixture to return key information data for Tuak Transport key generation.
     """
@@ -43,7 +31,7 @@ def key_info_tuak_transport_post_data():
 
 
 @pytest.fixture
-def key_gcp_storage_post_data():
+def key_gcp_storage_data():
     """
     Fixture to return GCP information data for testing.
     """
@@ -52,54 +40,6 @@ def key_gcp_storage_post_data():
         "gcp_kms_keyring": "",
         "gcp_kms_key": "",
     }
-
-
-@pytest.fixture
-def gcp_storage_url():
-    """
-    Fixture to return the URL for the GCP storage form.
-    """
-    return reverse("wireless_gcp_storage_form")
-
-
-@pytest.fixture
-def pgp_upload_url():
-    """
-    Fixture to return the URL for the PGP upload form.
-    """
-    return reverse("wireless_pgp_upload_form")
-
-
-@pytest.fixture
-def generate_keys_url():
-    """
-    Fixture to return the Generating key URL.
-    """
-    return reverse("wireless_generate_keys")
-
-
-@pytest.fixture
-def gcp_storage_html_page():
-    """
-    Fixture to return the HTML page for the GCP storage form.
-    """
-    return "cyph3r/wireless-gcp-storage.html"
-
-
-@pytest.fixture
-def pgp_upload_html_page():
-    """
-    Fixture to return the HTML page for the PGP upload form.
-    """
-    return "cyph3r/wireless-pgp-upload.html"
-
-
-@pytest.fixture
-def generate_keys_html_page():
-    """
-    Fixture to return the Generating key HTML page.
-    """
-    return "cyph3r/wireless-generate-keys.html"
 
 
 @pytest.fixture
