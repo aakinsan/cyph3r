@@ -158,18 +158,15 @@ def wireless_generate_keys(request):
 
             # Generate the secret key as a random byte string of the given key size
             secret_key = cm.generate_random_key_bytes(key_size)
-            print(f"secret key = {secret_key}")
 
             # Generates a 128 bit wrap key
             # Split it into 5 shares using Shamir Secret Sharing (SSS)
             # These will be shared among 5 internal security officers (SO) for a 3 of 5 scheme
             wrap_key = cm.generate_random_key_bytes(128)
             shares = cm.shamir_split_secret(3, 5, wrap_key)
-            print(f"so_wrap_key = {wrap_key}")
 
             # Generate 12 bytes nonce for the AES-GCM encryption of the secret key by the wrap key
             nonce = cm.generate_random_key_bytes(96)
-            print(f"nonce = {nonce}")
 
             # Encrypt the secret key using the wrap key and nonce
             wrapped_secret_key = cm.encrypt_with_aes_gcm(wrap_key, nonce, secret_key)
@@ -177,10 +174,9 @@ def wireless_generate_keys(request):
             # Concatenate 12 bytes nonce + wrapped secret key
             # Nonce is required for AES GCM decryption
             wrapped_data = nonce + wrapped_secret_key
-            print(f"data = {wrapped_data}")
 
             # Calling helper function to write the encrypted secret key to a file and return the file name
-            wrapped_data_file = create_wrapped_secret_key_file(
+            wrapped_secret_key_file = create_wrapped_secret_key_file(
                 cm, wrapped_data, protocol, key_type
             )
 
@@ -221,7 +217,7 @@ def wireless_generate_keys(request):
                 milenage_file = create_milenage_encrypted_file(
                     form, cm, secret_key, key_type
                 )
-
+            """
             # Initialize GCP Manager for GCP operations
             # Wrapped keys will be stored in GCP Secrets Manager and also available for download for backup
             # The use of KMS is optional
@@ -237,7 +233,7 @@ def wireless_generate_keys(request):
 
             # Store Encrypted data (nonce + key) in GCP Secrets Manager
             gm.create_secret(secret_id=secret_id, payload=wrapped_data)
-
+            """
             # Render the success page upon successful key generation and encryption if protocol is milenage
             if milenage_file:
                 return render(
@@ -247,7 +243,7 @@ def wireless_generate_keys(request):
                         "provider_files": provider_files,
                         "milenage_file": milenage_file,
                         "security_officer_files": security_officer_files,
-                        "wrapped_data_file": wrapped_data_file,
+                        "wrapped_secret_key_file": wrapped_secret_key_file,
                     },
                 )
             else:
@@ -258,7 +254,7 @@ def wireless_generate_keys(request):
                     {
                         "provider_files": provider_files,
                         "security_officer_files": security_officer_files,
-                        "wrapped_data_file": wrapped_data_file,
+                        "wrapped_secret_key_file": wrapped_secret_key_file,
                     },
                 )
         else:
