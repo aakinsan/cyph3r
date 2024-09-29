@@ -37,16 +37,16 @@ def wireless(request):
     return render(request, "cyph3r/wireless.html")
 
 
-##############
-# HTMX Views #
-##############
+################################
+# HTMX Wireless Ceremony Views #
+################################
 
 
 def wireless_ceremony_intro(request):
     """
     Returns partial template for the Wireless Key Ceremony Introduction
     """
-    return render(request, "cyph3r/wireless-ceremony-intro.html")
+    return render(request, "cyph3r/wireless_templates/wireless-ceremony-intro.html")
 
 
 def wireless_key_info_form(request):
@@ -54,7 +54,9 @@ def wireless_key_info_form(request):
     Returns partial template for the Wireless Key Information form
     """
     return render(
-        request, "cyph3r/wireless-key-info.html", {"form": WirelessKeyInfoForm()}
+        request,
+        "cyph3r/wireless_templates/wireless-key-info.html",
+        {"form": WirelessKeyInfoForm()},
     )
 
 
@@ -84,17 +86,21 @@ def wireless_gcp_storage_form(request):
             # Render the GCP Storage form on successful form validation
             return render(
                 request,
-                "cyph3r/wireless-gcp-storage.html",
+                "cyph3r/wireless_templates/wireless-gcp-storage.html",
                 {"form": WirelessGCPStorageForm()},
             )
         else:
             # Render the key info form if form validation fails
-            return render(request, "cyph3r/wireless-key-info.html", {"form": form})
+            return render(
+                request,
+                "cyph3r/wireless_templates/wireless-key-info.html",
+                {"form": form},
+            )
     else:
         # Render the GCP Storage form if the request is not a POST request
         return render(
             request,
-            "cyph3r/wireless-gcp-storage.html",
+            "cyph3r/wireless_templates/wireless-gcp-storage.html",
             {"form": WirelessGCPStorageForm()},
         )
 
@@ -123,12 +129,16 @@ def wireless_pgp_upload_form(request):
             # Render the PGP file upload form on successful form submission
             return render(
                 request,
-                "cyph3r/wireless-pgp-upload.html",
+                "cyph3r/wireless_templates/wireless-pgp-upload.html",
                 {"form": WirelessPGPUploadForm()},
             )
         else:
             # Render the gcp stprage form if form validation fails
-            return render(request, "cyph3r/wireless-gcp-storage.html", {"form": form})
+            return render(
+                request,
+                "cyph3r/wireless_templates/wireless-gcp-storage.html",
+                {"form": form},
+            )
 
 
 def wireless_generate_keys(request):
@@ -238,7 +248,7 @@ def wireless_generate_keys(request):
             if milenage_file:
                 return render(
                     request,
-                    "cyph3r/wireless-generate-keys.html",
+                    "cyph3r/wireless_templates/wireless-generate-keys.html",
                     {
                         "provider_files": provider_files,
                         "milenage_file": milenage_file,
@@ -250,7 +260,7 @@ def wireless_generate_keys(request):
                 # Render the success page upon successful key generation and encryption if protocol is tuak
                 return render(
                     request,
-                    "cyph3r/wireless-generate-keys.html",
+                    "cyph3r/wireless_templates/wireless-generate-keys.html",
                     {
                         "provider_files": provider_files,
                         "security_officer_files": security_officer_files,
@@ -259,4 +269,8 @@ def wireless_generate_keys(request):
                 )
         else:
             # Render the PGP Upload form again with validation errors if the form is invalid
-            return render(request, "cyph3r/wireless-pgp-upload.html", {"form": form})
+            return render(
+                request,
+                "cyph3r/wireless_templates/wireless-pgp-upload.html",
+                {"form": form},
+            )
