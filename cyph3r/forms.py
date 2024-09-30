@@ -252,7 +252,7 @@ class KeyShareInfoForm(forms.Form):
         ("reconstruct", "Reconstruct Key"),
     ]
 
-    key_task_choice = forms.ChoiceField(
+    key_task = forms.ChoiceField(
         choices=KEY_TASK_CHOICES,
         label="Task",
         help_text="Select a task",
@@ -265,7 +265,7 @@ class KeyShareInfoForm(forms.Form):
         label="Share Count",
         min_value=2,
         max_value=10,
-        required=True,
+        required=False,
         help_text="Total number of key shares to generate or total number required for key reconstruction (XOR).",
     )
 

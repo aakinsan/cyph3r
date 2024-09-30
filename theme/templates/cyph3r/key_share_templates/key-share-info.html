@@ -76,13 +76,13 @@
 <!-- Script to show/hide share count and threshold count fields based on user selection -->
 <script type="text/hyperscript">
     def checkSelections() 
-        if (#id_scheme.value == "shamir" and #id_key_task_choice.value == "split") 
+        if (#id_scheme.value == "shamir" and #id_key_task.value == "split") 
             then remove .hidden from #share_count
             then remove .hidden from #threshold_count
-        else if (#id_scheme.value == "xor" and (#id_key_task_choice.value == "split" or #id_key_task_choice.value == "reconstruct")) 
+        else if (#id_scheme.value == "xor" and (#id_key_task.value == "split" or #id_key_task.value == "reconstruct")) 
             then remove .hidden from #share_count
             add .hidden to #threshold_count
-        else if (#id_scheme.value == "shamir" and #id_key_task_choice.value == "reconstruct") 
+        else if (#id_scheme.value == "shamir" and #id_key_task.value == "reconstruct") 
             then remove .hidden from #threshold_count
             add .hidden to #share_count
         else

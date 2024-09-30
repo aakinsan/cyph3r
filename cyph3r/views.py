@@ -48,10 +48,15 @@ def key_share_info(request):
         form = KeyShareInfoForm(request.POST)
         if form.is_valid():
             request.session["scheme"] = form.cleaned_data.get("scheme")
-            request.session["task"] = form.cleaned_data.get("task")
+            request.session["key_task"] = form.cleaned_data.get("key_task")
             request.session["share_count"] = form.cleaned_data.get("share_count")
-            request.session["threshold"] = form.cleaned_data.get("threshold")
-            return redirect("key-share-input")
+            request.session["threshold_count"] = form.cleaned_data.get(
+                "threshold_count"
+            )
+            if form.cleaned_data.get("key_task") == "reconstruct":
+                return redirect("key-share-input")
+            else:
+                return redirect("/")
         else:
             return render(
                 request,
