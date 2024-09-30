@@ -1,11 +1,14 @@
 from django.shortcuts import render, redirect
 from django.conf import settings
+from cryptography.fernet import Fernet
 import os
 from django.contrib import messages
 from .forms import (
     WirelessKeyInfoForm,
     WirelessGCPStorageForm,
     WirelessPGPUploadForm,
+    KeyShareInfoForm,
+    KeyShareInputForm,
 )
 from .create_files import (
     create_provider_encrypted_key_files,
@@ -35,6 +38,57 @@ def wireless(request):
     Returns Wireless Key Ceremony Page
     """
     return render(request, "cyph3r/wireless.html")
+
+
+def key_share_info(request):
+    """
+    Returns Key Share Info Page
+    """
+    if request.method == "POST":
+        form = KeyShareInfoForm(request.POST)
+        if form.is_valid():
+            request.session["scheme"] = form.cleaned_data.get("scheme")
+            request.session["task"] = form.cleaned_data.get("task")
+            request.session["share_count"] = form.cleaned_data.get("share_count")
+            request.session["threshold"] = form.cleaned_data.get("threshold")
+            return redirect("key-share-input")
+        else:
+            return render(
+                request,
+                "cyph3r/key_share_templates/key-share-info.html",
+                {"form": form},
+            )
+    else:
+        form = KeyShareInfoForm()
+        return render(
+            request, "cyph3r/key_share_templates/key-share-info.html", {"form": form}
+        )
+
+
+def key_share_input(request):
+    """
+    Returns Key Share Input Page
+    """
+    if request.method == "POST":
+        form = KeyShareInputForm(request.POST)
+        if form.is_valid():
+            shares = form.cleaned_data.get("shares")
+            request.session["shares"] = shares
+            cm = CryptoManager()
+            secret = cm.recover_secret(shares)
+            if secret:
+                messages.success(request, "Secret recovered successfully.")
+                return redirect("key-share-info")
+            else:
+                messages.error(request, "Secret recovery failed.")
+                return redirect("key-share-info")
+    else:
+        form = KeyShareInputForm()
+        return render(
+            request,
+            "cyph3r/key_share_templates/key-share-input.html",
+            {"form": form},
+        )
 
 
 ################################

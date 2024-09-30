@@ -25,6 +25,11 @@ class MultipleFileField(forms.FileField):
         return result
 
 
+#################################
+# Wireless Key Management Forms #
+# ###############################
+
+
 class WirelessKeyInfoForm(forms.Form):
     # Key Identifier (Optional)
     key_identifier = forms.CharField(
@@ -209,6 +214,70 @@ class WirelessPGPUploadForm(forms.Form):
         return file
 
 
+##############################
+# Key Share Management Forms #
+# ############################
+
+
+class KeyShareInputForm(forms.Form):
+    # Key Index for key reconstruction for shamir secret sharing
+    key_index = forms.IntegerField(label="Key Index", min_value=1, required=False)
+
+    # Key Share field for key reconstruction
+    key_share = forms.CharField(
+        required=True, max_length=64, widget=forms.PasswordInput(), label="Key Share"
+    )
+
+
+class KeyShareInfoForm(forms.Form):
+    # Key Splitting/Reconstruction Options
+    KEY_SPLITTING_SCHEMES = [
+        ("", "Select a scheme"),
+        ("shamir", "Shamir"),
+        ("xor", "XOR"),
+    ]
+    # choice of splitting scheme
+    scheme = forms.ChoiceField(
+        choices=KEY_SPLITTING_SCHEMES,
+        label="Scheme",
+        help_text="Select a scheme",
+        widget=forms.Select(attrs={"_": "on change call checkSelections()"}),
+        required=True,
+    )
+
+    # XOR Key share choices
+    KEY_TASK_CHOICES = [
+        ("", "Select a Task"),
+        ("split", "Split Key"),
+        ("reconstruct", "Reconstruct Key"),
+    ]
+
+    key_task_choice = forms.ChoiceField(
+        choices=KEY_TASK_CHOICES,
+        label="Task",
+        help_text="Select a task",
+        widget=forms.Select(attrs={"_": "on change call checkSelections()"}),
+        required=True,
+    )
+
+    # Key Share Count (for key splitting, e.g., Shamir Secret Sharing)
+    share_count = forms.IntegerField(
+        label="Share Count",
+        min_value=2,
+        max_value=10,
+        required=True,
+        help_text="Total number of key shares to generate or total number required for key reconstruction (XOR).",
+    )
+
+    # Threshold Count (for key splitting, e.g., Shamir Secret Sharing)
+    threshold_count = forms.IntegerField(
+        label="Threshold Count",
+        min_value=2,
+        required=False,
+        help_text="Minimum number of key shares for key reconstruction.",
+    )
+
+
 class KeyGenerationForm(forms.Form):
     # Key Identifier (Optional)
     key_identifier = forms.CharField(
@@ -258,20 +327,5 @@ class KeyGenerationForm(forms.Form):
     passphrase = forms.CharField(
         label="Passphrase (Optional)",
         widget=forms.PasswordInput(),
-        required=False,
-    )
-
-    # Key Share Count (for key splitting, e.g., Shamir Secret Sharing)
-    share_count = forms.IntegerField(
-        label="Share Count",
-        min_value=2,
-        max_value=10,
-        required=False,
-    )
-
-    # Threshold Count (for key splitting, e.g., Shamir Secret Sharing)
-    threshold_count = forms.IntegerField(
-        label="Threshold Count",
-        min_value=2,
         required=False,
     )

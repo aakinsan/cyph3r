@@ -9,6 +9,8 @@ This module contains the URL patterns for the cyph3r app.
 urlpatterns = [
     path("", views.index, name="index"),
     path("wireless/", views.wireless, name="wireless"),
+    path("key-share-info/", views.key_share_info, name="key-share-info"),
+    path("key-share-input/", views.key_share_input, name="key-share-input"),
 ]
 
 htmx_urlpatterns = [

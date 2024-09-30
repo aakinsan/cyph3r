@@ -1,0 +1,94 @@
+{% extends 'cyph3r/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block content %}
+
+<div class="bg-slate-200 flex flex-col min-h-screen justify-center items-center w-full">
+    <div class="relative flex justify-center items-center w-full">        
+        <div id="form" class="w-full max-w-sm p-2">
+            <!-- Form Start -->
+            <form method="POST" class="w-full bg-white shadow-md rounded-lg px-4 pt-4 pb-4">
+                <div class="mb-2">
+                {% csrf_token %}
+                    <!-- Non-field Errors -->
+                    {% if form.non_field_errors %}
+                    <span class="text-red-500 text-xs"> {{ form.non_field_errors }}</span>
+                    {% endif %}
+
+                    <!-- Visible Fields -->
+
+                    {% for field in form.visible_fields %}
+                        <!-- Hide share count and threshold count fields -->
+                        {% if field.name == "share_count" %}
+                            <div id="share_count" class="mb-4 hidden">
+                                <label for="{{ field.id_for_label}}" class="block text-gray-500 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
+                                {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 focus:border-orange-500" }}
+                                <div class="text-xs text-gray-500">{{ field.help_text }}</div> 
+                                {% if field.errors %}
+                                    <span class="text-red-500 text-xs">
+                                        {% for error in field.errors %}
+                                        {{ error }}
+                                        {% endfor %}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        {% elif field.name == "threshold_count" %}
+                            <div id="threshold_count" class="mb-4 hidden">
+                                <label for="{{ field.id_for_label}}" class="block text-gray-500 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
+                                {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 focus:border-orange-500" }}
+                                <div class="text-xs text-gray-500">{{ field.help_text }}</div> 
+                                {% if field.errors %}
+                                    <span class="text-red-500 text-xs">
+                                        {% for error in field.errors %}
+                                        {{ error }}
+                                        {% endfor %}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                        <!-- Render other fields -->
+                        <div class="mb-4">
+                            <label for="{{ field.id_for_label}}" class="block text-gray-500 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
+                            {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 focus:border-orange-500" }}
+                            <div class="text-xs text-gray-500">{{ field.help_text }}</div> 
+                            {% if field.errors %}
+                                <span class="text-red-500 text-xs">
+                                    {% for error in field.errors %}
+                                    {{ error }}
+                                    {% endfor %}
+                                </span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    <!-- Buttons -->
+                    <div class="flex justify-end">
+                            <button type="submit" class="bg-orange-500 hover:bg-orange-400 text-white text-xs mt-2 px-6 py-2 rounded-lg transition">
+                                Next
+                            </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Script to show/hide share count and threshold count fields based on user selection -->
+<script type="text/hyperscript">
+    def checkSelections() 
+        if (#id_scheme.value == "shamir" and #id_key_task_choice.value == "split") 
+            then remove .hidden from #share_count
+            then remove .hidden from #threshold_count
+        else if (#id_scheme.value == "xor" and (#id_key_task_choice.value == "split" or #id_key_task_choice.value == "reconstruct")) 
+            then remove .hidden from #share_count
+            add .hidden to #threshold_count
+        else if (#id_scheme.value == "shamir" and #id_key_task_choice.value == "reconstruct") 
+            then remove .hidden from #threshold_count
+            add .hidden to #share_count
+        else
+            add .hidden to #share_count 
+            add .hidden to #threshold_count
+    end
+</script>
+
+{% endblock %}
