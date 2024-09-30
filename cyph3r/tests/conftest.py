@@ -109,7 +109,7 @@ def gcp_storage_html_page():
     """
     Fixture to return the HTML page for the GCP storage form.
     """
-    return "cyph3r/wireless-gcp-storage.html"
+    return "cyph3r/wireless_templates/wireless-gcp-storage.html"
 
 
 @pytest.fixture
@@ -117,7 +117,7 @@ def pgp_upload_html_page():
     """
     Fixture to return the HTML page for the PGP upload form.
     """
-    return "cyph3r/wireless-pgp-upload.html"
+    return "cyph3r/wireless_templates/wireless-pgp-upload.html"
 
 
 @pytest.fixture
@@ -125,7 +125,7 @@ def generate_keys_html_page():
     """
     Fixture to return the Generating key HTML page.
     """
-    return "cyph3r/wireless-generate-keys.html"
+    return "cyph3r/wireless_templates/wireless-generate-keys.html"
 
 
 @pytest.fixture

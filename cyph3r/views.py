@@ -11,10 +11,10 @@ from .forms import (
     KeyShareInputForm,
 )
 from .create_files import (
-    create_provider_encrypted_key_files,
-    create_milenage_encrypted_file,
-    create_security_officers_encrypted_key_files,
-    create_wrapped_secret_key_file,
+    create_wireless_provider_encrypted_key_files,
+    create_wireless_milenage_encrypted_file,
+    create_wireless_security_officers_encrypted_key_files,
+    create_wireless_wrapped_secret_key_file,
 )
 from .crypto import CryptoManager
 from .gcp import GCPManager
@@ -45,7 +45,7 @@ def key_share_info(request):
     Returns Key Share Info Page
     """
     if request.method == "POST":
-        form = KeyShareInfoForm(request.POST)
+        form = KeyShareInfoForm(request.POST, request.FILES)
         if form.is_valid():
             request.session["scheme"] = form.cleaned_data.get("scheme")
             request.session["key_task"] = form.cleaned_data.get("key_task")
@@ -77,6 +77,20 @@ def key_share_input(request):
     if request.method == "POST":
         form = KeyShareInputForm(request.POST)
         if form.is_valid():
+            key = Fernet.generate_key()
+            cm = CryptoManager()
+            f = Fernet(key)
+            submitted_officer_count = 0
+            request.session["shamir_key_shares"] = []
+            if request.session.get("scheme") == "shamir":
+                threshold_count = request.session.get("threshold_count")
+                key_index = form.cleaned_data.get("key_index")
+                token = f.encrypt(cm.hex_to_bytes(form.cleaned_data["key_share"]))
+                request.session["shamir_key_shares"].append((key_index, token))
+                submitted_officer_count += 1
+                if submitted_officer_count == threshold_count:
+                    return redirect("/")
+
             shares = form.cleaned_data.get("shares")
             request.session["shares"] = shares
             cm = CryptoManager()
@@ -245,14 +259,14 @@ def wireless_generate_keys(request):
             wrapped_data = nonce + wrapped_secret_key
 
             # Calling helper function to write the encrypted secret key to a file and return the file name
-            wrapped_secret_key_file = create_wrapped_secret_key_file(
+            wrapped_secret_key_file = create_wireless_wrapped_secret_key_file(
                 cm, wrapped_data, protocol, key_type
             )
 
             # Calling helper function to generate PGP encrypted files for the external provider
             # Each file contains the XOR share of the secret key encrypted with a provider's PGP key
             # This returns a list of the file names of the encrypted provider files for download
-            provider_files = create_provider_encrypted_key_files(
+            provider_files = create_wireless_provider_encrypted_key_files(
                 form,
                 cm,
                 secret_key,
@@ -265,12 +279,14 @@ def wireless_generate_keys(request):
             # Calling helper function to encrypt security officer (SO) files
             # Each file contains the Shamir wrap key share encrypted with a security officer's PGP key
             # This returns a list of the file names of the encrypted SO files for download
-            security_officer_files = create_security_officers_encrypted_key_files(
-                form,
-                cm,
-                key_type,
-                protocol,
-                shares,
+            security_officer_files = (
+                create_wireless_security_officers_encrypted_key_files(
+                    form,
+                    cm,
+                    key_type,
+                    protocol,
+                    shares,
+                )
             )
 
             # Check if protocol is milenage
@@ -283,7 +299,7 @@ def wireless_generate_keys(request):
 
                 # Calling helper function to create the encrypted milenage key file
                 # This returns the file name of the encrypted milenage key file for download
-                milenage_file = create_milenage_encrypted_file(
+                milenage_file = create_wireless_milenage_encrypted_file(
                     form, cm, secret_key, key_type
                 )
             """

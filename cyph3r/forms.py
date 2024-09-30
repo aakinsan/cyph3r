@@ -277,6 +277,12 @@ class KeyShareInfoForm(forms.Form):
         help_text="Minimum number of key shares for key reconstruction.",
     )
 
+    key_share_public_keys = MultipleFileField(
+        required=True,
+        help_text="Upload PGP Public keys for key/key-share encryption",
+        label="Public Keys",
+    )
+
 
 class KeyGenerationForm(forms.Form):
     # Key Identifier (Optional)

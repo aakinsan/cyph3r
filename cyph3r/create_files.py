@@ -7,9 +7,12 @@ import os
 Helper functions to create files containing encrypted secret keys and key shares.
 
 """
+###########################################
+# Wireless Module File Creation Functions #
+###########################################
 
 
-def create_wrapped_secret_key_file(
+def create_wireless_wrapped_secret_key_file(
     cm: CryptoManager, wrapped_data: bytes, protocol: str, key_type: str
 ) -> str:
     # Write Encrypted key to file for download.
@@ -24,7 +27,7 @@ def create_wrapped_secret_key_file(
     return wrapped_data_file_name
 
 
-def create_provider_encrypted_key_files(
+def create_wireless_provider_encrypted_key_files(
     form: forms.Form,
     cm: CryptoManager,
     secret_key: bytes,
@@ -87,7 +90,7 @@ def create_provider_encrypted_key_files(
     return provider_files
 
 
-def create_security_officers_encrypted_key_files(
+def create_wireless_security_officers_encrypted_key_files(
     form: forms.Form,
     cm: CryptoManager,
     key_type: str,
@@ -142,7 +145,7 @@ def create_security_officers_encrypted_key_files(
     return security_officer_file_names
 
 
-def create_milenage_encrypted_file(
+def create_wireless_milenage_encrypted_file(
     form: forms.Form,
     cm: CryptoManager,
     secret_key: bytes,
@@ -181,3 +184,37 @@ def create_milenage_encrypted_file(
 
     # Return the filename of the encrypted milenage keys for download
     return milenage_file_name
+
+
+############################################
+# Key Share Module File Creation Functions #
+############################################
+
+
+def write_key_share_so_public_keys_to_disk(
+    form: forms.Form, user_directory: str
+) -> list:
+    """Writes the Security Officer's public keys to a file to encrypt key or key-share."""
+
+    # Create the directory if it doesn't exist
+    if not os.path.exists(user_directory):
+        os.makedirs(user_directory)
+
+    # Initialize the list to store the file names of the public keys
+    key_share_public_key_files = []
+
+    # Write uploaded public keys to disk
+    for file in form.cleaned_data["key_share_public_keys"]:
+        # Reset the file pointer to the beginning of the file
+        file.seek(0)
+        save_path = os.path.join(settings.MEDIA_ROOT, user_directory, file.name)
+
+        with open(save_path, "wb") as fp:
+            for chunk in file.chunks():
+                fp.write(chunk)
+
+        # Append file name to list of public key files
+        key_share_public_key_files.append(save_path)
+
+    # Return the list of file paths to the public key files
+    return key_share_public_key_files
