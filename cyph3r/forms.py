@@ -225,12 +225,31 @@ class WirelessPGPUploadForm(forms.Form):
 
 class KeyShareInputForm(forms.Form):
     # Key Index for key reconstruction for shamir secret sharing
-    key_index = forms.IntegerField(label="Key Index", min_value=1, required=False)
+    key_index = forms.IntegerField(
+        label="Key Index", min_value=1, required=False, help_text="Shamir key index."
+    )
 
     # Key Share field for key reconstruction
     key_share = forms.CharField(
-        required=True, max_length=64, widget=forms.PasswordInput(), label="Key Share"
+        required=True,
+        min_length=32,
+        max_length=64,
+        widget=forms.PasswordInput(),
+        label="Key Share (HEXADECIMAL STRING)",
+        help_text="Minimum of 32 characters for 128 bit keys.",
     )
+
+    def clean_key_share(self):
+        # Check if key share is a hexadecimal string
+        key_share = self.cleaned_data.get("key_share")
+        if not key_share.isalnum():
+            self.add_error("key_share", "Key share must be a hexadecimal string.")
+        if not len(key_share) % 32 == 0:
+            self.add_error(
+                "key_share",
+                "Key share must be 128 or 256 bits.",
+            )
+        return key_share
 
 
 class KeyShareInfoForm(forms.Form):

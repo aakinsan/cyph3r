@@ -16,6 +16,7 @@
                 {% if form.non_field_errors %}
                 <span class="text-red-500 text-xs"> {{ form.non_field_errors }}</span>
                 {% endif %}
+                <p class="text-center py-2 font-sans font-semibold text-xs">SECURITY OFFICER {{ request.session.submitted_officer_count}}</p>
 
                 <!-- Visible Fields -->
 

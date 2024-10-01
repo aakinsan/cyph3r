@@ -131,12 +131,20 @@ def key_share_input(request):
             if not request.session.get("key_shares"):
                 request.session["key_shares"] = []
 
-            # Initialize the number of Security officers that have submitted their key shares
-            if not request.session.get("submitted_officer_count"):
-                request.session["submitted_officer_count"] = 0
-
             # Check if the scheme is Shamir
             if request.session.get("scheme") == "shamir":
+
+                # Check if the key index is provided
+                if form.cleaned_data.get("key_index") is None:
+                    form.add_error(
+                        "key_index", "A key Index is required for Shamir scheme."
+                    )
+                    # Return the form with the error message
+                    return render(
+                        request,
+                        "cyph3r/key_share_templates/key-share-input.html",
+                        {"form": form},
+                    )
 
                 # Retrieve the threshold number required to restore the secret
                 threshold_count = request.session.get("threshold_count")
@@ -160,7 +168,7 @@ def key_share_input(request):
                 )
 
                 # Check if the threshold number of key shares have been submitted
-                if request.session["submitted_officer_count"] == threshold_count:
+                if request.session["submitted_officer_count"] > threshold_count:
                     # Initialize the list to store the Shamir key shares
                     shamir_shares = []
 
@@ -204,6 +212,11 @@ def key_share_input(request):
                 pass
     else:
         form = KeyShareInputForm()
+
+        # Initialize the number of Security officers that have submitted their key shares
+        if not request.session.get("submitted_officer_count"):
+            request.session["submitted_officer_count"] = 1
+
         return render(
             request,
             "cyph3r/key_share_templates/key-share-input.html",
