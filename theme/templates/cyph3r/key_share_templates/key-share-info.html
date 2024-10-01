@@ -7,7 +7,7 @@
     <div class="relative flex justify-center items-center w-full">        
         <div id="form" class="w-full max-w-sm p-2">
             <!-- Form Start -->
-            <form method="POST" class="w-full bg-white shadow-md rounded-lg px-4 pt-4 pb-4">
+            <form method="POST" enctype="multipart/form-data" class="w-full bg-white shadow-md rounded-lg px-4 pt-4 pb-4">
                 <div class="mb-2">
                 {% csrf_token %}
                     <!-- Non-field Errors -->

@@ -197,8 +197,9 @@ def write_key_share_so_public_keys_to_disk(
     """Writes the Security Officer's public keys to a file to encrypt key or key-share."""
 
     # Create the directory if it doesn't exist
-    if not os.path.exists(user_directory):
-        os.makedirs(user_directory)
+    path = settings.MEDIA_ROOT / user_directory
+    if not os.path.exists(path):
+        os.makedirs(path)
 
     # Initialize the list to store the file names of the public keys
     key_share_public_key_files = []
@@ -207,7 +208,7 @@ def write_key_share_so_public_keys_to_disk(
     for file in form.cleaned_data["key_share_public_keys"]:
         # Reset the file pointer to the beginning of the file
         file.seek(0)
-        save_path = os.path.join(settings.MEDIA_ROOT, user_directory, file.name)
+        save_path = os.path.join(path, file.name)
 
         with open(save_path, "wb") as fp:
             for chunk in file.chunks():
@@ -218,3 +219,47 @@ def write_key_share_so_public_keys_to_disk(
 
     # Return the list of file paths to the public key files
     return key_share_public_key_files
+
+
+def create_key_share_shamir_secret_file(
+    cm: CryptoManager,
+    secret_key: bytes,
+    user_directory: str,
+    public_key_files: list,
+):
+    """Wraps the reconstructed secret key with PGP public key."""
+    # Create the directory if it doesn't exist
+    path = settings.MEDIA_ROOT / user_directory
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    # Initialize the list to store the file names of the encrypted secret
+    key_share_files_names = []
+
+    for file in public_key_files:
+        with open(file, "rb") as fp:
+
+            # Import the PGP public key from the uploaded file
+            cm.gpg.import_keys(fp.read())
+
+        # Retrieve the latest imported key's fingerprint and keyid
+        imported_key = cm.gpg.list_keys()[-1]
+        fingerprint = imported_key["fingerprint"]
+        keyid = imported_key["keyid"]
+
+        # Create the filename for the encrypted key and append filename to keys_share_files list for download
+        file_name = f"key-share-secret-{keyid}.txt.gpg"
+        save_path = os.path.join(path, file_name)
+        key_share_files_names.append(file_name)
+
+        # Encrypt the secret with PGP public key
+        encrypted_data = cm.gpg.encrypt(
+            cm.bytes_to_hex(secret_key), fingerprint, always_trust=True, armor=False
+        )
+
+        # Save the encrypted secret key to the designated file save path
+        with open(save_path, "wb") as fp:
+            fp.write(encrypted_data.data)
+
+    # Return the filename of the encrypted milenage keys for download
+    return key_share_files_names

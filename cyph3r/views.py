@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect
-from django.conf import settings
 from cryptography.fernet import Fernet
-import os
+from django.core.cache import cache
 from django.contrib import messages
 from .forms import (
     WirelessKeyInfoForm,
@@ -10,11 +9,13 @@ from .forms import (
     KeyShareInfoForm,
     KeyShareInputForm,
 )
-from .create_files import (
+from .files import (
     create_wireless_provider_encrypted_key_files,
     create_wireless_milenage_encrypted_file,
     create_wireless_security_officers_encrypted_key_files,
     create_wireless_wrapped_secret_key_file,
+    write_key_share_so_public_keys_to_disk,
+    create_key_share_shamir_secret_file,
 )
 from .crypto import CryptoManager
 from .gcp import GCPManager
@@ -40,19 +41,58 @@ def wireless(request):
     return render(request, "cyph3r/wireless.html")
 
 
+def key_share_download(request):
+    """
+    Returns Key Share Download Page
+    """
+    # Get download links from session
+    secret_files = request.session.get("secret_files")
+    return render(
+        request,
+        "cyph3r/key_share_templates/key-share-download.html",
+        {"secret_files": secret_files},
+    )
+
+
 def key_share_info(request):
     """
     Returns Key Share Info Page
     """
+    # Check if the request is a POST request
     if request.method == "POST":
+
+        # Populate the form with POST data and PGP public key files
         form = KeyShareInfoForm(request.POST, request.FILES)
+
+        # Validate the form data
         if form.is_valid():
+
+            # Ensure that the session is created.
+            # Session-key is used as folder name for storing the public keys & downloadable encrypted secret
+            if not request.session.session_key:
+                request.session.create()
+
+            # Get the session key
+            session_id = request.session.session_key
+
+            # Store the form data in the session
             request.session["scheme"] = form.cleaned_data.get("scheme")
             request.session["key_task"] = form.cleaned_data.get("key_task")
             request.session["share_count"] = form.cleaned_data.get("share_count")
             request.session["threshold_count"] = form.cleaned_data.get(
                 "threshold_count"
             )
+
+            print(request.session["scheme"])
+            print(f"session_id: {session_id}")
+
+            # write uploaded public keys to directory name session_id on the server and get list of file names
+            public_key_files = write_key_share_so_public_keys_to_disk(form, session_id)
+
+            # Store the file names in the session
+            request.session["public_key_files"] = public_key_files
+
+            # Redirect to the key share input page if the key task is reconstruct
             if form.cleaned_data.get("key_task") == "reconstruct":
                 return redirect("key-share-input")
             else:
@@ -77,30 +117,91 @@ def key_share_input(request):
     if request.method == "POST":
         form = KeyShareInputForm(request.POST)
         if form.is_valid():
-            key = Fernet.generate_key()
-            cm = CryptoManager()
-            f = Fernet(key)
-            submitted_officer_count = 0
-            request.session["shamir_key_shares"] = []
-            if request.session.get("scheme") == "shamir":
-                threshold_count = request.session.get("threshold_count")
-                key_index = form.cleaned_data.get("key_index")
-                token = f.encrypt(cm.hex_to_bytes(form.cleaned_data["key_share"]))
-                request.session["shamir_key_shares"].append((key_index, token))
-                submitted_officer_count += 1
-                if submitted_officer_count == threshold_count:
-                    return redirect("/")
+            # Retrieve or generate the Fernet key and store in cache
+            encryption_key = cache.get("encryption_key")
+            if not encryption_key:
+                encryption_key = Fernet.generate_key()
+                cache.set("encryption_key", encryption_key, None)
 
-            shares = form.cleaned_data.get("shares")
-            request.session["shares"] = shares
+            # Initialize the CryptoManager and Fernet object
             cm = CryptoManager()
-            secret = cm.recover_secret(shares)
-            if secret:
-                messages.success(request, "Secret recovered successfully.")
-                return redirect("key-share-info")
-            else:
-                messages.error(request, "Secret recovery failed.")
-                return redirect("key-share-info")
+            f = Fernet(encryption_key)
+
+            # Initialize the list to store the encrypted key shares
+            if not request.session.get("key_shares"):
+                request.session["key_shares"] = []
+
+            # Initialize the number of Security officers that have submitted their key shares
+            if not request.session.get("submitted_officer_count"):
+                request.session["submitted_officer_count"] = 0
+
+            # Check if the scheme is Shamir
+            if request.session.get("scheme") == "shamir":
+
+                # Retrieve the threshold number required to restore the secret
+                threshold_count = request.session.get("threshold_count")
+
+                # Retrieve the key index from the form
+                key_index = form.cleaned_data.get("key_index")
+
+                # Encrypt the key share using the Fernet key and store in the session
+                token = f.encrypt(cm.hex_to_bytes(form.cleaned_data["key_share"]))
+                request.session["key_shares"].append(
+                    (key_index, cm.bytes_to_hex(token))
+                )
+
+                # Increment the count of Security officers that have submitted their key shares
+                request.session["submitted_officer_count"] += 1
+
+                print(f"threshold_count: {threshold_count}")
+                print(f"fernet key: {encryption_key}")
+                print(
+                    f"submitted_officer_count: {request.session['submitted_officer_count']}"
+                )
+
+                # Check if the threshold number of key shares have been submitted
+                if request.session["submitted_officer_count"] == threshold_count:
+                    # Initialize the list to store the Shamir key shares
+                    shamir_shares = []
+
+                    # Decrypt the encrypted key shares and store in the list
+                    for idx, encrypted_share in request.session["key_shares"]:
+                        share = f.decrypt(cm.hex_to_bytes(encrypted_share))
+                        shamir_shares.append((idx, share))
+                    print(f"shamir_shares: {shamir_shares}")
+
+                    # Reconstruct the secret using the Shamir key shares
+                    secret = cm.shamir_reconstruct_secret(shamir_shares)
+
+                    print(f"secret: {secret}")
+
+                    # Write the secret to a file and encrypt with PGP public keys
+                    secret_files = create_key_share_shamir_secret_file(
+                        cm,
+                        secret,
+                        request.session.session_key,
+                        request.session["public_key_files"],
+                    )
+
+                    # Add path to secret files to session
+                    request.session["secret_files"] = secret_files
+
+                    # Clear cache data and relevant request session keys
+                    del request.session["submitted_officer_count"]
+                    del request.session["key_shares"]
+                    del request.session["scheme"]
+                    del request.session["key_task"]
+                    del request.session["share_count"]
+                    del request.session["threshold_count"]
+                    cache.delete("encryption_key")
+
+                    # Return page to download the secret file
+                    return redirect("key-share-download")
+                else:
+                    return redirect("key-share-input")
+            # Check if the scheme is Shamir
+            if request.session.get("scheme") == "shamir":
+                pass
     else:
         form = KeyShareInputForm()
         return render(

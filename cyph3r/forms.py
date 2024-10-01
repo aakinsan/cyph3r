@@ -8,10 +8,14 @@ This module contains the forms used in the Cyph3r application.
 
 
 class MultipleFileInput(forms.ClearableFileInput):
+    """Widget for multiple file input"""
+
     allow_multiple_selected = True
 
 
 class MultipleFileField(forms.FileField):
+    """Field for multiple file input"""
+
     def __init__(self, *args, **kwargs):
         kwargs.setdefault("widget", MultipleFileInput())
         super().__init__(*args, **kwargs)
@@ -280,58 +284,35 @@ class KeyShareInfoForm(forms.Form):
     key_share_public_keys = MultipleFileField(
         required=True,
         help_text="Upload PGP Public keys for key/key-share encryption",
-        label="Public Keys",
     )
 
+    def clean_key_share_public_keys(self):
+        files = self.cleaned_data.get("key_share_public_keys")
+        if files:
+            for file in files:
+                # Check file size is less than 5KB
+                file_size = file.size
+                if file_size > 5120:
+                    self.add_error(
+                        "key_share_public_keys",
+                        f"{file.name} must be less than 5KB.",
+                    )
+                # Check file type is PGP public key
+                file_type = magic.from_buffer(file.read(), mime=False)
+                if not file_type.startswith(
+                    ("PGP public key block", "OpenPGP Public Key")
+                ):
+                    self.add_error(
+                        "key_share_public_keys",
+                        f"{file.name} is not a PGP public key file.",
+                    )
+                # Check if the PGP key is ASCII armored
+                file.seek(0)
+                first_line = file.readline().strip()
+                if first_line != b"-----BEGIN PGP PUBLIC KEY BLOCK-----":
+                    self.add_error(
+                        "key_share_public_keys",
+                        f"{file.name} must be an ASCII armored PGP public key file.",
+                    )
 
-class KeyGenerationForm(forms.Form):
-    # Key Identifier (Optional)
-    key_identifier = forms.CharField(
-        label="Key Identifier",
-        max_length=100,
-        required=False,
-    )
-    # Key Type
-    KEY_TYPE_CHOICES = [
-        ("symmetric", "Symmetric (AES)"),
-        ("asymmetric", "Asymmetric (RSA, ECC)"),
-        ("dh", "Diffie-Hellman (DH)"),
-        ("dsa", "Digital Signature Algorithm (DSA)"),
-    ]
-    key_type = forms.ChoiceField(
-        choices=KEY_TYPE_CHOICES,
-        label="Key Type",
-    )
-
-    # Key Size
-    KEY_SIZE_CHOICES = [
-        (128, "128-bit (AES)"),
-        (256, "256-bit (AES)"),
-        (2048, "2048-bit (RSA)"),
-        (3072, "3072-bit (RSA)"),
-        (4096, "4096-bit (RSA)"),
-        (2048, "2048-bit (DH/DSA)"),
-        (3072, "3072-bit (DH/DSA)"),
-    ]
-    key_size = forms.ChoiceField(
-        choices=KEY_SIZE_CHOICES,
-        label="Key Size",
-    )
-
-    # Key Usage
-    key_usage = forms.MultipleChoiceField(
-        choices=[
-            ("encryption", "Encryption"),
-            ("signing", "Signing"),
-            ("key_agreement", "Key Agreement"),
-        ],
-        label="Key Usage",
-        widget=forms.CheckboxSelectMultiple(),
-    )
-
-    # Passphrase (Optional)
-    passphrase = forms.CharField(
-        label="Passphrase (Optional)",
-        widget=forms.PasswordInput(),
-        required=False,
-    )
+        return files
