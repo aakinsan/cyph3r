@@ -263,3 +263,47 @@ def create_key_share_shamir_secret_file(
 
     # Return the filename of the encrypted milenage keys for download
     return key_share_files_names
+
+
+def create_key_share_reconstruct_secret_file(
+    cm: CryptoManager,
+    secret_key: bytes,
+    user_directory: str,
+    public_key_files: list,
+):
+    """Wraps the reconstructed secret key with PGP public key."""
+    # Create the directory if it doesn't exist
+    path = settings.MEDIA_ROOT / user_directory
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    # Initialize the list to store the file names of the encrypted secret
+    key_share_files_names = []
+
+    for file in public_key_files:
+        with open(file, "rb") as fp:
+
+            # Import the PGP public key from the uploaded file
+            cm.gpg.import_keys(fp.read())
+
+        # Retrieve the latest imported key's fingerprint and keyid
+        imported_key = cm.gpg.list_keys()[-1]
+        fingerprint = imported_key["fingerprint"]
+        keyid = imported_key["keyid"]
+
+        # Create the filename for the encrypted key and append filename to keys_share_files list for download
+        file_name = f"key-share-secret-{keyid}.txt.gpg"
+        save_path = os.path.join(path, file_name)
+        key_share_files_names.append(file_name)
+
+        # Encrypt the secret with PGP public key
+        encrypted_data = cm.gpg.encrypt(
+            cm.bytes_to_hex(secret_key), fingerprint, always_trust=True, armor=False
+        )
+
+        # Save the encrypted secret key to the designated file save path
+        with open(save_path, "wb") as fp:
+            fp.write(encrypted_data.data)
+
+    # Return the filename of the encrypted milenage keys for download
+    return key_share_files_names

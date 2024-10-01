@@ -10,7 +10,16 @@ urlpatterns = [
     path("", views.index, name="index"),
     path("wireless/", views.wireless, name="wireless"),
     path("key-share-info/", views.key_share_info, name="key-share-info"),
-    path("key-share-input/", views.key_share_input, name="key-share-input"),
+    path(
+        "key-share-reconstruct/",
+        views.key_share_reconstruct,
+        name="key-share-reconstruct",
+    ),
+    path(
+        "key-share-split/",
+        views.key_share_split,
+        name="key-share-split",
+    ),
     path("key-share-download/", views.key_share_download, name="key-share-download"),
 ]
 

@@ -115,7 +115,7 @@ class CryptoManager:
         shares.append(last_share)
         return shares
 
-    def xor_reconstruct_secret(self, shares):
+    def xor_reconstruct_secret(self, shares: bytes) -> bytes:
         """
         Reconstruct the secret key from the provided key shares using bitwise XOR.
 

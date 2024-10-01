@@ -15,7 +15,7 @@ from .files import (
     create_wireless_security_officers_encrypted_key_files,
     create_wireless_wrapped_secret_key_file,
     write_key_share_so_public_keys_to_disk,
-    create_key_share_shamir_secret_file,
+    create_key_share_reconstruct_secret_file,
 )
 from .crypto import CryptoManager
 from .gcp import GCPManager
@@ -94,7 +94,7 @@ def key_share_info(request):
 
             # Redirect to the key share input page if the key task is reconstruct
             if form.cleaned_data.get("key_task") == "reconstruct":
-                return redirect("key-share-input")
+                return redirect("key-share-reconstruct")
             else:
                 return redirect("/")
         else:
@@ -110,13 +110,34 @@ def key_share_info(request):
         )
 
 
-def key_share_input(request):
+def key_share_split(request):
     """
-    Returns Key Share Input Page
+    Returns Key Input Page for key splitting
+    """
+    pass
+
+
+def key_share_reconstruct(request):
+    """
+    Returns Key Share Input Page for key reconstruction
     """
     if request.method == "POST":
         form = KeyShareInputForm(request.POST)
+        # Validate the form data
         if form.is_valid():
+            # Check if the scheme is Shamir
+            if request.session.get("scheme") == "shamir":
+                # Check if the key index is provided
+                if form.cleaned_data.get("key_index") is None:
+                    form.add_error(
+                        "key_index", "A key Index is required for Shamir scheme."
+                    )
+                    # Return the form with the error message
+                    return render(
+                        request,
+                        "cyph3r/key_share_templates/key-share-reconstruct.html",
+                        {"form": form},
+                    )
             # Retrieve or generate the Fernet key and store in cache
             encryption_key = cache.get("encryption_key")
             if not encryption_key:
@@ -131,23 +152,9 @@ def key_share_input(request):
             if not request.session.get("key_shares"):
                 request.session["key_shares"] = []
 
-            # Check if the scheme is Shamir
             if request.session.get("scheme") == "shamir":
-
-                # Check if the key index is provided
-                if form.cleaned_data.get("key_index") is None:
-                    form.add_error(
-                        "key_index", "A key Index is required for Shamir scheme."
-                    )
-                    # Return the form with the error message
-                    return render(
-                        request,
-                        "cyph3r/key_share_templates/key-share-input.html",
-                        {"form": form},
-                    )
-
                 # Retrieve the threshold number required to restore the secret
-                threshold_count = request.session.get("threshold_count")
+                count = request.session.get("threshold_count")
 
                 # Retrieve the key index from the form
                 key_index = form.cleaned_data.get("key_index")
@@ -156,55 +163,73 @@ def key_share_input(request):
                 token = f.encrypt(cm.hex_to_bytes(form.cleaned_data["key_share"]))
                 request.session["key_shares"].append(
                     (key_index, cm.bytes_to_hex(token))
-                )
+                )  # Only JSON serializable data can be stored in session/ Bytes are not / converting to hex
 
-                # Increment the count of Security officers that have submitted their key shares
-                request.session["submitted_officer_count"] += 1
+            if request.session.get("scheme") == "xor":
+                # Retrieve the share count required to restore the secret
+                count = request.session.get("share_count")
 
-                # Check if the threshold number of key shares have been submitted
-                if request.session["submitted_officer_count"] > threshold_count:
-                    # Initialize the list to store the Shamir key shares
-                    shamir_shares = []
+                # Encrypt the key share using the Fernet key and store in the session
+                token = f.encrypt(cm.hex_to_bytes(form.cleaned_data["key_share"]))
+                request.session["key_shares"].append(
+                    (cm.bytes_to_hex(token))
+                )  # Only JSON serializable data can be stored in session/ Bytes are not / converting to hex
 
+            # Increment the count of Security officers that have submitted their key shares
+            request.session["submitted_officer_count"] += 1
+
+            # Check if the threshold number of key shares have been submitted
+            if request.session["submitted_officer_count"] > count:
+                # Initialize the list to store the key shares
+                shares = []
+
+                if request.session.get("scheme") == "shamir":
                     # Decrypt the encrypted key shares and store in the list
                     for idx, encrypted_share in request.session["key_shares"]:
                         share = f.decrypt(cm.hex_to_bytes(encrypted_share))
-                        shamir_shares.append((idx, share))
-                    print(f"shamir_shares: {shamir_shares}")
+                        shares.append((idx, share))
 
                     # Reconstruct the secret using the Shamir key shares
-                    secret = cm.shamir_reconstruct_secret(shamir_shares)
+                    secret = cm.shamir_reconstruct_secret(shares)
 
-                    print(f"secret: {secret}")
+                if request.session.get("scheme") == "xor":
+                    # Decrypt the encrypted key shares and store in the list
+                    for encrypted_share in request.session["key_shares"]:
+                        share = f.decrypt(cm.hex_to_bytes(encrypted_share))
+                        shares.append((share))
 
-                    # Write the secret to a file and encrypt with PGP public keys
-                    secret_files = create_key_share_shamir_secret_file(
-                        cm,
-                        secret,
-                        request.session.session_key,
-                        request.session["public_key_files"],
-                    )
+                    # Reconstruct the secret using the Shamir key shares
+                    secret = cm.xor_reconstruct_secret(shares)
 
-                    # Add path to secret files to session
-                    request.session["secret_files"] = secret_files
+                # Write the secret to a file and encrypt with PGP public keys
+                secret_files = create_key_share_reconstruct_secret_file(
+                    cm,
+                    secret,
+                    request.session.session_key,
+                    request.session["public_key_files"],
+                )
 
-                    # Clear cache data and relevant request session keys
-                    del request.session["submitted_officer_count"]
-                    del request.session["key_shares"]
-                    del request.session["scheme"]
-                    del request.session["key_task"]
-                    del request.session["share_count"]
-                    del request.session["threshold_count"]
-                    cache.delete("encryption_key")
+                # Add path to secret files to session
+                request.session["secret_files"] = secret_files
 
-                    # Return page to download the secret file
-                    return redirect("key-share-download")
-                else:
-                    return redirect("key-share-input")
+                # Clear cache data and relevant request session keys
+                del request.session["submitted_officer_count"]
+                del request.session["key_shares"]
+                del request.session["scheme"]
+                del request.session["key_task"]
+                del request.session["share_count"]
+                del request.session["threshold_count"]
+                cache.delete("encryption_key")
+
+                # Return page to download the secret file
+                return redirect("key-share-download")
+            else:
+                return redirect("key-share-reconstruct")
+
         else:
             return render(
                 request,
-                "cyph3r/key_share_templates/key-share-input.html",
+                "cyph3r/key_share_templates/key-share-reconstruct.html",
                 {"form": form},
             )
     else:
@@ -216,7 +241,7 @@ def key_share_input(request):
 
         return render(
             request,
-            "cyph3r/key_share_templates/key-share-input.html",
+            "cyph3r/key_share_templates/key-share-reconstruct.html",
             {"form": form},
         )
 
