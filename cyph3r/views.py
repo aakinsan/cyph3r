@@ -161,12 +161,6 @@ def key_share_input(request):
                 # Increment the count of Security officers that have submitted their key shares
                 request.session["submitted_officer_count"] += 1
 
-                print(f"threshold_count: {threshold_count}")
-                print(f"fernet key: {encryption_key}")
-                print(
-                    f"submitted_officer_count: {request.session['submitted_officer_count']}"
-                )
-
                 # Check if the threshold number of key shares have been submitted
                 if request.session["submitted_officer_count"] > threshold_count:
                     # Initialize the list to store the Shamir key shares
@@ -207,9 +201,12 @@ def key_share_input(request):
                     return redirect("key-share-download")
                 else:
                     return redirect("key-share-input")
-            # Check if the scheme is Shamir
-            if request.session.get("scheme") == "shamir":
-                pass
+        else:
+            return render(
+                request,
+                "cyph3r/key_share_templates/key-share-input.html",
+                {"form": form},
+            )
     else:
         form = KeyShareInputForm()
 

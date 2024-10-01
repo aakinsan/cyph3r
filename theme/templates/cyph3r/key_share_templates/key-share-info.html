@@ -20,7 +20,7 @@
                     {% for field in form.visible_fields %}
                         <!-- Hide share count and threshold count fields -->
                         {% if field.name == "share_count" %}
-                            <div id="share_count" class="mb-4 hidden">
+                            <div id="share_count" class="mb-4 {% if not field.errors %}hidden{% endif %}">
                                 <label for="{{ field.id_for_label}}" class="block text-gray-500 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
                                 {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 focus:border-orange-500" }}
                                 <div class="text-xs text-gray-500">{{ field.help_text }}</div> 
@@ -33,7 +33,7 @@
                                 {% endif %}
                             </div>
                         {% elif field.name == "threshold_count" %}
-                            <div id="threshold_count" class="mb-4 hidden">
+                            <div id="threshold_count" class="mb-4 {% if not field.errors %}hidden{% endif %}">
                                 <label for="{{ field.id_for_label}}" class="block text-gray-500 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
                                 {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 focus:border-orange-500" }}
                                 <div class="text-xs text-gray-500">{{ field.help_text }}</div> 

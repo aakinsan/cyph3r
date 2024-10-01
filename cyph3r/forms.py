@@ -1,5 +1,8 @@
 from django import forms
+from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 import magic
+import re
 
 """
 This module contains the forms used in the Cyph3r application.
@@ -240,15 +243,12 @@ class KeyShareInputForm(forms.Form):
     )
 
     def clean_key_share(self):
-        # Check if key share is a hexadecimal string
+        # Check if key share is a hexadecimal string and is 128/256 bits
         key_share = self.cleaned_data.get("key_share")
-        if not key_share.isalnum():
-            self.add_error("key_share", "Key share must be a hexadecimal string.")
+        if not re.match(r"^[0-9a-fA-F]+$", key_share):
+            raise ValidationError("Key share must be a hexadecimal string.")
         if not len(key_share) % 32 == 0:
-            self.add_error(
-                "key_share",
-                "Key share must be 128 or 256 bits.",
-            )
+            raise ValidationError("Key share must be 128 or 256 bits.")
         return key_share
 
 
@@ -296,6 +296,7 @@ class KeyShareInfoForm(forms.Form):
     threshold_count = forms.IntegerField(
         label="Threshold Count",
         min_value=2,
+        max_value=10,
         required=False,
         help_text="Minimum number of key shares for key reconstruction.",
     )
@@ -306,32 +307,74 @@ class KeyShareInfoForm(forms.Form):
     )
 
     def clean_key_share_public_keys(self):
+        # Get uploaded files
         files = self.cleaned_data.get("key_share_public_keys")
-        if files:
-            for file in files:
-                # Check file size is less than 5KB
-                file_size = file.size
-                if file_size > 5120:
-                    self.add_error(
-                        "key_share_public_keys",
-                        f"{file.name} must be less than 5KB.",
-                    )
-                # Check file type is PGP public key
-                file_type = magic.from_buffer(file.read(), mime=False)
-                if not file_type.startswith(
-                    ("PGP public key block", "OpenPGP Public Key")
-                ):
-                    self.add_error(
-                        "key_share_public_keys",
-                        f"{file.name} is not a PGP public key file.",
-                    )
-                # Check if the PGP key is ASCII armored
-                file.seek(0)
-                first_line = file.readline().strip()
-                if first_line != b"-----BEGIN PGP PUBLIC KEY BLOCK-----":
-                    self.add_error(
-                        "key_share_public_keys",
-                        f"{file.name} must be an ASCII armored PGP public key file.",
-                    )
+        # Validate uploaded files
+        for file in files:
+            # Check file size is less than 5KB
+            file_size = file.size
+            if file_size > 5120:
+                self.add_error(
+                    "key_share_public_keys",
+                    f"{file.name} must be less than 5KB.",
+                )
+            # Check file type is PGP public key
+            file_type = magic.from_buffer(file.read(), mime=False)
+            if not file_type.startswith(("PGP public key block", "OpenPGP Public Key")):
+                self.add_error(
+                    "key_share_public_keys",
+                    f"{file.name} is not a PGP public key file.",
+                )
+            # Check if the PGP key is ASCII armored
+            file.seek(0)
+            first_line = file.readline().strip()
+            if first_line != b"-----BEGIN PGP PUBLIC KEY BLOCK-----":
+                self.add_error(
+                    "key_share_public_keys",
+                    f"{file.name} must be an ASCII armored PGP public key file.",
+                )
 
+        # Return files
         return files
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if (
+            cleaned_data.get("scheme") == "shamir"
+            and cleaned_data.get("key_task") == "reconstruct"
+        ):
+            if not cleaned_data.get("threshold_count"):
+                self.add_error(
+                    "threshold_count",
+                    "Threshold count is required for Shamir Secret Shares.",
+                )
+
+        if (
+            cleaned_data.get("scheme") == "shamir"
+            and cleaned_data.get("key_task") == "split"
+        ):
+            if not cleaned_data.get("share_count"):
+                self.add_error(
+                    "share_count", "Share count is required for Shamir Secret Shares."
+                )
+            if not cleaned_data.get("threshold_count"):
+                self.add_error(
+                    "threshold_count",
+                    "Threshold count is required for Shamir Secret Shares.",
+                )
+        if (
+            cleaned_data.get("scheme") == "xor"
+            and cleaned_data.get("key_task") == "reconstruct"
+        ):
+            if not cleaned_data.get("share_count"):
+                self.add_error(
+                    "share_count", "share count is required for XOR key shares."
+                )
+        if (
+            cleaned_data.get("scheme") == "xor"
+            and cleaned_data.get("key_task") == "split"
+        ):
+            if not cleaned_data.get("share_count"):
+                self.add_error(
+                    "share_count", "share count is required for XOR key shares."
+                )
