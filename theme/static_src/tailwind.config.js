@@ -54,6 +54,10 @@ module.exports = {
                 '4xl': '1920px', // Custom
                 '5xl': '2560px', // Custom
               },
+              
+            fontSize: {
+            'xxs': '0.8rem', // Custom size between text-xs and text-sm
+            },
         },
     },
     plugins: [

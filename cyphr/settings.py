@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "cyph3r",
+    "aaa",
     "tailwind",
     "theme",
     "django_browser_reload",
@@ -59,7 +60,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "cyphr.urls"
 
-AUTH_USER_MODEL = "cyph3r.User"
+AUTH_USER_MODEL = "aaa.User"
 
 TEMPLATES = [
     {

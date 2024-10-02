@@ -1,28 +1,31 @@
-{% load widget_tweaks %}
+<div id="container" class="bg-white shadow-md rounded-lg px-8 py-2 mt-3 max-w-4xl w-full">
+    <div class="w-full p-2">
+            <h1 class="text-lg font-bold text-center font-sans text-black">Key Ceremony</h1>
+                <h2 class="text-base font-bold font-sans">Objective</h2>
+                    <p class="text-xxs font-sans text-gray-600 pb-1">Secure generation and protection of four wireless keys:</p>
 
-<div id="container" class="bg-white shadow-md rounded-lg px-8 py-4 max-w-4xl w-full">
-    <div class="w-full p-1">
-            <h1 class="text-2xl font-semibold text-center leading-8 font-sans text-gray-600">Key Ceremony</h1>
-            <div class="text-gray-500 font-sans text-sm mt-2">
-                <p>The following secret keys will be generated:</p>
-                <ul class="list-disc list-inside pl-5 pt-1 pb-2">
-                    <li>Tuak OP key</li>
-                    <li>Tuak transport key</li>
-                    <li>Milenage OP key</li>                    
-                    <li>Milenage transport key</li>
-                </ul>
-                 <p class="pb-2">To mitigate the risk of key exposure, these keys will be encrypted with a recepient's PGP public key before download.</p>
-                <p class="pb-2">This app only accepts PGP public key files that are in the "ASCII Armored format" i.e. the file content must have the begin and end headers of 
-                    <span class="bg-gray-200 px-1  text-xs font-mono border border-gray-300 rounded shadow-md text-gray-800">-----
-                    BEGIN PGP PUBLIC KEY BLOCK-----</span> and <span class="bg-gray-200 border border-gray-300 b-1 px-1 text-xs font-mono rounded shadow-md text-gray-800">-----END PGP PUBLIC KEY BLOCK-----</span> respectively.</li></ul></p>
-                <p class="pb-2">Eight PGP Public key (3 for the provider and 5 for the security officers (SO)) files are required to protect the tuak and milenage keys. In addition, the public key of the recepient entering the milenage keys at the provider's terminal will also be required.</p>  
-                <p class="pb-2">Each generated secret key will be split in a bitwise (XOR) operation into three random key shares with each encrypted by one of the provider PGP public keys.</p>
-                <p class="pb-2">For internal safekeeping, four wrap keys will be generated, each one wrapping/encrypting one of the secret keys listed above. Each wrap key will in turn be split into 5 shares using Shamir Secret Splitting (SSS) and each of these shares will be wrapped by a SO's public key. 3 of 5 SOs will be needed to reconstruct the wrap key when required.</p> 
-                <p class="pb-2">Finally, a GCP project ID can be specified to store the wrapped secrets in a secret manager vault. This app will require credentials to create and store the keys in GCP. All files are also available for download at the end of this process.</p>    
+                            <p class="font-sans text-xxs block text-gray-600 pl-4"> - Tuak TOP and Transport Keys</p>
+                            <p class="font-sans text-xxs block text-gray-600 pl-4"> - Milenage OP and Transport Keys</p>
+
+                <h2 class="text-base font-bold font-sans pt-2">Requirements</h2>
+                    <h3 class="font-semibold text-sm pt-1">SIM Provider Public Keys</h3>
+                        <p class="text-xxs font-sans text-gray-600">3 PGP public keys for the SIM provider are required to encrypt the 3 XOR key shares generated for each wireless keys. The provider will reconstruct each key after decypting the shares with their private keys.</p>
+
+                    <h3 class="font-semibold pt-2 font-sans text-sm">Security Officer Public Keys</h3>
+                        <p class="text-xxs text-gray-600 font-sans">A unique 128-bit wrap key is generated for each wireless key. The wrap key is used to wrap/encrypt its associated wireless key. Each wrap key is then split into 5 shares using <strong>Shamir Secret Splitting (SSS)</strong>. Each of these shares will be encrypted with a PGP public key belonging to a security officer. Three security officers will be required to reconstruct this wrap key which in turn can be used to decrypt its wireless key.</p>
+
+                    <h3 class="font-semibold text-sm font-sans pt-2">Public Keys for the Milenage</h3>
+                        <p class="text-xxs text-gray-600 font-sans pb-2">The milenage key will be entered at the terminal of the network provider. To mitigate the risk of both milenage keys been known by a single resource, two public keys belonging to two different resources will be provided. One to encrypt the milenage Transport key and the other to encrypt the milenage OP key.</p>
+              
+                <p class="text-xxs text-gray-600 font-sans pt-1">This app only accepts PGP public key files that are in the <strong>ASCII Armored format</strong> i.e. the contents of each public key file must have the begin and end headers of   
+                    <span class="bg-gray-200 px-1 text-xxs font-sans border border-gray-300 rounded shadow-md text-gray-800">-----
+                    BEGIN PGP PUBLIC KEY BLOCK-----</span> and <span class="bg-gray-200 border border-gray-300 b-1 px-1 text-xxs font-sans rounded shadow-md text-gray-800">-----END PGP PUBLIC KEY BLOCK-----</span> respectively.</li></ul></p>
+ 
+                <p class="text-xxs text-gray-600 font-sans pt-2">Finally, a GCP project ID can be specified to store the wrapped secrets in a secret manager vault. This is optional since all keys will be encrypted and available for download at the end of this process.
             </div>
              <!-- Submit Button -->
-            <div class="flex justify-end pt-2">
-                <button type="button" hx-get="{% url 'wireless_key_info_form' %}" hx-trigger="click" hx-swap="outerHTML" hx-target="#container" class="bg-orange-500 hover:bg-orange-400 text-white mt-2 px-3 py-2 rounded-lg transition">
+            <div class="flex justify-end">
+                <button type="button" hx-get="{% url 'wireless_key_info_form' %}" hx-trigger="click" hx-swap="outerHTML" hx-target="#container" class="bg-orange-500 hover:bg-orange-400 text-white text-sm px-3 pt-2 mb-2 pb-2 rounded-lg transition">
                     Get Started
                 </button>
             </div>
