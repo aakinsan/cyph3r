@@ -7,7 +7,8 @@ from .forms import (
     WirelessGCPStorageForm,
     WirelessPGPUploadForm,
     KeyShareInfoForm,
-    KeyShareInputForm,
+    KeyShareReconstructForm,
+    KeyShareSplitForm,
 )
 from .files import (
     create_wireless_provider_encrypted_key_files,
@@ -16,6 +17,7 @@ from .files import (
     create_wireless_wrapped_secret_key_file,
     write_key_share_so_public_keys_to_disk,
     create_key_share_reconstruct_secret_file,
+    create_key_share_split_secret_files,
 )
 from .crypto import CryptoManager
 from .gcp import GCPManager
@@ -58,6 +60,10 @@ def key_share_info(request):
     """
     Returns Key Share Info Page
     """
+    # Clear the session entirely and create a new session
+    # This is to ensure that the session is clean and does not contain any stale data
+    request.session.flush()
+
     # Check if the request is a POST request
     if request.method == "POST":
 
@@ -92,11 +98,13 @@ def key_share_info(request):
             # Store the file names in the session
             request.session["public_key_files"] = public_key_files
 
-            # Redirect to the key share input page if the key task is reconstruct
+            # Redirect to the key share reconstruction page if the key task is 'reconstruct'
             if form.cleaned_data.get("key_task") == "reconstruct":
                 return redirect("key-share-reconstruct")
-            else:
-                return redirect("/")
+
+            # Redirect to the key share split page if the key task is 'split'
+            if form.cleaned_data.get("key_task") == "split":
+                return redirect("key-share-split")
         else:
             return render(
                 request,
@@ -114,7 +122,79 @@ def key_share_split(request):
     """
     Returns Key Input Page for key splitting
     """
-    pass
+    if request.method == "POST":
+        form = KeyShareSplitForm(request.POST)
+        # Validate the form data
+        if form.is_valid():
+            # Check if the scheme is Shamir
+            if request.session.get("scheme") == "shamir":
+                # Check if the key share size is 128 bits
+                if len(form.cleaned_data.get("key")) != 32:
+                    form.add_error(
+                        "key",
+                        "key share size for shamir must be 128 bits.",
+                    )
+                    # Return the form with the error message
+                    return render(
+                        request,
+                        "cyph3r/key_share_templates/key-share-split.html",
+                        {"form": form},
+                    )
+
+            # Initialize the CryptoManager
+            cm = CryptoManager()
+
+            # Initialize the list to store the encrypted key shares
+            if not request.session.get("key_shares"):
+                request.session["key_shares"] = []
+
+            # Get the total number of key shares required
+            share_count = request.session.get("share_count")
+
+            # Get the secret key from the form and convert to bytes
+            secret_key = cm.hex_to_bytes(form.cleaned_data["key"])
+
+            if request.session.get("scheme") == "shamir":
+                # Retrieve the threshold number required to restore the secret
+                threshold_count = request.session.get("threshold_count")
+
+                # Split the secret key into shares using Shamir Secret Sharing
+                shares = cm.shamir_split_secret(
+                    threshold_count, share_count, secret_key
+                )
+
+            if request.session.get("scheme") == "xor":
+                # Determine length of the secret key (bytes) e.g. 16 bytes = 128 bits
+                key_size = len(secret_key) * 8
+                # Split the secret key into shares using XOR Secret Sharing
+                shares = cm.xor_split_secret(secret_key, key_size, share_count)
+
+            secret_files = create_key_share_split_secret_files(
+                cm,
+                shares,
+                request.session.session_key,
+                request.session["public_key_files"],
+            )
+
+            # Add path to secret files to session
+            request.session["secret_files"] = secret_files
+
+            # Return page to download the secret file
+            return redirect("key-share-download")
+
+        else:
+            return render(
+                request,
+                "cyph3r/key_share_templates/key-share-split.html",
+                {"form": form},
+            )
+    else:
+        form = KeyShareSplitForm()
+        return render(
+            request,
+            "cyph3r/key_share_templates/key-share-split.html",
+            {"form": form},
+        )
 
 
 def key_share_reconstruct(request):
@@ -122,7 +202,7 @@ def key_share_reconstruct(request):
     Returns Key Share Input Page for key reconstruction
     """
     if request.method == "POST":
-        form = KeyShareInputForm(request.POST)
+        form = KeyShareReconstructForm(request.POST)
         # Validate the form data
         if form.is_valid():
             # Check if the scheme is Shamir
@@ -138,11 +218,27 @@ def key_share_reconstruct(request):
                         "cyph3r/key_share_templates/key-share-reconstruct.html",
                         {"form": form},
                     )
+                # Check if the key share size is 128 bits
+                if len(form.cleaned_data.get("key_share")) != 32:
+                    form.add_error(
+                        "key_share",
+                        "key share size for shamir must be 128 bits.",
+                    )
+                    # Return the form with the error message
+                    return render(
+                        request,
+                        "cyph3r/key_share_templates/key-share-reconstruct.html",
+                        {"form": form},
+                    )
             # Retrieve or generate the Fernet key and store in cache
-            encryption_key = cache.get("encryption_key")
+            encryption_key = cache.get(f"encryption_key_{request.session.session_key}")
             if not encryption_key:
                 encryption_key = Fernet.generate_key()
-                cache.set("encryption_key", encryption_key, None)
+                cache.set(
+                    f"encryption_key_{request.session.session_key}",
+                    encryption_key,
+                    None,
+                )
 
             # Initialize the CryptoManager and Fernet object
             cm = CryptoManager()
@@ -219,7 +315,7 @@ def key_share_reconstruct(request):
                 del request.session["key_task"]
                 del request.session["share_count"]
                 del request.session["threshold_count"]
-                cache.delete("encryption_key")
+                cache.delete(f"encryption_key_{request.session.session_key}")
 
                 # Return page to download the secret file
                 return redirect("key-share-download")
@@ -233,7 +329,7 @@ def key_share_reconstruct(request):
                 {"form": form},
             )
     else:
-        form = KeyShareInputForm()
+        form = KeyShareReconstructForm()
 
         # Initialize the number of Security officers that have submitted their key shares
         if not request.session.get("submitted_officer_count"):

@@ -96,7 +96,9 @@ class CryptoManager:
         """
         return Shamir.combine(shares)
 
-    def xor_split_secret(self, secret_key, key_size, num_shares):
+    def xor_split_secret(
+        self, secret_key: bytes, key_size: int, num_shares: int
+    ) -> list:
         """
         Split the secret key into num_shares using bitwise XOR.
 

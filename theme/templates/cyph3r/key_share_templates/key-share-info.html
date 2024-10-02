@@ -89,6 +89,10 @@
             add .hidden to #share_count 
             add .hidden to #threshold_count
     end
+
+    on change from #id_scheme or change from #id_key_task call checkSelections()
+    on load call checkSelections()
+
 </script>
 
 {% endblock %}

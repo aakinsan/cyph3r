@@ -221,50 +221,6 @@ def write_key_share_so_public_keys_to_disk(
     return key_share_public_key_files
 
 
-def create_key_share_shamir_secret_file(
-    cm: CryptoManager,
-    secret_key: bytes,
-    user_directory: str,
-    public_key_files: list,
-):
-    """Wraps the reconstructed secret key with PGP public key."""
-    # Create the directory if it doesn't exist
-    path = settings.MEDIA_ROOT / user_directory
-    if not os.path.exists(path):
-        os.makedirs(path)
-
-    # Initialize the list to store the file names of the encrypted secret
-    key_share_files_names = []
-
-    for file in public_key_files:
-        with open(file, "rb") as fp:
-
-            # Import the PGP public key from the uploaded file
-            cm.gpg.import_keys(fp.read())
-
-        # Retrieve the latest imported key's fingerprint and keyid
-        imported_key = cm.gpg.list_keys()[-1]
-        fingerprint = imported_key["fingerprint"]
-        keyid = imported_key["keyid"]
-
-        # Create the filename for the encrypted key and append filename to keys_share_files list for download
-        file_name = f"key-share-secret-{keyid}.txt.gpg"
-        save_path = os.path.join(path, file_name)
-        key_share_files_names.append(file_name)
-
-        # Encrypt the secret with PGP public key
-        encrypted_data = cm.gpg.encrypt(
-            cm.bytes_to_hex(secret_key), fingerprint, always_trust=True, armor=False
-        )
-
-        # Save the encrypted secret key to the designated file save path
-        with open(save_path, "wb") as fp:
-            fp.write(encrypted_data.data)
-
-    # Return the filename of the encrypted milenage keys for download
-    return key_share_files_names
-
-
 def create_key_share_reconstruct_secret_file(
     cm: CryptoManager,
     secret_key: bytes,
@@ -292,7 +248,7 @@ def create_key_share_reconstruct_secret_file(
         keyid = imported_key["keyid"]
 
         # Create the filename for the encrypted key and append filename to keys_share_files list for download
-        file_name = f"key-share-secret-{keyid}.txt.gpg"
+        file_name = f"key-share-reconstructed-secret-{keyid}.txt.gpg"
         save_path = os.path.join(path, file_name)
         key_share_files_names.append(file_name)
 
@@ -301,6 +257,64 @@ def create_key_share_reconstruct_secret_file(
             cm.bytes_to_hex(secret_key), fingerprint, always_trust=True, armor=False
         )
 
+        # Save the encrypted secret key to the designated file save path
+        with open(save_path, "wb") as fp:
+            fp.write(encrypted_data.data)
+
+    # Return the filename of the encrypted milenage keys for download
+    return key_share_files_names
+
+
+def create_key_share_split_secret_files(
+    cm: CryptoManager,
+    shares: list,
+    user_directory: str,
+    public_key_files: list,
+):
+    # Create the directory if it doesn't exist
+    path = settings.MEDIA_ROOT / user_directory
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    # Initialize the list to store the file names of the encrypted secret
+    key_share_files_names = []
+
+    for idx, file in enumerate(public_key_files, start=1):
+        with open(file, "rb") as fp:
+            # Reset the file pointer to the beginning of the file
+            fp.seek(0)
+
+            # Import the PGP public key from the uploaded file
+            cm.gpg.import_keys(fp.read())
+
+        # Retrieve the latest imported key's fingerprint and keyid
+        imported_key = cm.gpg.list_keys()[-1]
+        fingerprint = imported_key["fingerprint"]
+        keyid = imported_key["keyid"]
+
+        # Create the filename for the encrypted key and append filename to keys_share_files list for download
+        file_name = f"key-share-split-secret-index-{idx}-{keyid}.txt.gpg"
+        save_path = os.path.join(path, file_name)
+
+        # Append the file name to the list of key share files
+        key_share_files_names.append(file_name)
+
+        # Encrypt the secret with PGP public key
+
+        if isinstance(shares[idx - 1], tuple):
+            encrypted_data = cm.gpg.encrypt(
+                cm.bytes_to_hex(shares[idx - 1][1]),
+                fingerprint,
+                always_trust=True,
+                armor=False,
+            )
+        else:
+            encrypted_data = cm.gpg.encrypt(
+                cm.bytes_to_hex(shares[idx - 1]),
+                fingerprint,
+                always_trust=True,
+                armor=False,
+            )
         # Save the encrypted secret key to the designated file save path
         with open(save_path, "wb") as fp:
             fp.write(encrypted_data.data)

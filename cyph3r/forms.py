@@ -226,7 +226,7 @@ class WirelessPGPUploadForm(forms.Form):
 # ############################
 
 
-class KeyShareInputForm(forms.Form):
+class KeyShareReconstructForm(forms.Form):
     # Key Index for key reconstruction for shamir secret sharing
     key_index = forms.IntegerField(
         label="Key Index", min_value=1, required=False, help_text="Shamir key index."
@@ -239,7 +239,7 @@ class KeyShareInputForm(forms.Form):
         max_length=64,
         widget=forms.PasswordInput(),
         label="Key Share (HEXADECIMAL STRING)",
-        help_text="Minimum of 32 characters for 128 bit keys.",
+        help_text="Enter 128 bit or 256 key (only xor).",
     )
 
     def clean_key_share(self):
@@ -250,6 +250,27 @@ class KeyShareInputForm(forms.Form):
         if not len(key_share) % 32 == 0:
             raise ValidationError("Key share must be 128 or 256 bits.")
         return key_share
+
+
+class KeyShareSplitForm(forms.Form):
+    # Key Share field for key reconstruction
+    key = forms.CharField(
+        required=True,
+        min_length=32,
+        max_length=64,
+        widget=forms.PasswordInput(),
+        label="Key Share (HEXADECIMAL STRING)",
+        help_text="Enter 128 bit or 256 key (only xor).",
+    )
+
+    def clean_key_share(self):
+        # Check if key share is a hexadecimal string and is 128/256 bits
+        key = self.cleaned_data.get("key")
+        if not re.match(r"^[0-9a-fA-F]+$", key):
+            raise ValidationError("Key share must be a hexadecimal string.")
+        if not len(key) % 32 == 0:
+            raise ValidationError("Key share must be 128 or 256 bits.")
+        return key
 
 
 class KeyShareInfoForm(forms.Form):
@@ -264,7 +285,6 @@ class KeyShareInfoForm(forms.Form):
         choices=KEY_SPLITTING_SCHEMES,
         label="Scheme",
         help_text="Select a scheme",
-        widget=forms.Select(attrs={"_": "on change call checkSelections()"}),
         required=True,
     )
 
@@ -279,7 +299,6 @@ class KeyShareInfoForm(forms.Form):
         choices=KEY_TASK_CHOICES,
         label="Task",
         help_text="Select a task",
-        widget=forms.Select(attrs={"_": "on change call checkSelections()"}),
         required=True,
     )
 
@@ -362,19 +381,22 @@ class KeyShareInfoForm(forms.Form):
                     "threshold_count",
                     "Threshold count is required for Shamir Secret Shares.",
                 )
-        if (
-            cleaned_data.get("scheme") == "xor"
-            and cleaned_data.get("key_task") == "reconstruct"
-        ):
+        if cleaned_data.get("scheme") == "xor":
             if not cleaned_data.get("share_count"):
                 self.add_error(
-                    "share_count", "share count is required for XOR key shares."
+                    "share_count", "Share count is required for XOR key shares."
                 )
-        if (
-            cleaned_data.get("scheme") == "xor"
-            and cleaned_data.get("key_task") == "split"
-        ):
-            if not cleaned_data.get("share_count"):
+        if cleaned_data.get("key_task") == "split":
+            if cleaned_data.get("share_count") != len(
+                cleaned_data.get("key_share_public_keys")
+            ):
                 self.add_error(
-                    "share_count", "share count is required for XOR key shares."
+                    None,
+                    "Total number of public key files must be equal to the share count.",
+                )
+        if cleaned_data.get("key_task") == "reconstruct":
+            if len(cleaned_data.get("key_share_public_keys")) != 1:
+                self.add_error(
+                    "key_share_public_keys",
+                    "Only one PGP Public key file is required for reconstruction.",
                 )
