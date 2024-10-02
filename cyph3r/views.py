@@ -36,6 +36,14 @@ def index(request):
     return render(request, "cyph3r/index.html")
 
 
+def error(request):
+    """
+    Returns the Error Page
+    """
+    # Return the error page with the error message
+    return render(request, "cyph3r/error.html")
+
+
 def wireless(request):
     """
     Returns Wireless Key Ceremony Page
@@ -157,17 +165,28 @@ def key_share_split(request):
             if request.session.get("scheme") == "shamir":
                 # Retrieve the threshold number required to restore the secret
                 threshold_count = request.session.get("threshold_count")
+                try:
+                    # Split the secret key into shares using Shamir Secret Sharing
+                    shares = cm.shamir_split_secret(
+                        threshold_count, share_count, secret_key
+                    )
 
-                # Split the secret key into shares using Shamir Secret Sharing
-                shares = cm.shamir_split_secret(
-                    threshold_count, share_count, secret_key
-                )
+                # Redirect to Error page if an exception occurs
+                except Exception as e:
+                    messages.error(request, f"{e}")
+                    return redirect("error")
 
             if request.session.get("scheme") == "xor":
                 # Determine length of the secret key (bytes) e.g. 16 bytes = 128 bits
                 key_size = len(secret_key) * 8
+
                 # Split the secret key into shares using XOR Secret Sharing
-                shares = cm.xor_split_secret(secret_key, key_size, share_count)
+                try:
+                    shares = cm.xor_split_secret(secret_key, key_size, share_count)
+                # Redirect to Error page if an exception occurs
+                except Exception as e:
+                    messages.error(request, f"{e}")
+                    return redirect("error")
 
             secret_files = create_key_share_split_secret_files(
                 cm,
@@ -286,7 +305,13 @@ def key_share_reconstruct(request):
                         shares.append((idx, share))
 
                     # Reconstruct the secret using the Shamir key shares
-                    secret = cm.shamir_reconstruct_secret(shares)
+                    try:
+                        secret = cm.shamir_reconstruct_secret(shares)
+
+                    # Redirect to Error page if an exception occurs
+                    except Exception as e:
+                        messages.error(request, f"{e}")
+                        return redirect("error")
 
                 if request.session.get("scheme") == "xor":
                     # Decrypt the encrypted key shares and store in the list
@@ -295,7 +320,13 @@ def key_share_reconstruct(request):
                         shares.append((share))
 
                     # Reconstruct the secret using the Shamir key shares
-                    secret = cm.xor_reconstruct_secret(shares)
+                    try:
+                        secret = cm.xor_reconstruct_secret(shares)
+
+                    # Redirect to Error page if an exception occurs
+                    except Exception as e:
+                        messages.error(request, f"{e}")
+                        return redirect("error")
 
                 # Write the secret to a file and encrypt with PGP public keys
                 secret_files = create_key_share_reconstruct_secret_file(
@@ -478,7 +509,12 @@ def wireless_generate_keys(request):
             # Split it into 5 shares using Shamir Secret Sharing (SSS)
             # These will be shared among 5 internal security officers (SO) for a 3 of 5 scheme
             wrap_key = cm.generate_random_key_bytes(128)
-            shares = cm.shamir_split_secret(3, 5, wrap_key)
+            try:
+                shares = cm.shamir_split_secret(3, 5, wrap_key)
+            # Redirect to Error page if an exception occurs
+            except Exception as e:
+                messages.error(request, f"{e}")
+                return redirect("error")
 
             # Generate 12 bytes nonce for the AES-GCM encryption of the secret key by the wrap key
             nonce = cm.generate_random_key_bytes(96)

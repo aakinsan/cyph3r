@@ -21,6 +21,7 @@ urlpatterns = [
         name="key-share-split",
     ),
     path("key-share-download/", views.key_share_download, name="key-share-download"),
+    path("error/", views.error, name="error"),
 ]
 
 htmx_urlpatterns = [
