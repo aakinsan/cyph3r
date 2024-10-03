@@ -9,14 +9,20 @@ Helper functions for testing views.
 
 
 def validate_post_response(
-    client, url, post_data, html_page, validate_session_data=True
+    client,
+    url,
+    post_data,
+    html_page,
+    validate_session_data=True,
 ):
     """
     Helper function to validate response and client session after posting form data to a view.
     """
+    # The wireless views utilize htmx to make POST requests and to swap forms
     response = client.post(url, post_data, HTTP_HX_REQUEST="true", format="multipart")
     assert response.status_code == 200
     assert html_page in [t.name for t in response.templates]
+
     if validate_session_data:
         for key, value in post_data.items():
             assert client.session[key] == value

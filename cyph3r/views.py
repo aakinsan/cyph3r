@@ -97,9 +97,6 @@ def key_share_info(request):
                 "threshold_count"
             )
 
-            print(request.session["scheme"])
-            print(f"session_id: {session_id}")
-
             # write uploaded public keys to directory name session_id on the server and get list of file names
             public_key_files = write_key_share_so_public_keys_to_disk(form, session_id)
 

@@ -1,6 +1,6 @@
 import pytest
 from django.urls import reverse
-from testing_helpers import (
+from testing_helpers_wireless import (
     validate_post_response,
     validate_response_context,
     process_provider_keys,

@@ -1,0 +1,73 @@
+from django.conf import settings
+import random
+import os
+
+"""
+Helper functions for testing views.
+
+"""
+
+
+def validate_key_share_info_post_response(
+    client,
+    request_url,
+    post_data,
+    html_page,
+    validate_session_data=True,
+):
+    """
+    Helper function to validate response and client session after posting key share info form data to a view.
+    """
+    # The key share info view redirect users to either reconsruct or split key views
+    response = client.post(request_url, post_data, format="multipart", follow=True)
+    assert response.status_code == 200
+    assert html_page in [t.name for t in response.templates]
+    if validate_session_data:
+        for key, value in post_data.items():
+            if key == "key_share_public_keys":
+                pass  # Ignore key_share_public_keys for the key-share-flow for now since files cannot be stored in the session
+            else:
+                assert client.session[key] == value
+        # Assert public key files are written to disk
+        assert client.session["public_key_files"] is not None
+    return response
+
+
+def validate_shamir_key_reconstruction_post_response(
+    client, url, html_page_reconstruct, html_page_download, post_data
+):
+    """
+    Helper function to validate response and client session after posting shamir reconstruction form data to view.
+    """
+    # client posts "key index & key share" 3 times to simulate 3 Security Officers reconstructing the shamir key
+    for i in range(0, 3):
+        assert client.session["submitted_officer_count"] == i + 1
+        response = client.post(url, post_data[i], follow=True)
+        assert response.status_code == 200
+        # Check that the download page is displayed after the last post, otherwise continue displaying the reconstruction page
+        if i == 2:
+            assert html_page_download in [t.name for t in response.templates]
+        else:
+            assert html_page_reconstruct in [t.name for t in response.templates]
+    assert client.session["public_key_files"] is not None
+    return response
+
+
+def get_key_share_secret_key_and_validate(cm, client, response, secret_key):
+    """
+    Helper function to get reconstructed secret key and validate it is the right key.
+    """
+    # Access downloaded file and decrypt to get the secret key
+    for file_name in response.context["secret_files"]:
+        encrypted_secret_file_location = (
+            settings.MEDIA_ROOT / client.session.session_key / file_name
+        )
+        with open(encrypted_secret_file_location, "rb") as f:
+            encrypted_secret = f.read()
+            decrypted_secret = cm.gpg.decrypt(encrypted_secret)
+
+            # Check that the decryption was successful
+            assert decrypted_secret.ok == True
+
+    # Check that the decrypted secret key is the same secret key used to create the key shares
+    assert decrypted_secret.data.decode() == secret_key
