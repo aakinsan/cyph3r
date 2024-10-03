@@ -136,49 +136,98 @@ class WirelessPGPUploadForm(forms.Form):
     def clean_security_officer_public_keys(self):
         """validate the uploaded security officer public keys files are valid PGP public keys"""
         files = self.cleaned_data.get("security_officers_public_keys")
-        self.validate_multiple_files(files, "security_officers_public_keys", 5)
+        if files:
+            # Check if 5 files are uploaded
+            if len(files) != 5:
+                self.add_error(
+                    "security_officers_public_keys",
+                    "5 PGP public key files must be uploaded.",
+                )
+            for file in files:
+                # Check file size is less than 5KB
+                file_size = file.size
+                if file_size > 5120:
+                    self.add_error(
+                        "security_officers_public_keys",
+                        f"{file.name} must be less than 5KB.",
+                    )
+                # Check file type is PGP public key
+                file_type = magic.from_buffer(file.read(), mime=False)
+                if not file_type.startswith(
+                    ("PGP public key block", "OpenPGP Public Key")
+                ):
+                    self.add_error(
+                        "security_officers_public_keys",
+                        f"{file.name} is not a PGP public key file.",
+                    )
+                # Check if the PGP key is ASCII armored
+                file.seek(0)
+                first_line = file.readline().strip()
+                if first_line != b"-----BEGIN PGP PUBLIC KEY BLOCK-----":
+                    self.add_error(
+                        "security_officers_public_keys",
+                        f"{file.name} must be an ASCII armored PGP public key file.",
+                    )
+
         return files
 
     def clean_provider_public_keys(self):
         """Validate the uploaded provider public keys files are valid PGP public keys"""
         files = self.cleaned_data.get("provider_public_keys")
-        self.validate_multiple_files(files, "provider_public_keys", 3)
+        if files:
+            # Check if 3 files are uploaded
+            if len(files) != 3:
+                self.add_error(
+                    "provider_public_keys", "3 PGP public key files must be uploaded."
+                )
+            for file in files:
+                # Check file size is less than 5KB
+                file_size = file.size
+                if file_size > 5120:
+                    self.add_error(
+                        "provider_public_keys", f"{file.name} must be less than 5KB."
+                    )
+                # Check file type is PGP public key
+                file_type = magic.from_buffer(file.read(), mime=False)
+                if not file_type.startswith(
+                    ("PGP public key block", "OpenPGP Public Key")
+                ):
+                    self.add_error(
+                        "provider_public_keys",
+                        f"{file.name} is not a PGP public key file.",
+                    )
+                # Check if the PGP key is ASCII armored
+                file.seek(0)
+                first_line = file.readline().strip()
+                if first_line != b"-----BEGIN PGP PUBLIC KEY BLOCK-----":
+                    self.add_error(
+                        "provider_public_keys",
+                        f"{file.name} must be an ASCII armored PGP public key file.",
+                    )
+
         return files
 
     def clean_milenage_public_key(self):
         file = self.cleaned_data.get("milenage_public_key")
         if file:
-            self.validate_single_file(file, "milenage_public_key")
+            file_size = file.size
+            if file_size > 5120:
+                self.add_error(
+                    "milenage_public_key", f"{file.name} must be less than 5KB."
+                )
+            file_type = magic.from_buffer(file.read(), mime=False)
+            if not file_type.startswith(("PGP public key block", "OpenPGP Public Key")):
+                self.add_error(
+                    "milenage_public_key", f"{file.name} must be a PGP public key file"
+                )
+            file.seek(0)
+            first_line = file.readline().strip()
+            if first_line != b"-----BEGIN PGP PUBLIC KEY BLOCK-----":
+                self.add_error(
+                    "milenage_public_key",
+                    f"{file.name} must be an ASCII armored PGP public key file.",
+                )
         return file
-
-    def validate_single_file(self, file, field_name):
-        # Check file size is less than 5KB
-        file_size = file.size
-        if file_size > 5120:
-            self.add_error(field_name, f"{file.name} must be less than 5KB.")
-
-        # Check file is a PGP public key file
-        file_type = magic.from_buffer(file.read(), mime=False)
-        if not file_type.startswith(("PGP public key block", "OpenPGP Public Key")):
-            self.add_error(field_name, f"{file.name} must be a PGP public key file")
-
-        # Check if the PGP key is ASCII armored
-        file.seek(0)
-        first_line = file.readline().strip()
-        if first_line != b"-----BEGIN PGP PUBLIC KEY BLOCK-----":
-            self.add_error(
-                field_name,
-                f"{file.name} must be an ASCII armored PGP public key file.",
-            )
-
-    def validate_multiple_files(self, files, field_name, count):
-        # Check if the correct number of files are uploaded
-        if len(files) != count:
-            self.add_error(
-                field_name, f"{count} PGP public key files must be uploaded."
-            )
-        for file in files:
-            self.validate_single_file(file, field_name)
 
 
 ##############################
@@ -317,42 +366,46 @@ class KeyShareInfoForm(forms.Form):
         return files
 
     def clean(self):
-        # Validate form data based on the selected scheme and key task
         cleaned_data = super().clean()
-        scheme = cleaned_data.get("scheme")
-        key_task = cleaned_data.get("key_task")
-        share_count = cleaned_data.get("share_count")
-        threshold_count = cleaned_data.get("threshold_count")
-        key_share_public_keys = cleaned_data.get("key_share_public_keys")
+        if (
+            cleaned_data.get("scheme") == "shamir"
+            and cleaned_data.get("key_task") == "reconstruct"
+        ):
+            if not cleaned_data.get("threshold_count"):
+                self.add_error(
+                    "threshold_count",
+                    "Threshold count is required for Shamir Secret Shares.",
+                )
 
-        if scheme == "shamir":
-            if key_task == "reconstruct":
-                if not threshold_count:
-                    self.add_error(
-                        "threshold_count",
-                        "Threshold count is required for Shamir Secret Shares.",
-                    )
-            elif key_task == "split":
-                if not share_count:
-                    self.add_error(
-                        "share_count",
-                        "Share count is required for Shamir Secret Shares.",
-                    )
-                if not threshold_count:
-                    self.add_error(
-                        "threshold_count",
-                        "Threshold count is required for Shamir Secret Shares.",
-                    )
-        elif scheme == "xor" and not share_count:
-            self.add_error("share_count", "Share count is required for XOR key shares.")
-
-        if key_task == "split" and share_count != len(key_share_public_keys):
-            self.add_error(
-                None,
-                "Total number of public key files must be equal to the share count.",
-            )
-        if key_task == "reconstruct" and len(key_share_public_keys) != 1:
-            self.add_error(
-                "key_share_public_keys",
-                "Only one PGP Public key file is required for reconstruction.",
-            )
+        if (
+            cleaned_data.get("scheme") == "shamir"
+            and cleaned_data.get("key_task") == "split"
+        ):
+            if not cleaned_data.get("share_count"):
+                self.add_error(
+                    "share_count", "Share count is required for Shamir Secret Shares."
+                )
+            if not cleaned_data.get("threshold_count"):
+                self.add_error(
+                    "threshold_count",
+                    "Threshold count is required for Shamir Secret Shares.",
+                )
+        if cleaned_data.get("scheme") == "xor":
+            if not cleaned_data.get("share_count"):
+                self.add_error(
+                    "share_count", "Share count is required for XOR key shares."
+                )
+        if cleaned_data.get("key_task") == "split":
+            if cleaned_data.get("share_count") != len(
+                cleaned_data.get("key_share_public_keys")
+            ):
+                self.add_error(
+                    None,
+                    "Total number of public key files must be equal to the share count.",
+                )
+        if cleaned_data.get("key_task") == "reconstruct":
+            if len(cleaned_data.get("key_share_public_keys")) != 1:
+                self.add_error(
+                    "key_share_public_keys",
+                    "Only one PGP Public key file is required for reconstruction.",
+                )
