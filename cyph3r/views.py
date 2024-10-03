@@ -45,11 +45,9 @@ def error(request):
     return render(request, "cyph3r/error.html")
 
 
-def wireless(request):
-    """
-    Returns Wireless Key Ceremony Page
-    """
-    return render(request, "cyph3r/wireless.html")
+###################
+# Key Share Views #
+###################
 
 
 def key_share_download(request):
@@ -371,9 +369,16 @@ def key_share_reconstruct(request):
         )
 
 
-################################
-# HTMX Wireless Ceremony Views #
-################################
+###########################
+# Wireless Ceremony Views #
+###########################
+
+
+def wireless(request):
+    """
+    Returns Wireless Key Ceremony Page
+    """
+    return render(request, "cyph3r/wireless.html")
 
 
 def wireless_ceremony_intro(request):
@@ -387,6 +392,11 @@ def wireless_key_info_form(request):
     """
     Returns partial template for the Wireless Key Information form
     """
+    # Clear the session entirely and create a new session
+    # This is to ensure that the session is clean and does not contain any stale data
+    request.session.flush()
+
+    # Retun the key info form
     return render(
         request,
         "cyph3r/wireless_templates/wireless-key-info.html",
@@ -407,6 +417,10 @@ def wireless_gcp_storage_form(request):
 
         # Validate the form data
         if form.is_valid():
+            # Ensure that the session is created.
+            if not request.session.session_key:
+                request.session.create()
+
             # Store key information into the session
             request.session.update(
                 {
@@ -501,12 +515,27 @@ def wireless_generate_keys(request):
             cm = CryptoManager()
 
             # Generate the secret key as a random byte string of the given key size
-            secret_key = cm.generate_random_key_bytes(key_size)
+            # Retrieve or generate the key and store in the cache
+            secret_key = cache.get(f"secret_key_{request.session.session_key}")
+            if not secret_key:
+                secret_key = cm.generate_random_key_bytes(key_size)
+                cache.set(
+                    f"secret_key_{request.session.session_key}",
+                    secret_key,
+                    None,
+                )
 
             # Generates a 128 bit wrap key
             # Split it into 5 shares using Shamir Secret Sharing (SSS)
             # These will be shared among 5 internal security officers (SO) for a 3 of 5 scheme
-            wrap_key = cm.generate_random_key_bytes(128)
+            wrap_key = cache.get(f"wrap_key_{request.session.session_key}")
+            if not wrap_key:
+                wrap_key = cm.generate_random_key_bytes(128)
+                cache.set(
+                    f"wrap_key_{request.session.session_key}",
+                    wrap_key,
+                    None,
+                )
             try:
                 shares = cm.shamir_split_secret(3, 5, wrap_key)
             # Redirect to Error page if an exception occurs
@@ -585,6 +614,11 @@ def wireless_generate_keys(request):
             # Store Encrypted data (nonce + key) in GCP Secrets Manager
             gm.create_secret(secret_id=secret_id, payload=wrapped_data)
             """
+
+            # Clear secret and wrap key from cache
+            cache.delete(f"secret_key_{request.session.session_key}")
+            cache.delete(f"wrap_key_{request.session.session_key}")
+
             # Render the success page upon successful key generation and encryption if protocol is milenage
             if milenage_file:
                 return render(
