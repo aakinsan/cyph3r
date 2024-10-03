@@ -32,6 +32,19 @@ def key_share_info_shamir_reconstruct_post_data(pgp_public_keys):
 
 
 @pytest.fixture
+def key_share_info_xor_reconstruct_post_data(pgp_public_keys):
+    """
+    Fixture to return key information data for Xor Key Reconstruction.
+    """
+    return {
+        "scheme": "xor",
+        "key_task": "reconstruct",
+        "share_count": 5,
+        "key_share_public_keys": [pgp_public_keys["milenage_public_key"]],
+    }
+
+
+@pytest.fixture
 def key_share_reconstruct_shamir_key_shares():
     """
     Fixture to return 3 key shares for reconstructing shamir secret (3 of 5 scheme).
@@ -48,11 +61,35 @@ def key_share_reconstruct_shamir_key_shares():
 
 
 @pytest.fixture
+def key_share_reconstruct_xor_key_shares():
+    """
+    Fixture to return 5key shares for reconstructing xor secret.
+    """
+    xor_key_shares = [
+        "29a2ca11c4613a8ae5d529e1d2f7383129ee9fb1f0dec93e31393cf2d6aa15cc",
+        "4a5c0c7722e911a6bb32ffb85f7daa5e8f2d439a81ccf446ca2f74dcd56dacf0",
+        "5637ba92b43b070ec90b21e561dd8e691a266d06a6b484670aa83b6402f59af6",
+        "966383194fbf4d0d18b3e7b73a62bf22608101c5effbba40dd5b10fe515fc8b3",
+        "81e10fd18c8d35b710ea1bfa938f4bf6f69f7ce60d770fb5101306fd85a6813e",
+    ]
+    # return all shares
+    return xor_key_shares
+
+
+@pytest.fixture
 def key_share_reconstruct_shamir_secret_key():
     """
     Fixture to return shamir secret.
     """
     return "5b5239115089e0f9678ea6e49ef07b6a"
+
+
+@pytest.fixture
+def key_share_reconstruct_xor_secret_key():
+    """
+    Fixture to return xor secret.
+    """
+    return "224bf03c918154989fb50bf145bae8d22afbcc0e352a0cea3cf66549d5cb6a47"
 
 
 @pytest.fixture
@@ -64,6 +101,14 @@ def key_share_reconstruct_shamir_post_data(key_share_reconstruct_shamir_key_shar
         {"key_index": idx, "key_share": share}
         for idx, share in key_share_reconstruct_shamir_key_shares
     ]
+
+
+@pytest.fixture
+def key_share_reconstruct_xor_post_data(key_share_reconstruct_xor_key_shares):
+    """
+    Fixture to return key information data for Shamir Key Reconstruction.
+    """
+    return [{"key_share": share} for share in key_share_reconstruct_xor_key_shares]
 
 
 @pytest.fixture

@@ -16,7 +16,7 @@ def validate_key_share_info_post_response(
     validate_session_data=True,
 ):
     """
-    Helper function to validate response and client session after posting key share info form data to a view.
+    Helper function to validate response and client session after posting key share info form data to key-share-info view.
     """
     # The key share info view redirect users to either reconsruct or split key views
     response = client.post(request_url, post_data, format="multipart", follow=True)
@@ -34,18 +34,18 @@ def validate_key_share_info_post_response(
 
 
 def validate_shamir_key_reconstruction_post_response(
-    client, url, html_page_reconstruct, html_page_download, post_data
+    client, url, html_page_reconstruct, html_page_download, post_data, key_share_count
 ):
     """
-    Helper function to validate response and client session after posting shamir reconstruction form data to view.
+    Helper function to validate response and client session after posting xor/shamir reconstruction form data to key-share-reconstruct view.
     """
-    # client posts "key index & key share" 3 times to simulate 3 Security Officers reconstructing the shamir key
-    for i in range(0, 3):
+    # client posts "key index/key share" a number of times determined by "key_share_count" parameter to simulate Security Officers posting their key shares
+    for i in range(0, key_share_count):
         assert client.session["submitted_officer_count"] == i + 1
         response = client.post(url, post_data[i], follow=True)
         assert response.status_code == 200
         # Check that the download page is displayed after the last post, otherwise continue displaying the reconstruction page
-        if i == 2:
+        if i == key_share_count - 1:
             assert html_page_download in [t.name for t in response.templates]
         else:
             assert html_page_reconstruct in [t.name for t in response.templates]

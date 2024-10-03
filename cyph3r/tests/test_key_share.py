@@ -49,8 +49,47 @@ def test_key_share_shamir_reconstruction(
         key_share_reconstruct_html_page,
         key_share_download_html_page,
         key_share_reconstruct_shamir_post_data,
+        key_share_count=3,
     )
 
     get_key_share_secret_key_and_validate(
         cm, client, response, key_share_reconstruct_shamir_secret_key
+    )
+
+
+@pytest.mark.django_db
+def test_key_share_xor_reconstruction(
+    cleanup_generated_files,
+    cm,
+    client,
+    key_share_info_url,
+    key_share_reconstruct_url,
+    key_share_reconstruct_html_page,
+    key_share_download_html_page,
+    key_share_info_xor_reconstruct_post_data,
+    key_share_reconstruct_xor_post_data,
+    key_share_reconstruct_xor_secret_key,
+):
+    """
+    Test that xor key reconstruction is successful.
+    """
+    # Post the key information data to the view and validate the response
+    validate_key_share_info_post_response(
+        client,
+        key_share_info_url,
+        key_share_info_xor_reconstruct_post_data,
+        key_share_reconstruct_html_page,
+    )
+
+    response = validate_shamir_key_reconstruction_post_response(
+        client,
+        key_share_reconstruct_url,
+        key_share_reconstruct_html_page,
+        key_share_download_html_page,
+        key_share_reconstruct_xor_post_data,
+        key_share_count=5,
+    )
+
+    get_key_share_secret_key_and_validate(
+        cm, client, response, key_share_reconstruct_xor_secret_key
     )
