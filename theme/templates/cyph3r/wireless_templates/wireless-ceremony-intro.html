@@ -8,16 +8,16 @@
                             <p class="font-sans text-xxs block text-gray-600 pl-4"> - Milenage OP and Transport Keys</p>
 
                 <h2 class="text-base font-bold font-sans pt-2">Requirements</h2>
-                    <h3 class="font-semibold text-sm pt-1">SIM Provider Public Keys</h3>
-                        <p class="text-xxs font-sans text-gray-600">3 PGP public keys for the SIM provider are required to encrypt the 3 XOR key shares generated for each wireless keys. The provider will reconstruct each key after decypting the shares with their private keys.</p>
+                    <h3 class="font-semibold text-sm pt-1">Three SIM Provider Public Keys</h3>
+                        <p class="text-xxs font-sans text-gray-600">The PGP public keys for the SIM provider are required to encrypt the 3 XOR key shares generated for each wireless keys. The provider will reconstruct each key after decypting the shares with their private keys.</p>
 
-                    <h3 class="font-semibold pt-2 font-sans text-sm">Security Officer Public Keys</h3>
+                    <h3 class="font-semibold pt-2 font-sans text-sm">Five Security Officer Public Keys</h3>
                         <p class="text-xxs text-gray-600 font-sans">A unique 128-bit wrap key is generated for each wireless key. The wrap key is used to wrap/encrypt its associated wireless key. Each wrap key is then split into 5 shares using <strong>Shamir Secret Splitting (SSS)</strong>. Each of these shares will be encrypted with a PGP public key belonging to a security officer. Three security officers will be required to reconstruct this wrap key which in turn can be used to decrypt its wireless key.</p>
 
-                    <h3 class="font-semibold text-sm font-sans pt-2">Public Keys for the Milenage</h3>
+                    <h3 class="font-semibold text-sm font-sans pt-2">Two Public Keys for Milenage</h3>
                         <p class="text-xxs text-gray-600 font-sans pb-2">The milenage key will be entered at the terminal of the network provider. To mitigate the risk of both milenage keys been known by a single resource, two public keys belonging to two different resources will be provided. One to encrypt the milenage Transport key and the other to encrypt the milenage OP key.</p>
               
-                <p class="text-xxs text-gray-600 font-sans pt-1">This app only accepts PGP public key files that are in the <strong>ASCII Armored format</strong> i.e. the contents of each public key file must have the begin and end headers of   
+                <p class="text-xxs text-gray-600 font-sans pt-1">This app only accepts PGP public key files that are in the <strong>ASCII armored format</strong> i.e. the contents of each public key file must have the begin and end headers of   
                     <span class="bg-gray-200 px-1 text-xxs font-sans border border-gray-300 rounded shadow-md text-gray-800">-----
                     BEGIN PGP PUBLIC KEY BLOCK-----</span> and <span class="bg-gray-200 border border-gray-300 b-1 px-1 text-xxs font-sans rounded shadow-md text-gray-800">-----END PGP PUBLIC KEY BLOCK-----</span> respectively.</li></ul></p>
  

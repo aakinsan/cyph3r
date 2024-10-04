@@ -21,6 +21,7 @@ urlpatterns = [
         name="key-share-split",
     ),
     path("key-share-download/", views.key_share_download, name="key-share-download"),
+    path("key-share-intro/", views.key_share_intro, name="key-share-intro"),
     path("error/", views.error, name="error"),
 ]
 

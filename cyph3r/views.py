@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from cryptography.fernet import Fernet
 from django.core.cache import cache
 from django.contrib import messages
-from .forms import (
+from cyph3r.forms import (
     WirelessKeyInfoForm,
     WirelessGCPStorageForm,
     WirelessPGPUploadForm,
@@ -10,8 +10,8 @@ from .forms import (
     KeyShareReconstructForm,
     KeyShareSplitForm,
 )
-from .models import KeyGeneration, KeySplit, FileEncryption
-from .files import (
+from cyph3r.models import KeyGeneration, KeySplit, FileEncryption
+from cyph3r.files import (
     create_wireless_provider_encrypted_key_files,
     create_wireless_milenage_encrypted_file,
     create_wireless_security_officers_encrypted_key_files,
@@ -20,8 +20,10 @@ from .files import (
     create_key_share_reconstruct_secret_file,
     create_key_share_split_secret_files,
 )
-from .crypto import CryptoManager
-from .gcp import GCPManager
+from cyph3r.crypto import CryptoManager
+from cyph3r.gcp import GCPManager
+from cyph3r.key_tracker import total_key_shares, total_files_encrypted
+from datetime import datetime
 
 
 """
@@ -34,7 +36,29 @@ def index(request):
     """
     Returns the Home Page
     """
-    return render(request, "cyph3r/index.html")
+    # Get the total number of keys generated
+    keys_generated = KeyGeneration.objects.count()
+
+    # Get the total number of keys shares created and save to cache
+    key_shares = cache.get("keys_shares")
+    if key_shares is None:
+        key_shares = total_key_shares()
+        cache.set("key_shares", key_shares, 60)
+
+    # Get the total number of files encrypted and save to cache
+    files_encrypted = cache.get("files_encrypted")
+    if files_encrypted is None:
+        files_encrypted = total_files_encrypted()
+        cache.set("files_encrypted", files_encrypted, 60)
+
+    data = {
+        "keys_generated": keys_generated,
+        "key_shares": key_shares,
+        "files_encrypted": files_encrypted,
+    }
+    print(data)
+
+    return render(request, "cyph3r/index.html", data)
 
 
 def error(request):
@@ -48,6 +72,13 @@ def error(request):
 ###################
 # Key Share Views #
 ###################
+
+
+def key_share_intro(request):
+    """
+    Returns Key Share Introduction Page
+    """
+    return render(request, "cyph3r/key_share_templates/key-share-intro.html")
 
 
 def key_share_download(request):
@@ -166,6 +197,10 @@ def key_share_split(request):
                     shares = cm.shamir_split_secret(
                         threshold_count, share_count, secret_key
                     )
+                    # Update the database with the key split information
+                    KeySplit.objects.create(
+                        key=None, number_of_shares=share_count, type="SHAMIR"
+                    )
 
                 # Redirect to Error page if an exception occurs
                 except Exception as e:
@@ -179,6 +214,11 @@ def key_share_split(request):
                 # Split the secret key into shares using XOR Secret Sharing
                 try:
                     shares = cm.xor_split_secret(secret_key, key_size, share_count)
+
+                    # Update the database with the key split information
+                    KeySplit.objects.create(
+                        key=None, number_of_shares=share_count, type="XOR"
+                    )
                 # Redirect to Error page if an exception occurs
                 except Exception as e:
                     messages.error(request, f"{e}")
@@ -189,6 +229,13 @@ def key_share_split(request):
                 shares,
                 request.session.session_key,
                 request.session["public_key_files"],
+            )
+
+            # Update the database with the File Encryption information
+            FileEncryption.objects.create(
+                key=None,
+                encryption_algorithm="PGP",
+                number_of_files_encrypted=len(secret_files),
             )
 
             # Add path to secret files to session
@@ -255,6 +302,11 @@ def key_share_reconstruct(request):
                     None,
                 )
 
+            # Update the database with the Key Generation information
+            kg_fernet = KeyGeneration.objects.create(
+                key_id="fernet_share_encrypt_key", key_size=128, is_split=False
+            )
+
             # Initialize the CryptoManager and Fernet object
             cm = CryptoManager()
             f = Fernet(encryption_key)
@@ -286,6 +338,12 @@ def key_share_reconstruct(request):
                     (cm.bytes_to_hex(token))
                 )  # Only JSON serializable data can be stored in session/ Bytes are not / converting to hex
 
+            # Update the database with the data encryption information
+            FileEncryption.objects.create(
+                key=kg_fernet,
+                encryption_algorithm="AES-CBC",
+                number_of_files_encrypted=count,
+            )
             # Increment the count of Security officers that have submitted their key shares
             request.session["submitted_officer_count"] += 1
 
@@ -330,6 +388,13 @@ def key_share_reconstruct(request):
                     secret,
                     request.session.session_key,
                     request.session["public_key_files"],
+                )
+
+                # Update the database with the data encryption information
+                FileEncryption.objects.create(
+                    key=None,
+                    encryption_algorithm="PGP",
+                    number_of_files_encrypted=len(secret_files),
                 )
 
                 # Add path to secret files to session
@@ -525,6 +590,14 @@ def wireless_generate_keys(request):
                     None,
                 )
 
+            # Update the database with the Key Generation information
+            sk = KeyGeneration.objects.create(
+                key_id=f"{key_type}_secret_key",
+                date_generated=datetime.now(),
+                key_size=key_size,
+                is_split=False,
+            )
+
             # Generates a 128 bit wrap key
             # Split it into 5 shares using Shamir Secret Sharing (SSS)
             # These will be shared among 5 internal security officers (SO) for a 3 of 5 scheme
@@ -536,6 +609,15 @@ def wireless_generate_keys(request):
                     wrap_key,
                     None,
                 )
+
+            # Update the database with the Key Generation information
+            wk = KeyGeneration.objects.create(
+                key_id=f"{key_type}_wrap_key",
+                date_generated=datetime.now(),
+                key_size=key_size,
+                is_split=True,
+            )
+
             try:
                 shares = cm.shamir_split_secret(3, 5, wrap_key)
             # Redirect to Error page if an exception occurs
@@ -543,11 +625,21 @@ def wireless_generate_keys(request):
                 messages.error(request, f"{e}")
                 return redirect("error")
 
+            # Update the database with the Key Split information
+            KeySplit.objects.create(key=wk, number_of_shares=5, type="SHAMIR")
+
             # Generate 12 bytes nonce for the AES-GCM encryption of the secret key by the wrap key
             nonce = cm.generate_random_key_bytes(96)
 
             # Encrypt the secret key using the wrap key and nonce
             wrapped_secret_key = cm.encrypt_with_aes_gcm(wrap_key, nonce, secret_key)
+
+            # Update the database with the file encryption information
+            FileEncryption.objects.create(
+                key=wk,
+                encryption_algorithm="AES-GCM",
+                number_of_files_encrypted=1,
+            )
 
             # Concatenate 12 bytes nonce + wrapped secret key
             # Nonce is required for AES GCM decryption
@@ -571,6 +663,13 @@ def wireless_generate_keys(request):
                 number_of_shares=3,
             )
 
+            # Update the database with the File encryption information
+            FileEncryption.objects.create(
+                key=None,
+                encryption_algorithm="PGP",
+                number_of_files_encrypted=len(provider_files),
+            )
+
             # Calling helper function to encrypt security officer (SO) files
             # Each file contains the Shamir wrap key share encrypted with a security officer's PGP key
             # This returns a list of the file names of the encrypted SO files for download
@@ -582,6 +681,13 @@ def wireless_generate_keys(request):
                     protocol,
                     shares,
                 )
+            )
+
+            # Update the database with the File encryption information
+            FileEncryption.objects.create(
+                key=None,
+                encryption_algorithm="PGP",
+                number_of_files_encrypted=len(security_officer_files),
             )
 
             # Check if protocol is milenage
@@ -596,6 +702,13 @@ def wireless_generate_keys(request):
                 # This returns the file name of the encrypted milenage key file for download
                 milenage_file = create_wireless_milenage_encrypted_file(
                     form, cm, secret_key, key_type
+                )
+
+                # Update the database with the File encryption information
+                FileEncryption.objects.create(
+                    key=None,
+                    encryption_algorithm="PGP",
+                    number_of_files_encrypted=1,
                 )
             """
             # Initialize GCP Manager for GCP operations

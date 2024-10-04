@@ -1,0 +1,34 @@
+{% extends 'cyph3r/base.html' %}
+{% load static %}
+{% block content %}
+<div class="bg-slate-200 flex flex-col min-h-screen justify-center items-center w-full">
+    <div id="container" class="bg-white shadow-md rounded-lg px-8 py-2 pt-2 mt-3 max-w-4xl w-full">
+        <div class="w-full p-2">
+                <h1 class="text-lg font-bold text-center font-sans pb-3 text-black">Key Sharing</h1>
+                    <p class="text-sm font-sans text-gray-600 pb-1">Key sharing or splitting, also known as secret sharing, refers to a cryptographic technique where a secret (such as a cryptographic key) is divided into multiple parts, or shares, and distributed among participants.</p>
+                    <p class="text-sm font-sans text-gray-600 pb-1">The key idea behind this process is that no single share reveals enough information to reconstruct the original secret. This app supports the following schemes for key sharing:</p>
+
+                    <h3 class="font-semibold pt-2 font-sans text-sm">Shamir's Secrets Sharing</h3>
+                        <p class="text-xxs text-gray-600 font-sans">This app only supports splitting <span class="font-bold">128 bit</span> keys using Shamir's secret sharing. The key can be broken into n shares and a minimum of m shares (m < n) otherwise known as the threshold is required for key reconstruction.</p>
+
+                    <h3 class="font-semibold pt-2 font-sans text-sm">Xor-based Key Splitting</h3>
+                        <p class="text-xxs text-gray-600 font-sans">A much simpler approach than Shamir is using the XOR or bitwise operation to split a secret. All the shares are required to reconstruct the secret.</p>
+                                
+                    <p class="text-sm text-gray-600 font-sans pt-4">The assumption is the key shares are also expected to remain secret. Consequently, every key splitting operation requires PGP public files to be uploaded. The number of files to be uploaded must be the same number as that of the shares to be created.</p>
+
+                    <p class="text-sm text-gray-600 font-sans pt-2">Key reconstruction operations require only a single PGP file to be uploaded.</p>
+
+                    <p class="text-sm text-gray-600 font-sans pt-2">This app only accepts PGP public key files that are in the <strong>ASCII armored format</strong> i.e. the contents of each public key file must have the begin and end headers of   
+                        <span class="bg-gray-200 px-1 text-sm font-sans border border-gray-300 rounded shadow-md text-gray-800">-----
+                        BEGIN PGP PUBLIC KEY BLOCK-----</span> and <span class="bg-gray-200 border border-gray-300 b-1 px-1 text-xxs font-sans rounded shadow-md text-gray-800">-----END PGP PUBLIC KEY BLOCK-----</span> respectively.</li></ul></p>
+                </div>
+                <!-- Submit Button -->
+                <a href="{% url 'key-share-info' %}" class="flex justify-end pt-3 pb-3">
+                    <button type="button" hx-get="{% url 'key-share-info' %}" hx-trigger="click" hx-swap="outerHTML" hx-target="#form"  class="bg-orange-500 hover:bg-orange-400 text-white text-sm px-3 pt-2 mb-2 pb-2 rounded-lg transition">
+                        Get Started
+                    </button>
+                </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

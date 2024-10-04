@@ -7,16 +7,16 @@
         <p class="text-slate-500 text-lg w-full 2xl:text-xl 2xl: xl:text-nowrap text-center max-xl:w-96 font-sans pt-3">Your cryptography tooklit, simplified!</p>
         <div class="flex justify-center self-center item-center font-pal max-xl:w-96 mt-12 max-dl:mt-6 gap-16">
             <div>
-                <p class="text-lg text-center max-2xl:text-sm font-serif font-semibold">1K+</p>
-                <p class="text-slate-500 max-2xl:text-sm text-base font-serif text-center">Keys <br />generated</p>
+                <p class="text-lg text-center max-2xl:text-sm font-serif font-semibold text-orange-600">{{ keys_generated }}</p>
+                <p class="text-slate-500 max-2xl:text-sm font-serif text-sm text-center">Keys <br />generated</p>
             </div>
             <div>
-                <p class="text-lg text-center max-2xl:text-sm font-serif font-semibold">500+</p>
-                <p class="text-slate-500 max-2xl:text-sm font-serif text-base">Keys <br />split</p>
+                <p class="text-lg text-center max-2xl:text-sm font-serif font-semibold text-orange-600">{{ key_shares }}</p>
+                <p class="text-slate-500 max-2xl:text-sm font-serif text-sm">Key <br />shares</p>
             </div>
             <div>
-                <p class="text-lg font-semibold max-2xl:text-sm font-serif text-center">250K+</p>
-                <p class="text-slate-500 max-2xl:text-sm text-base font-serif text-center">Files <br />encrypted</p>
+                <p class="text-lg font-semibold max-2xl:text-sm font-serif text-center text-orange-600">{{ files_encrypted }}</p>
+                <p class="text-slate-500 max-2xl:text-sm text-sm font-serif text-center">Files <br />encrypted</p>
             </div>
         </div>
     </div>
@@ -28,7 +28,7 @@
             </div>
             <p class="text-slate-500 group-hover:text-white text-xs">Randomized cryptographic key creation</p>
         </a>
-        <a href="{% url 'key-share-info' %}" class="group block w-full mx-auto rounded-lg max-dl:p-4 p-6 bg-white ring-1 ring-slate-900/5 shadow-lg space-y-3 hover:bg-orange-500 hover:ring-orange-500">
+        <a href="{% url 'key-share-intro' %}" class="group block w-full mx-auto rounded-lg max-dl:p-4 p-6 bg-white ring-1 ring-slate-900/5 shadow-lg space-y-3 hover:bg-orange-500 hover:ring-orange-500">
             <div class="flex items-center space-x-3">
                 <h3 class="text-slate-900 group-hover:text-white text-sm font-semibold">Key Shares</h3>
             </div>
