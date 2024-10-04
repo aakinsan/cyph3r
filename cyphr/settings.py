@@ -11,7 +11,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-from configurations import Configuration
+from configurations import Configuration, values
+import os
 
 
 class Dev(Configuration):
@@ -25,9 +26,9 @@ class Dev(Configuration):
     SECRET_KEY = "django-insecure-xv4lnz$#1#k)lj3a+mz9i6y1n&swfexqfboa&q(%pbj53u#9bv"
 
     # SECURITY WARNING: don't run with debug turned on in production!
-    DEBUG = True
+    DEBUG = values.BooleanValue(True)
 
-    ALLOWED_HOSTS = ["192.168.2.121"]
+    ALLOWED_HOSTS = values.ListValue(["192.168.2.121"])
 
     # Application definition
 
@@ -115,7 +116,7 @@ class Dev(Configuration):
 
     LANGUAGE_CODE = "en-us"
 
-    TIME_ZONE = "UTC"
+    TIME_ZONE = values.Value("UTC")
 
     USE_I18N = True
 
@@ -144,7 +145,7 @@ class Dev(Configuration):
 
     MEDIA_URL = "/media/"
 
-    MEDIA_ROOT = BASE_DIR / "media"
+    MEDIA_ROOT = values.Value(os.path.join(BASE_DIR, "media"))
 
     CACHES = {
         "default": {
@@ -152,3 +153,10 @@ class Dev(Configuration):
             "LOCATION": "redis://127.0.0.1:6379",
         }
     }
+
+    STATIC_ROOT = values.Value()
+
+
+class Prod(Dev):
+    DEBUG = False
+    SECRET_KEY = values.SecretValue()

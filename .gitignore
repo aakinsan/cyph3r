@@ -27,6 +27,7 @@ Pipfile.lock
 # dotenv environment variables file (security-sensitive)
 .env
 .env.*
+production.conf
 
 # log files for Python
 *.log
