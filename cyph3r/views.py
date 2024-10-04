@@ -39,24 +39,17 @@ def index(request):
     # Get the total number of keys generated
     keys_generated = KeyGeneration.objects.count()
 
-    # Get the total number of keys shares created and save to cache
-    key_shares = cache.get("keys_shares")
-    if key_shares is None:
-        key_shares = total_key_shares()
-        cache.set("key_shares", key_shares, 60)
+    # Get the total number of keys shares
+    key_shares = total_key_shares()
 
-    # Get the total number of files encrypted and save to cache
-    files_encrypted = cache.get("files_encrypted")
-    if files_encrypted is None:
-        files_encrypted = total_files_encrypted()
-        cache.set("files_encrypted", files_encrypted, 60)
+    # Get the total number of files encrypted
+    files_encrypted = total_files_encrypted()
 
     data = {
         "keys_generated": keys_generated,
         "key_shares": key_shares,
         "files_encrypted": files_encrypted,
     }
-    print(data)
 
     return render(request, "cyph3r/index.html", data)
 

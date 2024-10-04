@@ -10,6 +10,7 @@ from testing_helpers_wireless import (
 )
 
 
+@pytest.mark.django_db
 def test_index_view(client):
     """
     Test that the index view renders correctly.

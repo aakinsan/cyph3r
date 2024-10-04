@@ -24,11 +24,13 @@
         <div class="flex justify-between items-center gap-12 md:gap-24">
           <a href="{% url 'index' %}" class="rounded-full w-12 h-12 hover:bg-orange-100 grid place-content-center">
             <img src="{% static 'icons/cog.svg' %}" alt="cog logo" width="30" height="30" title="settings" />
-          </a><a href="{% url 'index' %}" class="rounded-full w-12 h-12 hover:bg-orange-100 grid place-content-center">
+          </a>
+          <a href="{% url 'index' %}" class="rounded-full w-12 h-12 hover:bg-orange-100 grid place-content-center">
             <img src="{% static 'icons/user.svg' %}" alt="cog logo" width="30" height="30" title="login" />
           </a>
         </div>
       </nav>
+      
     </header>
     {% block content %} {% endblock %}
   </body>
