@@ -9,7 +9,7 @@ server {
 
 server {
     listen 80 deferred;
-    server_name localhost;
+    server_name cyph3r.ldzx.xyz;
     root /var/www/bookr;
     client_max_body_size 4G;
     keepalive_timeout 5;
