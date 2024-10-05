@@ -1,0 +1,19 @@
+[Unit]
+Description=Cyph3r Gunicorn daemon
+Requires=gunicorn-cyph3r.socket
+After=network.target
+[Service]
+EnvironmentFile=/home/cyph3r/cyph3r/production.conf
+Type=notify
+User=cyph3r
+Group=cyph3r
+RuntimeDirectory=gunicorn-cyph3r
+WorkingDirectory=/home/cyph3r/cyph3r
+ExecStart=/home/cyph3r/venv/bin/gunicorn cyph3r.
+wsgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
+[Install]
+WantedBy=multi-user.target

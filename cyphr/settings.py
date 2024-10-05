@@ -133,17 +133,21 @@ class Dev(Configuration):
         "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
     )
 
+    # Tailwind CSS app name
     TAILWIND_APP_NAME = "theme"
 
+    # Internal IPs that can recive Django Debug
     INTERNAL_IPS = [
         "127.0.0.1",
         "192.168.2.*",
     ]
 
+    # Media Settings
     MEDIA_URL = "/media/"
 
     MEDIA_ROOT = values.Value(os.path.join(BASE_DIR, "media"))
 
+    # Cache Settings
     CACHES = {
         "default": {
             "BACKEND": "django.core.cache.backends.redis.RedisCache",
@@ -151,14 +155,18 @@ class Dev(Configuration):
         }
     }
 
+    # Static files Root folder
     STATIC_ROOT = values.Value()
 
 
 class Prod(Dev):
+    # Debugging is disabled in production
     DEBUG = False
 
+    # Secret Key
     SECRET_KEY = values.SecretValue()
 
+    # Installed Apps and Middleware
     INSTALLED_APPS = [
         "django.contrib.admin",
         "django.contrib.auth",
@@ -184,3 +192,16 @@ class Prod(Dev):
         "django.middleware.clickjacking.XFrameOptionsMiddleware",
         "django_htmx.middleware.HtmxMiddleware",
     ]
+
+    # Remove Internal IPs
+    INTERNAL_IPS = []
+
+    """
+    # Secure Defaults
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    """
