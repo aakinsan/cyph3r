@@ -1,5 +1,5 @@
 upstream django {
-    server unix:/run/gunicorn-bookr.sock fail_timeout=0;
+    server unix:/run/gunicorn-cyph3r.sock fail_timeout=0;
  }
 
 server {
@@ -10,7 +10,7 @@ server {
 server {
     listen 80 deferred;
     server_name cyph3r.ldzx.xyz;
-    root /var/www/bookr;
+    root /var/www/cyph3r;
     client_max_body_size 4G;
     keepalive_timeout 5;
 
