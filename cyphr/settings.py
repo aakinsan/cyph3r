@@ -166,6 +166,8 @@ class Prod(Dev):
     # Secret Key
     SECRET_KEY = values.SecretValue()
 
+    DATABASES = values.DatabaseURLValue(environ_name="DJANGO_DATABASE_URL")
+
     # Installed Apps and Middleware
     INSTALLED_APPS = [
         "django.contrib.admin",
