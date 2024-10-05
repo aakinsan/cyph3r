@@ -166,12 +166,6 @@ class Prod(Dev):
     # Secret Key
     SECRET_KEY = values.SecretValue()
 
-    # Project root Folder
-    PROD_BASE_DIR = Path(__file__).resolve().parent.parent
-
-    # Database URL
-    DATABASES = values.DatabaseURLValue()
-
     # Installed Apps and Middleware
     INSTALLED_APPS = [
         "django.contrib.admin",
@@ -219,7 +213,7 @@ class Prod(Dev):
             "file": {
                 "level": "DEBUG",
                 "class": "logging.handlers.RotatingFileHandler",
-                "filename": os.path.join(PROD_BASE_DIR, "django_debug.log"),
+                "filename": "/var/log/django/debug.log",
                 "maxBytes": 1024 * 1024 * 5,
                 "backupCount": 5,
                 "formatter": "verbose",
