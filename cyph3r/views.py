@@ -24,42 +24,44 @@ from cyph3r.crypto import CryptoManager
 from cyph3r.gcp import GCPManager
 from cyph3r.key_tracker import total_key_shares, total_files_encrypted
 from datetime import datetime
+import logging
 
 
 """
 This module contains the views for the cyph3r app.
 
 """
+# Define the logger for the module
+logger = logging.getLogger(__name__)
 
 
 def index(request):
     """
     Returns the Home Page
     """
-    # Get the total number of keys generated
-    keys_generated = KeyGeneration.objects.count()
+    try:
+        # Get the total number of keys generated
+        keys_generated = KeyGeneration.objects.count()
 
-    # Get the total number of keys shares
-    key_shares = total_key_shares()
+        # Get the total number of keys shares
+        key_shares = total_key_shares()
 
-    # Get the total number of files encrypted
-    files_encrypted = total_files_encrypted()
+        # Get the total number of files encrypted
+        files_encrypted = total_files_encrypted()
 
-    data = {
-        "keys_generated": keys_generated,
-        "key_shares": key_shares,
-        "files_encrypted": files_encrypted,
-    }
+        data = {
+            "keys_generated": keys_generated,
+            "key_shares": key_shares,
+            "files_encrypted": files_encrypted,
+        }
 
-    return render(request, "cyph3r/index.html", data)
-
-
-def error(request):
-    """
-    Returns the Error Page
-    """
-    # Return the error page with the error message
-    return render(request, "cyph3r/error.html")
+        return render(request, "cyph3r/index.html", data)
+    except Exception as e:
+        logger.error(f"An error occurred in index view: {e}", exc_info=True)
+        return render(
+            request,
+            "cyph3r/500.html",
+        )
 
 
 ###################
@@ -197,8 +199,11 @@ def key_share_split(request):
 
                 # Redirect to Error page if an exception occurs
                 except Exception as e:
-                    messages.error(request, f"{e}")
-                    return redirect("error")
+                    logger.error(
+                        f"An error occurred in the shamir key-share-split view: {e}",
+                        exc_info=True,
+                    )
+                    return render(request, "cyph3r/500.html")
 
             if request.session.get("scheme") == "xor":
                 # Determine length of the secret key (bytes) e.g. 16 bytes = 128 bits
@@ -214,8 +219,11 @@ def key_share_split(request):
                     )
                 # Redirect to Error page if an exception occurs
                 except Exception as e:
-                    messages.error(request, f"{e}")
-                    return redirect("error")
+                    logger.error(
+                        f"An error occurred in the xorr key-share-split view: {e}",
+                        exc_info=True,
+                    )
+                    return render(request, "cyph3r/500.html")
 
             secret_files = create_key_share_split_secret_files(
                 cm,
@@ -357,8 +365,11 @@ def key_share_reconstruct(request):
 
                     # Redirect to Error page if an exception occurs
                     except Exception as e:
-                        messages.error(request, f"{e}")
-                        return redirect("error")
+                        logger.error(
+                            f"An error occurred in the shamir key-share-reconstruct view: {e}",
+                            exc_info=True,
+                        )
+                        return render(request, "cyph3r/500.html")
 
                 if request.session.get("scheme") == "xor":
                     # Decrypt the encrypted key shares and store in the list
@@ -372,8 +383,11 @@ def key_share_reconstruct(request):
 
                     # Redirect to Error page if an exception occurs
                     except Exception as e:
-                        messages.error(request, f"{e}")
-                        return redirect("error")
+                        logger.error(
+                            f"An error occurred in the xor key-share-split view: {e}",
+                            exc_info=True,
+                        )
+                        return render(request, "cyph3r/500.html")
 
                 # Write the secret to a file and encrypt with PGP public keys
                 secret_files = create_key_share_reconstruct_secret_file(
@@ -615,8 +629,11 @@ def wireless_generate_keys(request):
                 shares = cm.shamir_split_secret(3, 5, wrap_key)
             # Redirect to Error page if an exception occurs
             except Exception as e:
-                messages.error(request, f"{e}")
-                return redirect("error")
+                logger.error(
+                    f"An error occurred in the wireless generate keys view: {e}",
+                    exc_info=True,
+                )
+                return render(request, "cyph3r/500.html")
 
             # Update the database with the Key Split information
             KeySplit.objects.create(key=wk, number_of_shares=5, type="SHAMIR")

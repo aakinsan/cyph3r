@@ -15,8 +15,11 @@ cryptography==43.0.1
 curtsies==0.4.2
 cwcwidth==0.1.9
 dj-database-url==2.2.0
+dj-email-url==1.0.6
+dj-search-url==0.1
 Django==5.1.1
 django-browser-reload==1.15.0
+django-cache-url==3.4.5
 django-configurations==2.5.1
 django-htmx==1.19.0
 django-tailwind==3.8.0

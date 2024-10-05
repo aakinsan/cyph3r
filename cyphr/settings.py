@@ -145,7 +145,7 @@ class Dev(Configuration):
     # Media Settings
     MEDIA_URL = "/media/"
 
-    MEDIA_ROOT = values.Value(os.path.join(BASE_DIR, "media"))
+    MEDIA_ROOT = values.Value(BASE_DIR / "media")
 
     # Cache Settings
     CACHES = {
@@ -166,7 +166,11 @@ class Prod(Dev):
     # Secret Key
     SECRET_KEY = values.SecretValue()
 
-    DATABASES = values.DatabaseURLValue(environ_name="DJANGO_DATABASE_URL")
+    # Project root Folder
+    PROD_BASE_DIR = Path(__file__).resolve().parent.parent
+
+    # Database URL
+    DATABASES = values.DatabaseURLValue()
 
     # Installed Apps and Middleware
     INSTALLED_APPS = [
@@ -197,6 +201,47 @@ class Prod(Dev):
 
     # Remove Internal IPs
     INTERNAL_IPS = []
+
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "verbose": {
+                "format": "{levelname} {asctime} {module} {message}",
+                "style": "{",
+            },
+            "simple": {
+                "format": "{levelname} {message}",
+                "style": "{",
+            },
+        },
+        "handlers": {
+            "file": {
+                "level": "DEBUG",
+                "class": "logging.handlers.RotatingFileHandler",
+                "filename": os.path.join(PROD_BASE_DIR, "django_debug.log"),
+                "maxBytes": 1024 * 1024 * 5,
+                "backupCount": 5,
+                "formatter": "verbose",
+            },
+            "console": {
+                "class": "logging.StreamHandler",
+                "formatter": "simple",
+            },
+        },
+        "loggers": {
+            "django": {
+                "handlers": ["file", "console"],
+                "level": values.Value("INFO", environ_name="LOGGING"),
+                "propagate": True,
+            },
+            "django.request": {
+                "handlers": ["file", "console"],
+                "level": values.Value("ERROR", environ_name="REQUEST_LOGGING"),
+                "propagate": False,
+            },
+        },
+    }
 
     """
     # Secure Defaults
