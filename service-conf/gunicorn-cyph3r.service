@@ -9,8 +9,7 @@ User=cyph3r
 Group=cyph3r
 RuntimeDirectory=gunicorn-cyph3r
 WorkingDirectory=/home/cyph3r/cyph3r
-ExecStart=/home/cyph3r/venv/bin/gunicorn cyph3r.
-wsgi:application
+ExecStart=/home/cyph3r/venv/bin/gunicorn cyph3r.wsgi:application
 ExecReload=/bin/kill -s HUP $MAINPID
 KillMode=mixed
 TimeoutStopSec=5
