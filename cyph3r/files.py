@@ -38,10 +38,16 @@ def import_pgp_key_from_file(cm: CryptoManager, file):
 
 
 def create_wireless_wrapped_secret_key_file(
-    cm: CryptoManager, wrapped_data: bytes, protocol: str, key_type: str
+    cm: CryptoManager,
+    wrapped_data: bytes,
+    protocol: str,
+    key_type: str,
+    key_identifier: str,
 ) -> str:
     """Writes Encrypted key to a file for download."""
-    wrapped_data_file_name = f"{protocol}-{key_type}-wrapped-secret.txt"
+    wrapped_data_file_name = (
+        f"{key_identifier}-{protocol}-{key_type}-wrapped-secret.txt"
+    )
     save_path = os.path.join(settings.MEDIA_ROOT, wrapped_data_file_name)
 
     with open(save_path, "wb") as fp:
@@ -60,6 +66,7 @@ def create_wireless_provider_encrypted_key_files(
     key_size: int,
     key_type: str,
     protocol: str,
+    key_identifier: str,
     number_of_shares: int,
 ) -> list:
     """Creates XOR key shares encrypted with Provider PGP keys and saves them to files."""
@@ -76,9 +83,7 @@ def create_wireless_provider_encrypted_key_files(
         fingerprint, keyid = import_pgp_key_from_file(cm, file)
         kcv = cm.generate_kcv(shares[key_index - 1])
         xor_key_share_hex = cm.bytes_to_hex(shares[key_index - 1])
-        provider_file_name = (
-            f"G+D-{protocol}-{key_type}-key-{key_index}-{keyid}{GPG_FILE_EXTENSION}"
-        )
+        provider_file_name = f"G+D-{key_identifier}-{protocol}-{key_type}-key-{key_index}-{keyid}{GPG_FILE_EXTENSION}"
         save_path = os.path.join(settings.MEDIA_ROOT, provider_file_name)
         provider_files.append(provider_file_name)
 
@@ -95,7 +100,12 @@ def create_wireless_provider_encrypted_key_files(
 
 
 def create_wireless_security_officers_encrypted_key_files(
-    form: forms.Form, cm: CryptoManager, key_type: str, protocol: str, shares: list
+    form: forms.Form,
+    cm: CryptoManager,
+    key_type: str,
+    key_identifier: str,
+    protocol: str,
+    shares: list,
 ) -> list:
     """Encrypts files containing the Shamir wrap key share with security officer (SO) PGP keys."""
     # Initialize the list to store the paths to the encrypted shares for download
@@ -106,9 +116,7 @@ def create_wireless_security_officers_encrypted_key_files(
         form.cleaned_data["security_officers_public_keys"], start=1
     ):
         fingerprint, keyid = import_pgp_key_from_file(cm, file)
-        security_officer_file_name = (
-            f"SO-{protocol}-{key_type}-wrap-key-{key_index}-{keyid}{GPG_FILE_EXTENSION}"
-        )
+        security_officer_file_name = f"SO-{key_identifier}-{protocol}-{key_type}-wrap-key-{key_index}-{keyid}{GPG_FILE_EXTENSION}"
         save_path = os.path.join(settings.MEDIA_ROOT, security_officer_file_name)
         security_officer_file_names.append(security_officer_file_name)
 
@@ -126,14 +134,20 @@ def create_wireless_security_officers_encrypted_key_files(
 
 
 def create_wireless_milenage_encrypted_file(
-    form: forms.Form, cm: CryptoManager, secret_key: bytes, key_type: str
+    form: forms.Form,
+    cm: CryptoManager,
+    secret_key: bytes,
+    key_type: str,
+    key_identifier: str,
 ) -> str:
     """Wraps the secret key with PGP public key of engineer entering milenage keys in provider terminal and saves it to file."""
     file = form.cleaned_data["milenage_public_key"]
     fingerprint, keyid = import_pgp_key_from_file(cm, file)
 
     secret_key_hex = cm.bytes_to_hex(secret_key)
-    milenage_file_name = f"milenage-{key_type}-key-{keyid}{GPG_FILE_EXTENSION}"
+    milenage_file_name = (
+        f"milenage-{key_identifier}-{key_type}-key-{keyid}{GPG_FILE_EXTENSION}"
+    )
     save_path = os.path.join(settings.MEDIA_ROOT, milenage_file_name)
 
     encrypted_data = cm.gpg.encrypt(

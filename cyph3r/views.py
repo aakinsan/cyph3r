@@ -741,7 +741,7 @@ def wireless_generate_keys(request):
 
                 # Calling helper function to write the encrypted secret key to a file and return the file name
                 wrapped_secret_key_file = create_wireless_wrapped_secret_key_file(
-                    cm, wrapped_data, protocol, key_type
+                    cm, wrapped_data, protocol, key_type, key_identifier
                 )
 
                 # Calling helper function to generate PGP encrypted files for the external provider
@@ -754,6 +754,7 @@ def wireless_generate_keys(request):
                     key_size,
                     key_type,
                     protocol,
+                    key_identifier,
                     number_of_shares=3,
                 )
 
@@ -772,6 +773,7 @@ def wireless_generate_keys(request):
                         form,
                         cm,
                         key_type,
+                        key_identifier,
                         protocol,
                         shares,
                     )
@@ -795,7 +797,7 @@ def wireless_generate_keys(request):
                     # Calling helper function to create the encrypted milenage key file
                     # This returns the file name of the encrypted milenage key file for download
                     milenage_file = create_wireless_milenage_encrypted_file(
-                        form, cm, secret_key, key_type
+                        form, cm, secret_key, key_type, key_identifier
                     )
 
                     # Update the database with the File encryption information
