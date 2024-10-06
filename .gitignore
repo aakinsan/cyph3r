@@ -28,6 +28,7 @@ Pipfile.lock
 .env
 .env.*
 production.conf
+development.conf
 
 # log files for Python
 *.log
@@ -92,3 +93,8 @@ coverage/
 # Temporary files
 *.tmp
 *.swp
+
+# Sonarqube files
+sonar-project.properties
+.sonar_lock
+report_task.txt
