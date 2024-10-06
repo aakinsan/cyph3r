@@ -477,7 +477,7 @@ def wireless(request):
         )
         return render(
             request,
-            "cyph3r/500.html",
+            "cyph3r/500p.html",
         )
 
 
@@ -493,7 +493,7 @@ def wireless_ceremony_intro(request):
         )
         return render(
             request,
-            "cyph3r/500.html",
+            "cyph3r/500p.html",
         )
 
 
@@ -519,7 +519,7 @@ def wireless_key_info_form(request):
         )
         return render(
             request,
-            "cyph3r/500.html",
+            "cyph3r/500p.html",
         )
 
 
@@ -578,7 +578,7 @@ def wireless_gcp_storage_form(request):
         )
         return render(
             request,
-            "cyph3r/500.html",
+            "cyph3r/500p.html",
         )
 
 
@@ -623,7 +623,7 @@ def wireless_pgp_upload_form(request):
         )
         return render(
             request,
-            "cyph3r/500.html",
+            "cyph3r/500p.html",
         )
 
 
