@@ -837,7 +837,4 @@ def wireless_generate_keys(request):
         logger.error(
             f"An error occurred in the wireless generate key view: {e}", exc_info=True
         )
-        return render(
-            request,
-            "cyph3r/500.html",
-        )
+        return redirect("cyph3r/500.html")
