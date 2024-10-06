@@ -216,7 +216,7 @@ class Prod(Dev):
             }
         },
         "loggers": {
-            "django": {
+            "": {
                 "handlers": ["file"],
                 "level": "DEBUG",
                 "propagate": True,
