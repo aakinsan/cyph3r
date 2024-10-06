@@ -228,7 +228,7 @@ class KeyShareSplitForm(forms.Form):
         key = self.cleaned_data.get("key")
         if not re.match(r"^[0-9a-fA-F]+$", key):
             raise ValidationError("Key share must be a hexadecimal string.")
-        if not len(key) % 32 == 0:
+        if len(key) % 32 != 0:
             raise ValidationError("Key share must be 128 or 256 bits.")
         return key
 

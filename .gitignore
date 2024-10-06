@@ -97,4 +97,4 @@ coverage/
 # Sonarqube files
 sonar-project.properties
 .sonar_lock
-report_task.txt
+report-task.txt
