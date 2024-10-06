@@ -213,7 +213,7 @@ class Prod(Dev):
             "file": {
                 "level": "DEBUG",
                 "class": "logging.handlers.RotatingFileHandler",
-                "filename": "/var/log/django/debug.log",
+                "filename": "/home/cyph3r/logs/debug.log",
                 "maxBytes": 1024 * 1024 * 5,
                 "backupCount": 5,
                 "formatter": "verbose",
