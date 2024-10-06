@@ -218,16 +218,12 @@ class Prod(Dev):
         "loggers": {
             "django": {
                 "handlers": ["file"],
-                "level": values.Value(
-                    "DEBUG", environ_name="LOGGING_LEVEL", environ_prefix="DJANGO"
-                ),
+                "level": "DEBUG",
                 "propagate": True,
             },
             "django.request": {
                 "handlers": ["file"],
-                "level": values.Value(
-                    "DEBUG", environ_name="REQUEST_LOGGING", environ_prefix="DJANGO"
-                ),
+                "level": "DEBUG",
                 "propagate": True,
             },
         },
