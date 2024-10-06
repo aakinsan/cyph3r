@@ -206,20 +206,32 @@ class Prod(Dev):
             },
         },
         "handlers": {
-            "file": {
+            "default": {
                 "level": "DEBUG",
                 "class": "logging.handlers.RotatingFileHandler",
-                "filename": "/home/cyph3r/logs/debug.log",
+                "filename": "/home/cyph3r/logs/root.log",
                 "maxBytes": 1024 * 1024 * 5,
                 "backupCount": 5,
                 "formatter": "verbose",
-            }
+            },
+            "django_handler": {
+                "level": "DEBUG",
+                "class": "logging.handlers.RotatingFileHandler",
+                "filename": "/home/cyph3r/logs/django.log",
+                "maxBytes": 1024 * 1024 * 5,
+                "backupCount": 5,
+                "formatter": "verbose",
+            },
         },
         "loggers": {
             "": {
-                "handlers": ["file"],
-                "level": "DEBUG",
-                "propagate": True,
+                "handlers": ["default"],
+                "level": "ERROR",
+            },
+            "django": {
+                "handlers": ["django_handler"],
+                "level": "ERROR",
+                "propagate": False,
             },
         },
     }
