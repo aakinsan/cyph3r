@@ -221,11 +221,6 @@ class Prod(Dev):
                 "level": "DEBUG",
                 "propagate": True,
             },
-            "django.request": {
-                "handlers": ["file"],
-                "level": "DEBUG",
-                "propagate": True,
-            },
         },
     }
 
