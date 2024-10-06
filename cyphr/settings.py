@@ -227,14 +227,14 @@ class Prod(Dev):
             "django": {
                 "handlers": ["file", "console"],
                 "level": values.Value(
-                    "INFO", environ_name="LOGGING_LEVEL", environ_prefix="DJANGO"
+                    "DEBUG", environ_name="LOGGING_LEVEL", environ_prefix="DJANGO"
                 ),
                 "propagate": True,
             },
             "django.request": {
                 "handlers": ["file", "console"],
                 "level": values.Value(
-                    "ERROR", environ_name="REQUEST_LOGGING", environ_prefix="DJANGO"
+                    "DEBUG", environ_name="REQUEST_LOGGING", environ_prefix="DJANGO"
                 ),
                 "propagate": False,
             },
