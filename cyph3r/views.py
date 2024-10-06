@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from cryptography.fernet import Fernet
 from django.core.cache import cache
-from django.contrib import messages
+from django.views.decorators.http import require_http_methods
 from cyph3r.forms import (
     WirelessKeyInfoForm,
     WirelessGCPStorageForm,
@@ -34,7 +34,17 @@ This module contains the views for the cyph3r app.
 # Define the logger for the module
 logger = logging.getLogger(__name__)
 
+# Constants for HTML templates
+CYPH3R_500_ERROR_PAGE = "cyph3r/500.html"
+CYPH3R_500_ERROR_PAGE_HTMX = "cyph3r/500p.html"
+CYPH3R_KEY_SHARE_SPLIT_PAGE = "cyph3r/key_share_templates/key-share-split.html"
+CYPH3R_KEY_SHARE_RECONSTRUCT_PAGE = (
+    "cyph3r/key_share_templates/key-share-reconstruct.html"
+)
+CYPH3R_WIRELESS_GCP_STORAGE_PAGE = "cyph3r/wireless_templates/wireless-gcp-storage.html"
 
+
+@require_http_methods(["GET"])
 def index(request):
     """
     Returns the Home Page
@@ -60,7 +70,7 @@ def index(request):
         logger.error(f"An error occurred in the index view: {e}", exc_info=True)
         return render(
             request,
-            "cyph3r/500.html",
+            CYPH3R_500_ERROR_PAGE,
         )
 
 
@@ -69,6 +79,7 @@ def index(request):
 ###################
 
 
+@require_http_methods(["GET"])
 def key_share_intro(request):
     """
     Returns Key Share Introduction Page
@@ -81,10 +92,11 @@ def key_share_intro(request):
         )
         return render(
             request,
-            "cyph3r/500.html",
+            CYPH3R_500_ERROR_PAGE,
         )
 
 
+@require_http_methods(["GET"])
 def key_share_download(request):
     """
     Returns Key Share Download Page
@@ -103,20 +115,23 @@ def key_share_download(request):
         )
         return render(
             request,
-            "cyph3r/500.html",
+            CYPH3R_500_ERROR_PAGE,
         )
 
 
+@require_http_methods(["GET", "POST"])
 def key_share_info(request):
     """
     Returns Key Share Info Page
     """
     try:
-        # Clear the session entirely and create a new session
-        # This is to ensure that the session is clean and does not contain any stale data
-        # request.session.flush()
-        # Check if the submitted_officer_count key is in the session and remove it.
+        # Remove any existing key share session key to ensure that session is clean and has no stale data.
         request.session.pop("submitted_officer_count", None)
+        request.session.pop("key_shares", None)
+        request.session.pop("scheme", None)
+        request.session.pop("key_task", None)
+        request.session.pop("share_count", None)
+        request.session.pop("threshold_count", None)
 
         # Check if the request is a POST request
         if request.method == "POST":
@@ -177,10 +192,11 @@ def key_share_info(request):
         )
         return render(
             request,
-            "cyph3r/500.html",
+            CYPH3R_500_ERROR_PAGE,
         )
 
 
+@require_http_methods(["GET", "POST"])
 def key_share_split(request):
     """
     Returns Key Input Page for key splitting
@@ -201,7 +217,7 @@ def key_share_split(request):
                         # Return the form with the error message
                         return render(
                             request,
-                            "cyph3r/key_share_templates/key-share-split.html",
+                            CYPH3R_KEY_SHARE_SPLIT_PAGE,
                             {"form": form},
                         )
 
@@ -266,14 +282,14 @@ def key_share_split(request):
             else:
                 return render(
                     request,
-                    "cyph3r/key_share_templates/key-share-split.html",
+                    CYPH3R_KEY_SHARE_SPLIT_PAGE,
                     {"form": form},
                 )
         else:
             form = KeyShareSplitForm()
             return render(
                 request,
-                "cyph3r/key_share_templates/key-share-split.html",
+                CYPH3R_KEY_SHARE_SPLIT_PAGE,
                 {"form": form},
             )
     except Exception as e:
@@ -282,10 +298,11 @@ def key_share_split(request):
         )
         return render(
             request,
-            "cyph3r/500.html",
+            CYPH3R_500_ERROR_PAGE,
         )
 
 
+@require_http_methods(["GET", "POST"])
 def key_share_reconstruct(request):
     """
     Returns Key Share Input Page for key reconstruction
@@ -305,7 +322,7 @@ def key_share_reconstruct(request):
                         # Return the form with the error message
                         return render(
                             request,
-                            "cyph3r/key_share_templates/key-share-reconstruct.html",
+                            CYPH3R_KEY_SHARE_RECONSTRUCT_PAGE,
                             {"form": form},
                         )
                     # Check if the key share size is 128 bits
@@ -317,7 +334,7 @@ def key_share_reconstruct(request):
                         # Return the form with the error message
                         return render(
                             request,
-                            "cyph3r/key_share_templates/key-share-reconstruct.html",
+                            CYPH3R_KEY_SHARE_RECONSTRUCT_PAGE,
                             {"form": form},
                         )
                 # Retrieve or generate the Fernet key and store in cache
@@ -397,7 +414,7 @@ def key_share_reconstruct(request):
                             share = f.decrypt(cm.hex_to_bytes(encrypted_share))
                             shares.append((share))
 
-                        # Reconstruct the secret using the Shamir key shares
+                        # Reconstruct the secret using the xor key shares
                         secret = cm.xor_reconstruct_secret(shares)
 
                     # Write the secret to a file and encrypt with PGP public keys
@@ -435,7 +452,7 @@ def key_share_reconstruct(request):
             else:
                 return render(
                     request,
-                    "cyph3r/key_share_templates/key-share-reconstruct.html",
+                    CYPH3R_KEY_SHARE_RECONSTRUCT_PAGE,
                     {"form": form},
                 )
         else:
@@ -447,7 +464,7 @@ def key_share_reconstruct(request):
 
             return render(
                 request,
-                "cyph3r/key_share_templates/key-share-reconstruct.html",
+                CYPH3R_KEY_SHARE_RECONSTRUCT_PAGE,
                 {"form": form},
             )
     except Exception as e:
@@ -456,7 +473,7 @@ def key_share_reconstruct(request):
         )
         return render(
             request,
-            "cyph3r/500.html",
+            CYPH3R_500_ERROR_PAGE,
         )
 
 
@@ -465,6 +482,7 @@ def key_share_reconstruct(request):
 ###########################
 
 
+@require_http_methods(["GET"])
 def wireless(request):
     """
     Returns Wireless Key Ceremony Page
@@ -477,10 +495,11 @@ def wireless(request):
         )
         return render(
             request,
-            "cyph3r/500p.html",
+            CYPH3R_500_ERROR_PAGE_HTMX,
         )
 
 
+@require_http_methods(["GET"])
 def wireless_ceremony_intro(request):
     """
     Returns partial template for the Wireless Key Ceremony Introduction
@@ -493,10 +512,11 @@ def wireless_ceremony_intro(request):
         )
         return render(
             request,
-            "cyph3r/500p.html",
+            CYPH3R_500_ERROR_PAGE_HTMX,
         )
 
 
+@require_http_methods(["GET"])
 def wireless_key_info_form(request):
     """
     Returns partial template for the Wireless Key Information form
@@ -519,10 +539,11 @@ def wireless_key_info_form(request):
         )
         return render(
             request,
-            "cyph3r/500p.html",
+            CYPH3R_500_ERROR_PAGE_HTMX,
         )
 
 
+@require_http_methods(["GET", "POST"])
 def wireless_gcp_storage_form(request):
     """
     Validates form POST data from /wireless-key-info.html
@@ -554,7 +575,7 @@ def wireless_gcp_storage_form(request):
                 # Render the GCP Storage form on successful form validation
                 return render(
                     request,
-                    "cyph3r/wireless_templates/wireless-gcp-storage.html",
+                    CYPH3R_WIRELESS_GCP_STORAGE_PAGE,
                     {"form": WirelessGCPStorageForm()},
                 )
             else:
@@ -568,7 +589,7 @@ def wireless_gcp_storage_form(request):
             # Render the GCP Storage form if the request is not a POST request
             return render(
                 request,
-                "cyph3r/wireless_templates/wireless-gcp-storage.html",
+                CYPH3R_WIRELESS_GCP_STORAGE_PAGE,
                 {"form": WirelessGCPStorageForm()},
             )
     except Exception as e:
@@ -578,10 +599,11 @@ def wireless_gcp_storage_form(request):
         )
         return render(
             request,
-            "cyph3r/500p.html",
+            CYPH3R_500_ERROR_PAGE_HTMX,
         )
 
 
+@require_http_methods(["GET", "POST"])
 def wireless_pgp_upload_form(request):
     """
     Validates form POST data from /wireless-pgp-upload.html
@@ -614,7 +636,7 @@ def wireless_pgp_upload_form(request):
                 # Render the gcp stprage form if form validation fails
                 return render(
                     request,
-                    "cyph3r/wireless_templates/wireless-gcp-storage.html",
+                    CYPH3R_WIRELESS_GCP_STORAGE_PAGE,
                     {"form": form},
                 )
     except Exception as e:
@@ -623,10 +645,11 @@ def wireless_pgp_upload_form(request):
         )
         return render(
             request,
-            "cyph3r/500p.html",
+            CYPH3R_500_ERROR_PAGE_HTMX,
         )
 
 
+@require_http_methods(["GET", "POST"])
 def wireless_generate_keys(request):
     """
     Validates uploaded PGP public keys
@@ -664,7 +687,7 @@ def wireless_generate_keys(request):
                     )
 
                 # Update the database with the Key Generation information
-                sk = KeyGeneration.objects.create(
+                KeyGeneration.objects.create(
                     key_id=f"{key_type}_secret_key",
                     date_generated=datetime.now(),
                     key_size=key_size,
@@ -839,5 +862,5 @@ def wireless_generate_keys(request):
         )
         return render(
             request,
-            "cyph3r/500p.html",
+            CYPH3R_500_ERROR_PAGE_HTMX,
         )

@@ -1,7 +1,7 @@
 import secrets
 import tempfile
 import gnupg
-import os
+import logging
 import binascii
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes, aead
 from cryptography import exceptions as crypto_exceptions
@@ -12,25 +12,28 @@ This module provides a CryptoManager class that encapsulates cryptographic opera
 The class provides methods to generate random keys, encrypt and decrypt data using AES-GCM and AES-CFB, key splitting etc.
 """
 
+# Define the logger for the module
+logger = logging.getLogger(__name__)
+
 
 class CryptoManager:
-    def __init__(self, dir=None):
-        if dir is None:
-            dir = tempfile.mkdtemp()
-        self.dir = dir
-        self.gpg = gnupg.GPG(gnupghome=self.dir)
+    def __init__(self, homedir=None):
+        if homedir is None:
+            homedir = tempfile.mkdtemp()
+        self.homedir = homedir
+        self.gpg = gnupg.GPG(gnupghome=self.homedir)
 
     def generate_random_key_bytes(self, key_size: int) -> bytes:
         if key_size % 8 != 0:
             raise ValueError("Number of bits must be a multiple of 8")
-        bytes = int(key_size / 8)
-        return secrets.token_bytes(bytes)
+        bytes_length = int(key_size / 8)
+        return secrets.token_bytes(bytes_length)
 
     def generate_random_key_hex(self, key_size: int) -> str:
         if key_size % 8 != 0:
             raise ValueError("Number of bits must be a multiple of 8")
-        bytes = int(key_size / 8)
-        return secrets.token_hex(bytes)
+        bytes_length = int(key_size / 8)
+        return secrets.token_hex(bytes_length)
 
     def bytes_to_hex(self, byte_data: bytes) -> str:
         return binascii.hexlify(byte_data).decode("utf-8")
@@ -57,8 +60,7 @@ class CryptoManager:
             ct = aesgcm.encrypt(nonce, plaintext, aad)
             return ct
         except crypto_exceptions.OverflowError as err:
-            print("Encryption failed: {}".format(err))
-            return None
+            logger.error(f"Encryption failed: {err}", exc_info=True)
 
     def decrypt_with_aes_gcm(
         self, key: bytes, nonce: bytes, ciphertext: bytes, aad: bytes = None
@@ -69,8 +71,7 @@ class CryptoManager:
             pt = aesgcm.decrypt(nonce, ciphertext, aad)
             return pt
         except crypto_exceptions.InvalidTag as err:
-            print("Decryption failed: {}".format(err))
-            return None
+            logger.error(f"Decryption failed: {err}", exc_info=True)
 
     def encrypt_with_aes(self, key, data):
         iv = secrets.token_bytes(16)
@@ -117,7 +118,7 @@ class CryptoManager:
         shares.append(last_share)
         return shares
 
-    def xor_reconstruct_secret(self, shares: bytes) -> bytes:
+    def xor_reconstruct_secret(self, shares: list) -> bytes:
         """
         Reconstruct the secret key from the provided key shares using bitwise XOR.
 
