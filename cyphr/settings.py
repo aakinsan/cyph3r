@@ -204,10 +204,6 @@ class Prod(Dev):
                 "format": "{levelname} {asctime} {module} {message}",
                 "style": "{",
             },
-            "simple": {
-                "format": "{levelname} {message}",
-                "style": "{",
-            },
         },
         "handlers": {
             "file": {
@@ -217,26 +213,22 @@ class Prod(Dev):
                 "maxBytes": 1024 * 1024 * 5,
                 "backupCount": 5,
                 "formatter": "verbose",
-            },
-            "console": {
-                "class": "logging.StreamHandler",
-                "formatter": "simple",
-            },
+            }
         },
         "loggers": {
             "django": {
-                "handlers": ["file", "console"],
+                "handlers": ["file"],
                 "level": values.Value(
                     "DEBUG", environ_name="LOGGING_LEVEL", environ_prefix="DJANGO"
                 ),
                 "propagate": True,
             },
             "django.request": {
-                "handlers": ["file", "console"],
+                "handlers": ["file"],
                 "level": values.Value(
                     "DEBUG", environ_name="REQUEST_LOGGING", environ_prefix="DJANGO"
                 ),
-                "propagate": False,
+                "propagate": True,
             },
         },
     }
