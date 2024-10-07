@@ -98,3 +98,5 @@ coverage/
 sonar-project.properties
 .sonar_lock
 report-task.txt
+.scannerwork/*
+.scannerwork/report-task.txt
