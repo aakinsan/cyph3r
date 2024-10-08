@@ -157,7 +157,7 @@ def key_info_milenage_op_post_data():
     Fixture to return key information data for Milenage OP key generation.
     """
     return {
-        "key_identifier": "test_op_key_identifier",
+        "key_identifier": "op_kid",
         "key_type": "op",
         "protocol": "milenage",
         "key_size": "128",
@@ -170,7 +170,7 @@ def key_info_milenage_transport_post_data():
     Fixture to return key information data for Milenage OP key generation.
     """
     return {
-        "key_identifier": "test_op_key_identifier",
+        "key_identifier": "op_kid",
         "key_type": "transport",
         "protocol": "milenage",
         "key_size": "128",
@@ -183,7 +183,7 @@ def key_info_tuak_transport_post_data():
     Fixture to return key information data for Tuak Transport key generation.
     """
     return {
-        "key_identifier": "test_transport_key_identifier",
+        "key_identifier": "transport_kid",
         "key_type": "transport",
         "protocol": "tuak",
         "key_size": "256",
@@ -196,7 +196,7 @@ def key_info_tuak_op_post_data():
     Fixture to return key information data for Tuak Transport key generation.
     """
     return {
-        "key_identifier": "test_transport_key_identifier",
+        "key_identifier": "transport_kid",
         "key_type": "op",
         "protocol": "tuak",
         "key_size": "256",
@@ -209,19 +209,7 @@ def key_gcp_storage_post_data():
     Fixture to return GCP information data for testing.
     """
     return {
-        "gcp_project_id": "test_gcp_project_id",
-        "gcp_kms_keyring": "",
-        "gcp_kms_key": "",
-    }
-
-
-@pytest.fixture
-def key_gcp_storage_post_data():
-    """
-    Fixture to return GCP information data for testing.
-    """
-    return {
-        "gcp_project_id": "test_gcp_project_id",
+        "gcp_project_id": "test-gcp-project-id",
         "gcp_kms_keyring": "",
         "gcp_kms_key": "",
     }

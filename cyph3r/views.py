@@ -224,10 +224,6 @@ def key_share_split(request):
                 # Initialize the CryptoManager
                 cm = CryptoManager()
 
-                # Initialize the list to store the encrypted key shares
-                if not request.session.get("key_shares"):
-                    request.session["key_shares"] = []
-
                 # Get the total number of key shares required
                 share_count = request.session.get("share_count")
 

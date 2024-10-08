@@ -236,10 +236,35 @@ class Prod(Dev):
         },
     }
 
-    # Secure Defaults
+    # Set session cookie age to 8 hours
+    SESSION_COOKIE_AGE = 28800
+
+    # Redirect all HTTP requests to HTTPS
     SECURE_SSL_REDIRECT = True
+
+    # Set secure fags for cookies
     SESSION_COOKIE_SECURE = True
+
+    # Set cookie to HttpOnly
+    SESSION_COOKIE_HTTPONLY = True
+
+    # Set samesite attribute for cookies
+    SESSION_COOKIE_SAMESITE = "Strict"
+
+    # Set CSRF cookie to secure
     CSRF_COOKIE_SECURE = True
+
+    # Set secure HSTS max-age to 1 year
     SECURE_HSTS_SECONDS = 31536000  # 1 year
+
+    # include subdomains if any as part of HSTS
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+    # Set HSTS preload to True
     SECURE_HSTS_PRELOAD = True
+
+    # MIME type sniffing protection
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+
+    # Enables Browser XSS filter
+    SECURE_BROWSER_XSS_FILTER = True

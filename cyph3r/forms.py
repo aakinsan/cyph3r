@@ -43,7 +43,8 @@ class WirelessKeyInfoForm(forms.Form):
     # Key Identifier (Optional)
     key_identifier = forms.CharField(
         label="Key Identifier",
-        max_length=100,
+        max_length=15,
+        min_length=3,
         required=True,
         help_text="Enter a unique key identifier.",
     )
@@ -99,22 +100,49 @@ class WirelessGCPStorageForm(forms.Form):
 
     gcp_project_id = forms.CharField(
         label="GCP Project ID",
-        max_length=100,
+        max_length=30,
+        min_length=6,
         help_text="Project ID to store secrets and access KMS key",
         required=False,
     )
     gcp_kms_keyring = forms.CharField(
         label="KMS Keyring",
-        max_length=100,
+        max_length=30,
+        min_length=6,
         help_text="GCP KMS key ring name",
         required=False,
     )
     gcp_kms_key = forms.CharField(
         label="KMS Key",
-        max_length=100,
+        max_length=30,
+        min_length=6,
         help_text="GCP KMS key name",
         required=False,
     )
+
+    def clean_gcp_project_id(self):
+        """Validate the GCP Project ID"""
+        project_id = self.cleaned_data.get("gcp_project_id")
+        if project_id:
+            if not re.match(r"\b[a-z][a-z0-9-]*\b", project_id):
+                raise ValidationError("Invalid GCP Project ID.")
+        return project_id
+
+    def clean_gcp_kms_keyring(self):
+        """Validate the GCP KMS Keyring"""
+        keyring = self.cleaned_data.get("gcp_kms_keyring")
+        if keyring:
+            if not re.match(r"\b[a-z][a-z0-9-]*\b", keyring):
+                raise ValidationError("Invalid GCP KMS Keyring.")
+        return keyring
+
+    def clean_gcp_kms_key(self):
+        """Validate the GCP KMS Key"""
+        kms_key = self.cleaned_data.get("gcp_kms_key")
+        if kms_key:
+            if not re.match(r"\b[a-z][a-z0-9-]*\b", kms_key):
+                raise ValidationError("Invalid GCP KMS Key.")
+        return kms_key
 
 
 class WirelessPGPUploadForm(forms.Form):
