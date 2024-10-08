@@ -1,6 +1,0 @@
-projectKey=cyph3r
-serverUrl=http://192.168.2.121:9000
-serverVersion=10.7.0.96327
-dashboardUrl=http://192.168.2.121:9000/dashboard?id=cyph3r
-ceTaskId=f1281201-b368-43f8-8e49-0ea1cb2111ee
-ceTaskUrl=http://192.168.2.121:9000/api/ce/task?id=f1281201-b368-43f8-8e49-0ea1cb2111ee
