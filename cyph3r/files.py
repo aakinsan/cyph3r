@@ -2,6 +2,7 @@ import os
 from .crypto import CryptoManager
 from django.conf import settings
 from django import forms
+from django.utils._os import safe_join
 
 # Constants for file extensions
 GPG_FILE_EXTENSION = ".txt.gpg"
@@ -48,7 +49,7 @@ def create_wireless_wrapped_secret_key_file(
     wrapped_data_file_name = (
         f"{key_identifier}-{protocol}-{key_type}-wrapped-secret.txt"
     )
-    save_path = os.path.join(settings.MEDIA_ROOT, wrapped_data_file_name)
+    save_path = safe_join(settings.MEDIA_ROOT, wrapped_data_file_name)
 
     with open(save_path, "wb") as fp:
         data = cm.wrapped_key_text_format(
@@ -84,7 +85,7 @@ def create_wireless_provider_encrypted_key_files(
         kcv = cm.generate_kcv(shares[key_index - 1])
         xor_key_share_hex = cm.bytes_to_hex(shares[key_index - 1])
         provider_file_name = f"G+D-{key_identifier}-{protocol}-{key_type}-key-{key_index}-{keyid}{GPG_FILE_EXTENSION}"
-        save_path = os.path.join(settings.MEDIA_ROOT, provider_file_name)
+        save_path = safe_join(settings.MEDIA_ROOT, provider_file_name)
         provider_files.append(provider_file_name)
 
         gd_key_share_data = cm.gd_text_format(
@@ -117,7 +118,7 @@ def create_wireless_security_officers_encrypted_key_files(
     ):
         fingerprint, keyid = import_pgp_key_from_file(cm, file)
         security_officer_file_name = f"SO-{key_identifier}-{protocol}-{key_type}-wrap-key-{key_index}-{keyid}{GPG_FILE_EXTENSION}"
-        save_path = os.path.join(settings.MEDIA_ROOT, security_officer_file_name)
+        save_path = safe_join(settings.MEDIA_ROOT, security_officer_file_name)
         security_officer_file_names.append(security_officer_file_name)
 
         wrap_key_share_hex = cm.bytes_to_hex(shares[key_index - 1][1])
@@ -148,7 +149,7 @@ def create_wireless_milenage_encrypted_file(
     milenage_file_name = (
         f"milenage-{key_identifier}-{key_type}-key-{keyid}{GPG_FILE_EXTENSION}"
     )
-    save_path = os.path.join(settings.MEDIA_ROOT, milenage_file_name)
+    save_path = safe_join(settings.MEDIA_ROOT, milenage_file_name)
 
     encrypted_data = cm.gpg.encrypt(
         secret_key_hex, fingerprint, always_trust=True, armor=False
@@ -168,7 +169,7 @@ def write_key_share_so_public_keys_to_disk(
     form: forms.Form, user_directory: str
 ) -> list:
     """Writes the Security Officer's public keys to a file to encrypt key or key-share."""
-    path = os.path.join(settings.MEDIA_ROOT, user_directory)
+    path = safe_join(settings.MEDIA_ROOT, user_directory)
     create_directory_if_not_exists(path)
 
     # Initialize the list to store the paths to the public key files
@@ -176,7 +177,7 @@ def write_key_share_so_public_keys_to_disk(
 
     # Loop through the uploaded public key files and write them to disk
     for file in form.cleaned_data["key_share_public_keys"]:
-        save_path = os.path.join(path, file.name)
+        save_path = safe_join(path, file.name)
         with open(save_path, "wb") as fp:
             for chunk in file.chunks():
                 fp.write(chunk)
@@ -191,7 +192,7 @@ def create_key_share_reconstruct_secret_file(
     cm: CryptoManager, secret_key: bytes, user_directory: str, public_key_files: list
 ) -> list:
     """Wraps the reconstructed secret key with PGP public key."""
-    path = os.path.join(settings.MEDIA_ROOT, user_directory)
+    path = safe_join(settings.MEDIA_ROOT, user_directory)
     create_directory_if_not_exists(path)
 
     # Initialize the list to store the file names of the encrypted secret key
@@ -205,7 +206,7 @@ def create_key_share_reconstruct_secret_file(
         imported_key = cm.gpg.list_keys()[-1]
         fingerprint, keyid = imported_key["fingerprint"], imported_key["keyid"]
         file_name = f"key-share-reconstructed-secret-{keyid}{GPG_FILE_EXTENSION}"
-        save_path = os.path.join(path, file_name)
+        save_path = safe_join(path, file_name)
         key_share_files_names.append(file_name)
 
         encrypted_data = cm.gpg.encrypt(
@@ -221,7 +222,7 @@ def create_key_share_split_secret_files(
     cm: CryptoManager, shares: list, user_directory: str, public_key_files: list
 ) -> list:
     """Splits the secret key into shares and encrypts each share."""
-    path = os.path.join(settings.MEDIA_ROOT, user_directory)
+    path = safe_join(settings.MEDIA_ROOT, user_directory)
     create_directory_if_not_exists(path)
 
     # Initialize the list to store the file names of the encrypted shares
@@ -236,7 +237,7 @@ def create_key_share_split_secret_files(
         imported_key = cm.gpg.list_keys()[-1]
         fingerprint, keyid = imported_key["fingerprint"], imported_key["keyid"]
         file_name = f"key-share-split-secret-index-{idx}-{keyid}{GPG_FILE_EXTENSION}"
-        save_path = os.path.join(path, file_name)
+        save_path = safe_join(path, file_name)
         key_share_files_names.append(file_name)
 
         share_data = (
