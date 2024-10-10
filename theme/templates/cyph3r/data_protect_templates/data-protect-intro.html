@@ -1,0 +1,34 @@
+{% extends 'cyph3r/base.html' %}
+{% load static %}
+{% block content %}
+<div class="bg-slate-200 flex flex-col min-h-screen justify-center items-center w-full">
+    <div id="container" class="bg-white shadow-md rounded-lg px-8 py-2 pt-2 mt-3 max-w-4xl w-full">
+        <div class="w-full p-2">
+                <h1 class="text-lg font-bold text-center font-sans pb-3 text-black">Data Encryption/Decryption</h1>
+                    <p class="text-sm font-sans text-gray-600 pb-1">The application makes use of 2 AES modes - AES GCM and AES CBC for encryption and decryption operations. 128, 192 and 256 bit key sizes are supported.</p>
+                    <p class="text-sm font-sans text-gray-600 pb-1"> Both modes require the use of an Initialization Vector (IV or alternatively a nonce)</p>
+
+                    <h3 class="font-semibold pt-2 font-sans text-sm">AES GCM</h3>
+                        <p class="text-xxs text-gray-600 font-sans">This app only supports splitting <span class="font-bold">128 bit</span> keys using Shamir's secret sharing. The key can be broken into n shares and a minimum of m shares (m < n) otherwise known as the threshold is required for key reconstruction.</p>
+
+                    <h3 class="font-semibold pt-2 font-sans text-sm">Xor-based Key Splitting</h3>
+                        <p class="text-xxs text-gray-600 font-sans">A much simpler approach than Shamir is using the XOR or bitwise operation to split a secret. All the shares are required to reconstruct the secret.</p>
+                                
+                    <p class="text-sm text-gray-600 font-sans pt-4">The assumption is the key shares are also expected to remain secret. Consequently, every key splitting operation requires PGP public files to be uploaded. The number of files to be uploaded must be the same number as that of the shares to be created.</p>
+
+                    <p class="text-sm text-gray-600 font-sans pt-2">Key reconstruction operations require only a single PGP file to be uploaded.</p>
+
+                    <p class="text-sm text-gray-600 font-sans pt-2">This app only accepts PGP public key files that are in the <strong>ASCII armored format</strong> i.e. the contents of each public key file must have the begin and end headers of   
+                        <span class="bg-gray-200 px-1 text-sm font-sans border border-gray-300 rounded shadow-md text-gray-800">-----
+                        BEGIN PGP PUBLIC KEY BLOCK-----</span> and <span class="bg-gray-200 border border-gray-300 b-1 px-1 text-xxs font-sans rounded shadow-md text-gray-800">-----END PGP PUBLIC KEY BLOCK-----</span> respectively.</li></ul></p>
+                </div>
+                <!-- Submit Button -->
+                <a href="{% url 'data-protect-info' %}" class="flex justify-end pt-3 pb-3">
+                    <button type="button" class="bg-orange-500 hover:bg-orange-400 text-white text-sm px-3 pt-2 mb-2 pb-2 rounded-lg transition">
+                        Get Started
+                    </button>
+                </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

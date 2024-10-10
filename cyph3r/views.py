@@ -9,6 +9,7 @@ from cyph3r.forms import (
     KeyShareInfoForm,
     KeyShareReconstructForm,
     KeyShareSplitForm,
+    DataProtectionForm,
 )
 from cyph3r.models import KeyGeneration, KeySplit, FileEncryption
 from cyph3r.files import (
@@ -19,7 +20,10 @@ from cyph3r.files import (
     write_key_share_so_public_keys_to_disk,
     create_key_share_reconstruct_secret_file,
     create_key_share_split_secret_files,
+    create_data_protection_pgp_wrapped_file,
+    create_data_protection_unwrapped_file,
 )
+from cryptography.exceptions import InvalidTag
 from cyph3r.crypto import CryptoManager
 from cyph3r.gcp import GCPManager
 from cyph3r.key_tracker import total_key_shares, total_files_encrypted
@@ -42,6 +46,10 @@ CYPH3R_KEY_SHARE_RECONSTRUCT_PAGE = (
     "cyph3r/key_share_templates/key-share-reconstruct.html"
 )
 CYPH3R_WIRELESS_GCP_STORAGE_PAGE = "cyph3r/wireless_templates/wireless-gcp-storage.html"
+
+##############
+# Index View #
+##############
 
 
 @require_http_methods(["GET"])
@@ -68,6 +76,150 @@ def index(request):
         return render(request, "cyph3r/index.html", data)
     except Exception as e:
         logger.error(f"An error occurred in the index view: {e}", exc_info=True)
+        return render(
+            request,
+            CYPH3R_500_ERROR_PAGE,
+        )
+
+
+#########################
+# Data Protection Views #
+#########################
+
+
+@require_http_methods(["GET"])
+def data_protect_intro(request):
+    """
+    Returns the Data Protection Introduction Page
+    """
+    try:
+        return render(request, "cyph3r/data_protect_templates/data-protect-intro.html")
+    except Exception as e:
+        logger.error(f"An error occurred in the index view: {e}", exc_info=True)
+        return render(
+            request,
+            CYPH3R_500_ERROR_PAGE,
+        )
+
+
+@require_http_methods(["GET", "POST"])
+def data_protect_info(request):
+    """
+    Returns the Data Protection Introduction Page
+    """
+    try:
+        if request.method == "POST":
+            form = DataProtectionForm(request.POST, request.FILES)
+            if form.is_valid():
+                # Ensure that the session is created. Session-key is used as folder name for file storage
+                if not request.session.session_key:
+                    request.session.create()
+
+                cm = CryptoManager()
+                aes_operation = form.cleaned_data.get("aes_operation")
+                aes_mode = form.cleaned_data.get("aes_mode")
+                aes_key = cm.hex_to_bytes(form.cleaned_data.get("aes_key"))
+
+                if aes_operation == "encrypt":
+                    plaintext = form.cleaned_data.get("plaintext").encode("utf-8")
+                    if aes_mode == "gcm":
+                        nonce = cm.generate_random_key_bytes(96)
+                        aad = form.cleaned_data.get("aad").encode("utf-8")
+                        aes_output = cm.encrypt_with_aes_gcm(
+                            aes_key, nonce, plaintext, aad
+                        )
+                    if aes_mode == "cbc":
+                        nonce = cm.generate_random_key_bytes(128)
+                        aes_output = cm.encrypt_with_aes_cbc(aes_key, nonce, plaintext)
+                        aad = None
+
+                if aes_operation == "decrypt":
+                    ciphertext = cm.hex_to_bytes(form.cleaned_data.get("ciphertext"))
+                    try:
+                        if aes_mode == "gcm":
+                            nonce = cm.hex_to_bytes(form.cleaned_data.get("nonce"))
+                            aad = form.cleaned_data.get("aad").encode("utf-8")
+                            aes_output = cm.decrypt_with_aes_gcm(
+                                aes_key, nonce, ciphertext, aad
+                            )
+                        if aes_mode == "cbc":
+                            nonce = iv = cm.hex_to_bytes(form.cleaned_data.get("iv"))
+                            aes_output = cm.decrypt_with_aes_cbc(
+                                aes_key, iv, ciphertext
+                            )
+                            aad = None
+                    except (ValueError, InvalidTag) as e:
+                        form.add_error(
+                            None,
+                            "Decryption failed - Ensure all parameters entered are valid",
+                        )
+                        return render(
+                            request,
+                            "cyph3r/data_protect_templates/data-protect-info.html",
+                            {"form": form},
+                        )
+
+                public_key = form.cleaned_data.get("public_key")
+                user_dir = request.session.session_key
+                data_protect_file = (
+                    create_data_protection_pgp_wrapped_file(
+                        form,
+                        cm,
+                        aes_mode,
+                        aes_operation,
+                        nonce,
+                        aes_output,
+                        user_dir,
+                        aad,
+                    )
+                    if public_key
+                    else create_data_protection_unwrapped_file(
+                        cm, aes_mode, aes_operation, nonce, aes_output, user_dir, aad
+                    )
+                )
+
+                # Add path to secret files to session
+                request.session["data_protect_file"] = data_protect_file
+
+                return redirect("data-protect-download")
+            else:
+                return render(
+                    request,
+                    "cyph3r/data_protect_templates/data-protect-info.html",
+                    {"form": form},
+                )
+        else:
+            form = DataProtectionForm()
+        return render(
+            request,
+            "cyph3r/data_protect_templates/data-protect-info.html",
+            {"form": form},
+        )
+    except Exception as e:
+        logger.error(f"An error occurred in the index view: {e}", exc_info=True)
+        return render(
+            request,
+            CYPH3R_500_ERROR_PAGE,
+        )
+
+
+@require_http_methods(["GET"])
+def data_protect_download(request):
+    """
+    Returns Data Protection Download Page
+    """
+    # Get download links from session
+    try:
+        data_protect_file = request.session.get("data_protect_file")
+        return render(
+            request,
+            "cyph3r/data_protect_templates/data-protect-download.html",
+            {"data_protect_file": data_protect_file},
+        )
+    except Exception as e:
+        logger.error(
+            f"An error occurred in key share download view: {e}", exc_info=True
+        )
         return render(
             request,
             CYPH3R_500_ERROR_PAGE,

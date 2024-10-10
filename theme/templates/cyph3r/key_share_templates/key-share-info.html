@@ -63,7 +63,12 @@
                     {% endfor %}
 
                     <!-- Buttons -->
-                    <div class="flex justify-end">
+                    <div class="flex justify-between">
+                            <a href={% url 'key-share-intro' %}>
+                                <button type="button" class="bg-orange-500 hover:bg-orange-400 text-white text-xs mt-2 px-6 py-2 rounded-lg transition">
+                                    Back
+                                </button>
+                            </a>
                             <button type="submit" class="bg-orange-500 hover:bg-orange-400 text-white text-xs mt-2 px-6 py-2 rounded-lg transition">
                                 Next
                             </button>

@@ -33,6 +33,56 @@ def import_pgp_key_from_file(cm: CryptoManager, file):
     return imported_key["fingerprint"], imported_key["keyid"]
 
 
+def data_protection_file_processing(
+    cm: CryptoManager,
+    mode: str,
+    operation: str,
+    nonce: bytes,
+    aes_output: bytes,
+    user_directory: str,
+    file_name: str,
+    aad: bytes = None,
+) -> tuple:
+    create_directory_if_not_exists(safe_join(settings.MEDIA_ROOT, user_directory))
+    save_path = safe_join(settings.MEDIA_ROOT, user_directory, file_name)
+
+    if not aad:
+        aad = b""
+
+    if operation == "decrypt":
+        decoded_aes_output = try_decode_bytes_to_utf8(aes_output)
+        if decoded_aes_output:
+            data = cm.data_protection_text_format(
+                mode,
+                cm.bytes_to_hex(nonce),
+                aes_output.decode("utf-8"),  # convert bytes to unicode text string
+                aad.decode("utf-8"),
+            )
+        else:
+            data = cm.data_protection_text_format(
+                mode,
+                cm.bytes_to_hex(nonce),
+                cm.bytes_to_hex(aes_output),  # convert bytes to base 16 hex string
+                aad.decode("utf-8"),
+            )
+    if operation == "encrypt":
+        data = cm.data_protection_text_format(
+            mode,
+            cm.bytes_to_hex(nonce),
+            cm.bytes_to_hex(aes_output),  # convert bytes to base 16 hex string
+            aad.decode("utf-8"),
+        )
+    return data, save_path
+
+
+def try_decode_bytes_to_utf8(data: bytes) -> str:
+    """Try to decode bytes to utf-8 string."""
+    try:
+        return data.decode("utf-8")
+    except UnicodeDecodeError:
+        return None
+
+
 ##########################################
 # Wireless Module File Creation Functions #
 ##########################################
@@ -252,3 +302,51 @@ def create_key_share_split_secret_files(
 
     # Return the file namea of the encrypted secret key shares for download
     return key_share_files_names
+
+
+##################################################
+# Data Protection Module File Creation Functions #
+##################################################
+
+
+def create_data_protection_pgp_wrapped_file(
+    form: forms.Form,
+    cm: CryptoManager,
+    mode: str,
+    operation: str,
+    nonce: bytes,
+    aes_output: bytes,
+    user_directory: str,
+    aad: bytes = None,
+) -> str:
+    """Writes the PGP encrypted data to a file for download."""
+
+    public_key_file = form.cleaned_data["public_key"]
+    fingerprint, keyid = import_pgp_key_from_file(cm, public_key_file)
+    file_name = f"{operation}-operation-protected-data-{keyid}{GPG_FILE_EXTENSION}"
+    data, save_path = data_protection_file_processing(
+        cm, mode, operation, nonce, aes_output, user_directory, file_name, aad
+    )
+    encrypted_data = cm.gpg.encrypt(data, fingerprint, always_trust=True, armor=False)
+    save_encrypted_data_to_file(save_path, encrypted_data.data)
+    return file_name
+
+
+def create_data_protection_unwrapped_file(
+    cm: CryptoManager,
+    mode: str,
+    operation: str,
+    nonce: bytes,
+    aes_output: bytes,
+    user_directory: str,
+    aad: bytes = None,
+) -> str:
+    """Writes data to a file for download."""
+    file_name = f"{operation}-operation-data.txt"
+    data, save_path = data_protection_file_processing(
+        cm, mode, operation, nonce, aes_output, user_directory, file_name, aad
+    )
+    with open(save_path, "wb") as fp:
+        fp.write(data)
+
+    return file_name

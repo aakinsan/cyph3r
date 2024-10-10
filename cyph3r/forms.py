@@ -235,7 +235,7 @@ class KeyShareReconstructForm(forms.Form):
         key_share = self.cleaned_data.get("key_share")
         if not re.match(r"^[0-9a-fA-F]+$", key_share):
             raise ValidationError("Key share must be a hexadecimal string.")
-        if len(key_share) % 32 != 0:
+        if len(key_share) != 32 or len(key_share) != 64:
             raise ValidationError("Key share must be 128 or 256 bits.")
         return key_share
 
@@ -256,7 +256,7 @@ class KeyShareSplitForm(forms.Form):
         key = self.cleaned_data.get("key")
         if not re.match(r"^[0-9a-fA-F]+$", key):
             raise ValidationError("Key share must be a hexadecimal string.")
-        if len(key) % 32 != 0:
+        if len(key) != 32 or len(key) != 64:
             raise ValidationError("Key share must be 128 or 256 bits.")
         return key
 
@@ -310,7 +310,7 @@ class KeyShareInfoForm(forms.Form):
 
     key_share_public_keys = MultipleFileField(
         required=True,
-        help_text="Upload PGP Public keys for key/key-share encryption",
+        help_text="Upload PGP Public key(s)",
     )
 
     def clean_key_share_public_keys(self):
@@ -383,4 +383,151 @@ class KeyShareInfoForm(forms.Form):
             self.add_error(
                 "key_share_public_keys",
                 "Only one PGP Public key file is required for reconstruction.",
+            )
+
+
+#########################
+# Data Protection Forms #
+# #######################
+
+
+class DataProtectionForm(forms.Form):
+    # AES Mode choices
+    AES_MODE_CHOICES = [
+        ("", ""),
+        ("gcm", "GCM"),
+        ("cbc", "CBC"),
+    ]
+    # choice of AES mode
+    aes_mode = forms.ChoiceField(
+        choices=AES_MODE_CHOICES,
+        label="AES Mode",
+        required=True,
+    )
+
+    # AES Task choices
+    AES_OPERATION_CHOICES = [
+        ("", ""),
+        ("encrypt", "Encrypt"),
+        ("decrypt", "Decrypt"),
+    ]
+
+    aes_operation = forms.ChoiceField(
+        choices=AES_OPERATION_CHOICES,
+        label="AES Operation",
+        required=True,
+    )
+
+    # Encryption Key
+    aes_key = forms.CharField(
+        required=True,
+        min_length=32,
+        max_length=64,
+        widget=forms.PasswordInput(),
+        label="AES Key",
+        help_text="128 | 192 | 256 bit (Hex).",
+    )
+
+    # Nonce field for AES GCM decryption
+    nonce = forms.CharField(
+        label="Nonce",
+        max_length=24,
+        min_length=24,
+        help_text="12 bytes Nonce (Hex)",
+        required=False,
+    )
+
+    iv = forms.CharField(
+        label="IV",
+        max_length=32,
+        min_length=32,
+        help_text="16 bytes IV (Hex)",
+        required=False,
+    )
+
+    # Associated Data for AES GCM encryption/decryption
+    aad = forms.CharField(
+        label="ADDITIONAL AUTHENTICATED DATA (AAD)",
+        max_length=100,
+        required=False,
+    )
+
+    # Cipher Text field for AES decryption
+    ciphertext = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 2}),
+        label="CIPHERTEXT (HEX)",
+        required=False,
+    )
+
+    # Cipher Text field for AES encryption
+    plaintext = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 2}),
+        label="Plaintext",
+        required=False,
+    )
+
+    # PGP public key (Optional)
+    public_key = forms.FileField(
+        required=False,
+        label="PGP Public Key (Optional)",
+        help_text="Upload PGP Public key to encrypt output",
+    )
+
+    def clean_aes_key(self):
+        # Check if AES key is a hexadecimal string and is 128/192/256 bits
+        aes_key = self.cleaned_data.get("aes_key")
+        if not re.match(r"^[0-9a-fA-F]+$", aes_key):
+            raise ValidationError("AES key must be a hexadecimal string.")
+        if len(aes_key) != 32 or len(aes_key) != 64 or len(aes_key) != 48:
+            raise ValidationError("AES key must be 128, 192, or 256 bits.")
+        return aes_key
+
+    def clean_iv(self):
+        # Check if IV is a hexadecimal string and is 128 bits
+        iv = self.cleaned_data.get("iv")
+        if iv:
+            if not re.match(r"^[0-9a-fA-F]+$", iv):
+                raise ValidationError("IV must be a hexadecimal string.")
+        return iv
+
+    def clean_nonce(self):
+        # Check if nonce is a hexadecimal string and is 96 bits
+        nonce = self.cleaned_data.get("nonce")
+        if nonce:
+            if not re.match(r"^[0-9a-fA-F]+$", nonce):
+                raise ValidationError("Nonce must be a hexadecimal string.")
+        return nonce
+
+    def clean_ciphertext(self):
+        # Check if ciphertext is a hexadecimal string
+        ciphertext = self.cleaned_data.get("ciphertext")
+        if ciphertext:
+            if not re.match(r"^[0-9a-fA-F]+$", ciphertext):
+                raise ValidationError("Ciphertext must be a hexadecimal string.")
+        return ciphertext
+
+    def clean_public_key(self):
+        file = self.cleaned_data.get("public_key")
+        if file:
+            self.validate_single_file(file, "public_key")
+        return file
+
+    def validate_single_file(self, file, field_name):
+        # Check file size is less than 5KB
+        file_size = file.size
+        if file_size > 5120:
+            self.add_error(field_name, f"{file.name} must be less than 5KB.")
+
+        # Check file is a PGP public key file
+        file_type = magic.from_buffer(file.read(), mime=False)
+        if not file_type.startswith(("PGP public key block", "OpenPGP Public Key")):
+            self.add_error(field_name, f"{file.name} must be a PGP public key file")
+
+        # Check if the PGP key is ASCII armored
+        file.seek(0)
+        first_line = file.readline().strip()
+        if first_line != b"-----BEGIN PGP PUBLIC KEY BLOCK-----":
+            self.add_error(
+                field_name,
+                f"{file.name} must be an ASCII armored PGP public key file.",
             )

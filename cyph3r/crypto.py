@@ -4,6 +4,7 @@ import gnupg
 import logging
 import binascii
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes, aead
+from cryptography.hazmat.primitives import padding
 from cryptography import exceptions as crypto_exceptions
 from Crypto.Protocol.SecretSharing import Shamir
 
@@ -65,7 +66,7 @@ class CryptoManager:
     def decrypt_with_aes_gcm(
         self, key: bytes, nonce: bytes, ciphertext: bytes, aad: bytes = None
     ) -> bytes:
-        """Encrypts data using AES-GCM."""
+        """Decrypts data using AES-GCM."""
         aesgcm = aead.AESGCM(key)
         try:
             pt = aesgcm.decrypt(nonce, ciphertext, aad)
@@ -73,17 +74,23 @@ class CryptoManager:
         except crypto_exceptions.InvalidTag as err:
             logger.error(f"Decryption failed: {err}", exc_info=True)
 
-    def encrypt_with_aes(self, key, data):
-        iv = secrets.token_bytes(16)
-        cipher = Cipher(algorithms.AES(key), modes.CFB(iv))
+    def encrypt_with_aes_cbc(self, key: bytes, iv: bytes, plaintext: bytes) -> bytes:
+        """Encrypts data using AES-CBC."""
+        cipher = Cipher(algorithms.AES(key), modes.CBC(iv))
         encryptor = cipher.encryptor()
-        return iv + encryptor.update(data) + encryptor.finalize()
+        padder = padding.PKCS7(128).padder()
+        padded_data = padder.update(plaintext) + padder.finalize()
+        ct = encryptor.update(padded_data) + encryptor.finalize()
+        return ct
 
-    def decrypt_with_aes(self, key, encrypted_data):
-        iv = encrypted_data[:16]
-        cipher = Cipher(algorithms.AES(key), modes.CFB(iv))
+    def decrypt_with_aes_cbc(self, key: bytes, iv: bytes, ciphertext: bytes) -> bytes:
+        """Decrypts data using AES-CBC."""
+        cipher = Cipher(algorithms.AES(key), modes.CBC(iv))
         decryptor = cipher.decryptor()
-        return decryptor.update(encrypted_data[16:]) + decryptor.finalize()
+        decrypted_padded_data = decryptor.update(ciphertext) + decryptor.finalize()
+        unpadder = padding.PKCS7(128).unpadder()
+        pt = unpadder.update(decrypted_padded_data) + unpadder.finalize()
+        return pt
 
     def shamir_split_secret(
         self, threshold_shares: int, total_shares: int, secret: bytes
@@ -156,11 +163,16 @@ class CryptoManager:
         return data.encode("utf-8")
 
     def so_text_format(self, key_share, protocol, key_type, key_index):
-        # Prepare the data in the requested text format
+        # Prepare the data to be written into file in this format
         data = f"Protocol: {protocol.title()}\n\nKey Type: {key_type.title()}\n\nKey ID/Index: {key_index}\n\nWrap Key Share:\n{key_share.upper()}"
         return data.encode("utf-8")
 
     def wrapped_key_text_format(self, protocol, key_type, wrapped_key):
-        # Prepare the data in the requested text format
+        # Prepare the data to be written into file in this format
         data = f"Protocol: {protocol.title()}\n\nKey Type: {key_type.title()}\n\nWrapped Key:\n{wrapped_key.upper()}"
+        return data.encode("utf-8")
+
+    def data_protection_text_format(self, mode, nonce, text, aad=None):
+        # Prepare the data to be written into file in this format
+        data = f"AES Mode: {mode.upper()}\n\nNonce/IV: {nonce.upper()}\n\nAAD: {aad}\n\nText: {text}"
         return data.encode("utf-8")

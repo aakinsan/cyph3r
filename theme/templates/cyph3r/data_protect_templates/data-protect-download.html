@@ -1,0 +1,18 @@
+{% extends 'cyph3r/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+{% block content %}
+
+<div class="bg-slate-200 flex flex-col min-h-screen justify-center items-center w-full">
+    
+    <div class="w-full justify-center items-start flex flex-col gap-4 max-w-md p-8 shadow-md bg-white rounded-lg">
+            <div>
+                <p class="text-start font-font-sans font-semibold text-xs">Downloads</p>
+
+                    <a href="{{ MEDIA_URL }}{{ request.session.session_key }}/{{ data_protect_file }}" download="{{ data_protect_file }}" class="w-full mt-4 underline underline-offset-4 font-palanquin  decoration-blue-600 text-blue-600 text-xs">
+                        {{ data_protect_file }}
+                    </a>
+            
+    </div>
+<div>
+{% endblock %}

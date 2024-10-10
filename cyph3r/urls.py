@@ -22,6 +22,13 @@ urlpatterns = [
     ),
     path("key-share-download/", views.key_share_download, name="key-share-download"),
     path("key-share-intro/", views.key_share_intro, name="key-share-intro"),
+    path("data-protect-intro/", views.data_protect_intro, name="data-protect-intro"),
+    path("data-protect-info/", views.data_protect_info, name="data-protect-info"),
+    path(
+        "data-protect-download/",
+        views.data_protect_download,
+        name="data-protect-download",
+    ),
 ]
 
 htmx_urlpatterns = [
