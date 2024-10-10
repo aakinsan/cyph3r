@@ -235,7 +235,7 @@ class KeyShareReconstructForm(forms.Form):
         key_share = self.cleaned_data.get("key_share")
         if not re.match(r"^[0-9a-fA-F]+$", key_share):
             raise ValidationError("Key share must be a hexadecimal string.")
-        if len(key_share) != 32 or len(key_share) != 64:
+        if len(key_share) != 32 and len(key_share) != 64:
             raise ValidationError("Key share must be 128 or 256 bits.")
         return key_share
 
@@ -256,7 +256,7 @@ class KeyShareSplitForm(forms.Form):
         key = self.cleaned_data.get("key")
         if not re.match(r"^[0-9a-fA-F]+$", key):
             raise ValidationError("Key share must be a hexadecimal string.")
-        if len(key) != 32 or len(key) != 64:
+        if len(key) != 32 and len(key) != 64:
             raise ValidationError("Key share must be 128 or 256 bits.")
         return key
 
@@ -478,7 +478,7 @@ class DataProtectionForm(forms.Form):
         aes_key = self.cleaned_data.get("aes_key")
         if not re.match(r"^[0-9a-fA-F]+$", aes_key):
             raise ValidationError("AES key must be a hexadecimal string.")
-        if len(aes_key) != 32 or len(aes_key) != 64 or len(aes_key) != 48:
+        if len(aes_key) != 32 and len(aes_key) != 64 and len(aes_key) != 48:
             raise ValidationError("AES key must be 128, 192, or 256 bits.")
         return aes_key
 
