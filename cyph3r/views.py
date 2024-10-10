@@ -116,6 +116,7 @@ def data_protect_info(request):
                     request.session.create()
 
                 cm = CryptoManager()
+                task_name = form.cleaned_data.get("name")
                 aes_operation = form.cleaned_data.get("aes_operation")
                 aes_mode = form.cleaned_data.get("aes_mode")
                 aes_key = cm.hex_to_bytes(form.cleaned_data.get("aes_key"))
@@ -165,6 +166,7 @@ def data_protect_info(request):
                     create_data_protection_pgp_wrapped_file(
                         form,
                         cm,
+                        task_name,
                         aes_mode,
                         aes_operation,
                         nonce,
@@ -174,7 +176,14 @@ def data_protect_info(request):
                     )
                     if public_key
                     else create_data_protection_unwrapped_file(
-                        cm, aes_mode, aes_operation, nonce, aes_output, user_dir, aad
+                        cm,
+                        task_name,
+                        aes_mode,
+                        aes_operation,
+                        nonce,
+                        aes_output,
+                        user_dir,
+                        aad,
                     )
                 )
 

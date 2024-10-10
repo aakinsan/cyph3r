@@ -312,6 +312,7 @@ def create_key_share_split_secret_files(
 def create_data_protection_pgp_wrapped_file(
     form: forms.Form,
     cm: CryptoManager,
+    task_name: str,
     mode: str,
     operation: str,
     nonce: bytes,
@@ -323,7 +324,9 @@ def create_data_protection_pgp_wrapped_file(
 
     public_key_file = form.cleaned_data["public_key"]
     fingerprint, keyid = import_pgp_key_from_file(cm, public_key_file)
-    file_name = f"{operation}-operation-protected-data-{keyid}{GPG_FILE_EXTENSION}"
+    file_name = (
+        f"{task_name}-{operation}-operation-protected-{keyid}{GPG_FILE_EXTENSION}"
+    )
     data, save_path = data_protection_file_processing(
         cm, mode, operation, nonce, aes_output, user_directory, file_name, aad
     )
@@ -334,6 +337,7 @@ def create_data_protection_pgp_wrapped_file(
 
 def create_data_protection_unwrapped_file(
     cm: CryptoManager,
+    task_name: str,
     mode: str,
     operation: str,
     nonce: bytes,
@@ -342,7 +346,7 @@ def create_data_protection_unwrapped_file(
     aad: bytes = None,
 ) -> str:
     """Writes data to a file for download."""
-    file_name = f"{operation}-operation-data.txt"
+    file_name = f"{task_name}-{operation}-operation-unwrapped.txt"
     data, save_path = data_protection_file_processing(
         cm, mode, operation, nonce, aes_output, user_directory, file_name, aad
     )

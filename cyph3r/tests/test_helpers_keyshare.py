@@ -1,9 +1,7 @@
 from django.conf import settings
-import random
-import os
 
 """
-Helper functions for testing views.
+Helper functions for testing key sharing views.
 
 """
 
@@ -33,7 +31,18 @@ def validate_key_share_info_post_response(
     return response
 
 
-def validate_shamir_key_reconstruction_post_response(
+def validate_key_reconstruction_bad_post_response(client, url, html_page, post_data):
+    """
+    Helper function to validate bad response when invalid hex string is provided.
+    """
+    # client posts "key index/key share" with invalid hex string
+    response = client.post(url, post_data, follow=True)
+    assert response.status_code == 200
+    assert html_page in [t.name for t in response.templates]
+    return response
+
+
+def validate_key_reconstruction_post_response(
     client, url, html_page_reconstruct, html_page_download, post_data, key_share_count
 ):
     """

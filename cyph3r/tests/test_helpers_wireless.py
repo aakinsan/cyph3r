@@ -3,7 +3,7 @@ import random
 import os
 
 """
-Helper functions for testing views.
+Helper functions for testing wireless views.
 
 """
 

@@ -1,40 +1,70 @@
+from typing import Literal
+from django.test import Client
 import pytest
 from django.urls import reverse
-from testing_helpers_keyshare import (
+from cyph3r.crypto import CryptoManager
+from test_helpers_keyshare import (
     validate_key_share_info_post_response,
-    validate_shamir_key_reconstruction_post_response,
+    validate_key_reconstruction_post_response,
+    validate_key_reconstruction_bad_post_response,
     get_key_share_secret_key_and_validate,
 )
 
 
-def test_key_share_info(client):
+def test_key_share_info(
+    client: Client,
+    key_share_info_html_page: str,
+    key_share_info_url: str,
+):
     """
-    Test that the index view renders correctly.
+    Test that the key share info view renders correctly.
     """
-    url = reverse("key-share-info")  # Get the URL for the index view
-    response = client.get(url)
+    response = client.get(key_share_info_url)
     assert response.status_code == 200
-    assert "cyph3r/key_share_templates/key-share-info.html" in [
-        t.name for t in response.templates
-    ]
+    assert key_share_info_html_page in [t.name for t in response.templates]
+
+
+@pytest.mark.django_db
+def test_key_share_post_invalid_public_keys(
+    cleanup_generated_files: None,
+    cm: CryptoManager,
+    client: Client,
+    key_share_info_url: str,
+    key_share_info_html_page: str,
+    key_share_info_post_bad_data: dict,
+):
+    """
+    Test app invalidates non-PGP public files.
+    """
+    # Post bad PGP public keys and validate the response
+    bad_response = validate_key_share_info_post_response(
+        client,
+        key_share_info_url,
+        key_share_info_post_bad_data,
+        key_share_info_html_page,
+        validate_session_data=False,
+    )
+    # Validate that the form reports 3 errors related to the bad PGP public keys
+    assert len(bad_response.context["form"]["key_share_public_keys"].errors) == 3
 
 
 @pytest.mark.django_db
 def test_key_share_shamir_reconstruction(
-    cleanup_generated_files,
-    cm,
-    client,
-    key_share_info_url,
-    key_share_reconstruct_url,
-    key_share_reconstruct_html_page,
-    key_share_download_html_page,
-    key_share_info_shamir_reconstruct_post_data,
-    key_share_reconstruct_shamir_post_data,
-    key_share_reconstruct_shamir_secret_key,
+    cleanup_generated_files: None,
+    cm: CryptoManager,
+    client: Client,
+    key_share_info_url: str,
+    key_share_reconstruct_url: str,
+    key_share_reconstruct_html_page: str,
+    key_share_download_html_page: str,
+    key_share_info_shamir_reconstruct_post_data: dict,
+    key_share_reconstruct_shamir_post_data: list[dict],
+    key_share_reconstruct_shamir_secret_key: str,
 ):
     """
-    Test that shamir key reconstruction is successful.
+    Test that shamir key reconstruction flow is successful.
     """
+
     # Post the key information data to the view and validate the response
     validate_key_share_info_post_response(
         client,
@@ -43,7 +73,7 @@ def test_key_share_shamir_reconstruction(
         key_share_reconstruct_html_page,
     )
 
-    response = validate_shamir_key_reconstruction_post_response(
+    response = validate_key_reconstruction_post_response(
         client,
         key_share_reconstruct_url,
         key_share_reconstruct_html_page,
@@ -59,16 +89,16 @@ def test_key_share_shamir_reconstruction(
 
 @pytest.mark.django_db
 def test_key_share_xor_reconstruction(
-    cleanup_generated_files,
-    cm,
-    client,
-    key_share_info_url,
-    key_share_reconstruct_url,
-    key_share_reconstruct_html_page,
-    key_share_download_html_page,
-    key_share_info_xor_reconstruct_post_data,
-    key_share_reconstruct_xor_post_data,
-    key_share_reconstruct_xor_secret_key,
+    cleanup_generated_files: None,
+    cm: CryptoManager,
+    client: Client,
+    key_share_info_url: str,
+    key_share_reconstruct_url: str,
+    key_share_reconstruct_html_page: str,
+    key_share_download_html_page: str,
+    key_share_info_xor_reconstruct_post_data: dict,
+    key_share_reconstruct_xor_post_data: list[dict],
+    key_share_reconstruct_xor_secret_key: str,
 ):
     """
     Test that xor key reconstruction is successful.
@@ -81,7 +111,7 @@ def test_key_share_xor_reconstruction(
         key_share_reconstruct_html_page,
     )
 
-    response = validate_shamir_key_reconstruction_post_response(
+    response = validate_key_reconstruction_post_response(
         client,
         key_share_reconstruct_url,
         key_share_reconstruct_html_page,

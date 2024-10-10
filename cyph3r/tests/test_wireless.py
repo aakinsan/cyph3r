@@ -1,6 +1,6 @@
 import pytest
 from django.urls import reverse
-from testing_helpers_wireless import (
+from test_helpers_wireless import (
     validate_post_response,
     validate_response_context,
     process_provider_keys,
@@ -37,6 +37,7 @@ def test_wireless_key_generation_milenage_op_keys(
     cm,
     client,
     pgp_public_keys,
+    bad_pgp_public_keys,
     key_info_milenage_op_post_data,
     key_gcp_storage_post_data,
     gcp_storage_url,
@@ -62,6 +63,22 @@ def test_wireless_key_generation_milenage_op_keys(
     validate_post_response(
         client, pgp_upload_url, key_gcp_storage_post_data, pgp_upload_html_page
     )
+
+    # Post/upload bad public keys to the view and validate the response
+    bad_response = validate_post_response(
+        client,
+        generate_keys_url,
+        bad_pgp_public_keys,
+        pgp_upload_html_page,
+        validate_session_data=False,
+    )
+
+    assert (
+        len(bad_response.context["form"]["security_officers_public_keys"].errors) == 3
+    )
+    assert len(bad_response.context["form"]["provider_public_keys"].errors) == 3
+    assert len(bad_response.context["form"]["milenage_public_key"].errors) == 3
+
     # Post/upload the public keys to the view and validate the response
     response = validate_post_response(
         client,

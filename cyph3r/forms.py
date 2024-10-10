@@ -9,6 +9,10 @@ This module contains the forms used in the Cyph3r application.
 
 """
 
+######################################
+# Helper Classes for Form Validation #
+######################################
+
 
 class MultipleFileInput(forms.ClearableFileInput):
     """Widget Class for multiple file input"""
@@ -32,6 +36,39 @@ class MultipleFileField(forms.FileField):
         return result
 
 
+class ValidatePGPFiles:
+    def validate_single_file(self, file, field_name):
+        # Check file size is less than 5KB
+        file_size = file.size
+        if file_size > 5120:
+            self.add_error(field_name, f"{file.name} must be less than 5KB.")
+
+        # Check file is a PGP public key file
+        file_type = magic.from_buffer(file.read(), mime=False)
+        if not file_type.startswith(("PGP public key block", "OpenPGP Public Key")):
+            self.add_error(field_name, f"{file.name} is not a PGP public key")
+
+        # Check if the PGP key is ASCII armored
+        file.seek(0)
+        first_line = file.readline().strip()
+        if first_line != b"-----BEGIN PGP PUBLIC KEY BLOCK-----":
+            self.add_error(
+                field_name,
+                f"{file.name} is not PGP ASCII armored.",
+            )
+
+    def validate_multiple_files_no_count(self, files, field_name):
+        # Check if the correct number of files are uploaded
+        for file in files:
+            self.validate_single_file(file, field_name)
+
+    def validate_multiple_files(self, files, field_name, count):
+        # Check if the correct number of files are uploaded
+        if len(files) != count:
+            self.add_error(field_name, f"Upload {count} PGP public keys.")
+        self.validate_multiple_files_no_count(files, field_name)
+
+
 #################################
 # Wireless Key Management Forms #
 # ###############################
@@ -40,7 +77,7 @@ class MultipleFileField(forms.FileField):
 class WirelessKeyInfoForm(forms.Form):
     """Form for Wireless Key Information"""
 
-    # Key Identifier (Optional)
+    # Key Identifier
     key_identifier = forms.CharField(
         label="Key Identifier",
         max_length=15,
@@ -48,8 +85,8 @@ class WirelessKeyInfoForm(forms.Form):
         required=True,
         help_text="Enter a unique key identifier.",
     )
-    # Key Type
 
+    # Key Type
     KEY_TYPE_CHOICES = [
         ("transport", "Transport Key"),
         ("op", "Operator (OP) Key"),
@@ -59,6 +96,7 @@ class WirelessKeyInfoForm(forms.Form):
         choices=KEY_TYPE_CHOICES,
         label="Key Type",
         help_text="Select the key type.",
+        required=True,
     )
     # Protocol
     PROTOCOL_TYPE_CHOICES = [
@@ -70,6 +108,7 @@ class WirelessKeyInfoForm(forms.Form):
         choices=PROTOCOL_TYPE_CHOICES,
         label="Protocol",
         help_text="Select the protocol.",
+        required=True,
     )
 
     # Key Size
@@ -82,6 +121,7 @@ class WirelessKeyInfoForm(forms.Form):
         choices=KEY_SIZE_CHOICES,
         label="Key Size",
         help_text="Select the key size.",
+        required=True,
     )
 
     def clean(self):
@@ -145,7 +185,7 @@ class WirelessGCPStorageForm(forms.Form):
         return kms_key
 
 
-class WirelessPGPUploadForm(forms.Form):
+class WirelessPGPUploadForm(forms.Form, ValidatePGPFiles):
     """Form for PGP Public Key Upload"""
 
     security_officers_public_keys = MultipleFileField(
@@ -161,7 +201,7 @@ class WirelessPGPUploadForm(forms.Form):
         required=False, help_text="Upload PGP public key to wrap milenage keys"
     )
 
-    def clean_security_officer_public_keys(self):
+    def clean_security_officers_public_keys(self):
         """validate the uploaded security officer public keys files are valid PGP public keys"""
         files = self.cleaned_data.get("security_officers_public_keys")
         self.validate_multiple_files(files, "security_officers_public_keys", 5)
@@ -179,35 +219,6 @@ class WirelessPGPUploadForm(forms.Form):
             self.validate_single_file(file, "milenage_public_key")
         return file
 
-    def validate_single_file(self, file, field_name):
-        # Check file size is less than 5KB
-        file_size = file.size
-        if file_size > 5120:
-            self.add_error(field_name, f"{file.name} must be less than 5KB.")
-
-        # Check file is a PGP public key file
-        file_type = magic.from_buffer(file.read(), mime=False)
-        if not file_type.startswith(("PGP public key block", "OpenPGP Public Key")):
-            self.add_error(field_name, f"{file.name} must be a PGP public key file")
-
-        # Check if the PGP key is ASCII armored
-        file.seek(0)
-        first_line = file.readline().strip()
-        if first_line != b"-----BEGIN PGP PUBLIC KEY BLOCK-----":
-            self.add_error(
-                field_name,
-                f"{file.name} must be an ASCII armored PGP public key file.",
-            )
-
-    def validate_multiple_files(self, files, field_name, count):
-        # Check if the correct number of files are uploaded
-        if len(files) != count:
-            self.add_error(
-                field_name, f"{count} PGP public key files must be uploaded."
-            )
-        for file in files:
-            self.validate_single_file(file, field_name)
-
 
 ##############################
 # Key Share Management Forms #
@@ -217,7 +228,11 @@ class WirelessPGPUploadForm(forms.Form):
 class KeyShareReconstructForm(forms.Form):
     # Key Index for key reconstruction for shamir secret sharing
     key_index = forms.IntegerField(
-        label="Key Index", min_value=1, required=False, help_text="Shamir key index."
+        label="Key Index",
+        min_value=1,
+        max_value=10,
+        required=False,
+        help_text="Shamir key index.",
     )
 
     # Key Share field for key reconstruction
@@ -227,7 +242,7 @@ class KeyShareReconstructForm(forms.Form):
         max_length=64,
         widget=forms.PasswordInput(),
         label="Key Share (HEXADECIMAL STRING)",
-        help_text="Enter 128 bit or 256 key (only xor).",
+        help_text="Enter 128 or 256 (only xor) bit key.",
     )
 
     def clean_key_share(self):
@@ -248,7 +263,7 @@ class KeyShareSplitForm(forms.Form):
         max_length=64,
         widget=forms.PasswordInput(),
         label="Key Share (HEXADECIMAL STRING)",
-        help_text="Enter 128 bit or 256 key (only xor).",
+        help_text="Enter 128 or 256 (only xor) bit key.",
     )
 
     def clean_key_share(self):
@@ -261,7 +276,7 @@ class KeyShareSplitForm(forms.Form):
         return key
 
 
-class KeyShareInfoForm(forms.Form):
+class KeyShareInfoForm(forms.Form, ValidatePGPFiles):
     # Key Splitting/Reconstruction Options
     KEY_SPLITTING_SCHEMES = [
         ("", "Select a scheme"),
@@ -272,7 +287,6 @@ class KeyShareInfoForm(forms.Form):
     scheme = forms.ChoiceField(
         choices=KEY_SPLITTING_SCHEMES,
         label="Scheme",
-        help_text="Select a scheme",
         required=True,
     )
 
@@ -286,7 +300,6 @@ class KeyShareInfoForm(forms.Form):
     key_task = forms.ChoiceField(
         choices=KEY_TASK_CHOICES,
         label="Task",
-        help_text="Select a task",
         required=True,
     )
 
@@ -296,7 +309,7 @@ class KeyShareInfoForm(forms.Form):
         min_value=2,
         max_value=10,
         required=False,
-        help_text="Total number of key shares to generate or total number required for key reconstruction (XOR).",
+        help_text="Total number of key shares.",
     )
 
     # Threshold Count (for key splitting, e.g., Shamir Secret Sharing)
@@ -317,30 +330,7 @@ class KeyShareInfoForm(forms.Form):
         # Get uploaded files
         files = self.cleaned_data.get("key_share_public_keys")
         # Validate uploaded files
-        for file in files:
-            # Check file size is less than 5KB
-            file_size = file.size
-            if file_size > 5120:
-                self.add_error(
-                    "key_share_public_keys",
-                    f"{file.name} must be less than 5KB.",
-                )
-            # Check file type is PGP public key
-            file_type = magic.from_buffer(file.read(), mime=False)
-            if not file_type.startswith(("PGP public key block", "OpenPGP Public Key")):
-                self.add_error(
-                    "key_share_public_keys",
-                    f"{file.name} is not a PGP public key file.",
-                )
-            # Check if the PGP key is ASCII armored
-            file.seek(0)
-            first_line = file.readline().strip()
-            if first_line != b"-----BEGIN PGP PUBLIC KEY BLOCK-----":
-                self.add_error(
-                    "key_share_public_keys",
-                    f"{file.name} must be an ASCII armored PGP public key file.",
-                )
-
+        self.validate_multiple_files_no_count(files, "key_share_public_keys")
         # Return files
         return files
 
@@ -371,6 +361,11 @@ class KeyShareInfoForm(forms.Form):
                         "threshold_count",
                         "Threshold count is required for Shamir Secret Shares.",
                     )
+                if threshold_count > share_count:
+                    self.add_error(
+                        None,
+                        "Threshold count must be less than or equal to the share count.",
+                    )
         elif scheme == "xor" and not share_count:
             self.add_error("share_count", "Share count is required for XOR key shares.")
 
@@ -391,7 +386,16 @@ class KeyShareInfoForm(forms.Form):
 # #######################
 
 
-class DataProtectionForm(forms.Form):
+class DataProtectionForm(forms.Form, ValidatePGPFiles):
+    # Key Identifier
+    name = forms.CharField(
+        label="name",
+        max_length=15,
+        min_length=3,
+        required=True,
+        help_text="Identifier for generated file.",
+    )
+
     # AES Mode choices
     AES_MODE_CHOICES = [
         ("", ""),
@@ -511,23 +515,3 @@ class DataProtectionForm(forms.Form):
         if file:
             self.validate_single_file(file, "public_key")
         return file
-
-    def validate_single_file(self, file, field_name):
-        # Check file size is less than 5KB
-        file_size = file.size
-        if file_size > 5120:
-            self.add_error(field_name, f"{file.name} must be less than 5KB.")
-
-        # Check file is a PGP public key file
-        file_type = magic.from_buffer(file.read(), mime=False)
-        if not file_type.startswith(("PGP public key block", "OpenPGP Public Key")):
-            self.add_error(field_name, f"{file.name} must be a PGP public key file")
-
-        # Check if the PGP key is ASCII armored
-        file.seek(0)
-        first_line = file.readline().strip()
-        if first_line != b"-----BEGIN PGP PUBLIC KEY BLOCK-----":
-            self.add_error(
-                field_name,
-                f"{file.name} must be an ASCII armored PGP public key file.",
-            )
