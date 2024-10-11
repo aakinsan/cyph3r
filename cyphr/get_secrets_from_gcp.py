@@ -29,13 +29,12 @@ def get_secret(id=None) -> str:
         if id == "django_secret":
             secret_id = os.getenv("DJANGO_SECRET_KEY_SECRET_ID")
             secret = gcpm.get_secret(secret_id).decode("utf-8")
-            return secret
 
         # Get PostgreSQL password from secrets manager.
         if id == "postgres_secret":
             secret_id = os.getenv("DJANGO_POSTGRES_PASSWORD_SECRET_ID")
             secret = gcpm.get_secret(secret_id).decode("utf-8")
-            return f"postgres://cyph3r:{secret}@localhost/cyph3r"
+        return secret
     except Exception as e:
         logger.error(f"Error getting secret: {e}")
         return None

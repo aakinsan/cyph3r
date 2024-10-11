@@ -171,7 +171,9 @@ class Prod(Dev):
     # Database
     # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-    DATABASES = get_secret(id="postgres_secret")
+    DATABASE_PASSWORD = get_secret(id="postgres_secret")
+
+    DATABASES = f"postgres://cyph3r:{DATABASE_PASSWORD}@localhost/cyph3r"
 
     # Installed Apps and Middleware
     INSTALLED_APPS = [
