@@ -60,7 +60,7 @@ def test_key_share_post_long_hex_response(
         data_protect_info_html_page,
     )
     assert response.context["form"]["aes_key"].errors == [
-        "AES key must be 128, 192, or 256 bits."
+        "value must be either 128 | 192 | 256 bits."
     ]
 
 
@@ -84,5 +84,5 @@ def test_key_share_post_bad_hex_response(
         data_protect_info_html_page,
     )
     assert response.context["form"]["aes_key"].errors == [
-        "AES key must be a hexadecimal string."
+        "value must be a hexadecimal string."
     ]

@@ -36,7 +36,9 @@ class MultipleFileField(forms.FileField):
         return result
 
 
-class ValidatePGPFiles:
+class ValidateCyph3rForms:
+    """Class for form validation"""
+
     def validate_single_file(self, file, field_name):
         # Check file size is less than 5KB
         file_size = file.size
@@ -67,6 +69,21 @@ class ValidatePGPFiles:
         if len(files) != count:
             self.add_error(field_name, f"Upload {count} PGP public keys.")
         self.validate_multiple_files_no_count(files, field_name)
+
+    def validate_gcp_resource_name(self, value):
+        # Check if GCP Project ID, KMS Keyring, and KMS Key are valid
+        if not re.match(r"\b[a-z][a-z0-9-]*\b", value):
+            raise ValidationError("Invalid Name for GCP Resource.")
+
+    def validate_hex_string(self, value):
+        # Check if the value is a hexadecimal string
+        if not re.match(r"^[0-9a-fA-F]+$", value):
+            raise ValidationError("value must be a hexadecimal string.")
+
+    def validate_hex_length(self, value):
+        # Check if the value is the correct length
+        if len(value) != 32 and len(value) != 64 and len(value) != 48:
+            raise ValidationError("value must be either 128 | 192 | 256 bits.")
 
 
 #################################
@@ -135,7 +152,7 @@ class WirelessKeyInfoForm(forms.Form):
             self.add_error(None, "The Milenage protocol only supports 128-bit OP keys.")
 
 
-class WirelessGCPStorageForm(forms.Form):
+class WirelessGCPStorageForm(forms.Form, ValidateCyph3rForms):
     """Form for GCP Storage Information"""
 
     gcp_project_id = forms.CharField(
@@ -164,28 +181,25 @@ class WirelessGCPStorageForm(forms.Form):
         """Validate the GCP Project ID"""
         project_id = self.cleaned_data.get("gcp_project_id")
         if project_id:
-            if not re.match(r"\b[a-z][a-z0-9-]*\b", project_id):
-                raise ValidationError("Invalid GCP Project ID.")
+            self.validate_gcp_resource_name(project_id)
         return project_id
 
     def clean_gcp_kms_keyring(self):
         """Validate the GCP KMS Keyring"""
         keyring = self.cleaned_data.get("gcp_kms_keyring")
         if keyring:
-            if not re.match(r"\b[a-z][a-z0-9-]*\b", keyring):
-                raise ValidationError("Invalid GCP KMS Keyring.")
+            self.validate_gcp_resource_name(keyring)
         return keyring
 
     def clean_gcp_kms_key(self):
         """Validate the GCP KMS Key"""
         kms_key = self.cleaned_data.get("gcp_kms_key")
         if kms_key:
-            if not re.match(r"\b[a-z][a-z0-9-]*\b", kms_key):
-                raise ValidationError("Invalid GCP KMS Key.")
+            self.validate_gcp_resource_name(kms_key)
         return kms_key
 
 
-class WirelessPGPUploadForm(forms.Form, ValidatePGPFiles):
+class WirelessPGPUploadForm(forms.Form, ValidateCyph3rForms):
     """Form for PGP Public Key Upload"""
 
     security_officers_public_keys = MultipleFileField(
@@ -225,7 +239,7 @@ class WirelessPGPUploadForm(forms.Form, ValidatePGPFiles):
 # ############################
 
 
-class KeyShareReconstructForm(forms.Form):
+class KeyShareReconstructForm(forms.Form, ValidateCyph3rForms):
     # Key Index for key reconstruction for shamir secret sharing
     key_index = forms.IntegerField(
         label="Key Index",
@@ -248,14 +262,12 @@ class KeyShareReconstructForm(forms.Form):
     def clean_key_share(self):
         # Check if key share is a hexadecimal string and is 128/256 bits (32/64 characters hex)
         key_share = self.cleaned_data.get("key_share")
-        if not re.match(r"^[0-9a-fA-F]+$", key_share):
-            raise ValidationError("Key share must be a hexadecimal string.")
-        if len(key_share) != 32 and len(key_share) != 64:
-            raise ValidationError("Key share must be 128 or 256 bits.")
+        self.validate_hex_string(key_share)
+        self.validate_hex_length(key_share)
         return key_share
 
 
-class KeyShareSplitForm(forms.Form):
+class KeyShareSplitForm(forms.Form, ValidateCyph3rForms):
     # Key Share field for key reconstruction
     key = forms.CharField(
         required=True,
@@ -269,14 +281,12 @@ class KeyShareSplitForm(forms.Form):
     def clean_key_share(self):
         # Check if key share is a hexadecimal string and is 128/256 bits
         key = self.cleaned_data.get("key")
-        if not re.match(r"^[0-9a-fA-F]+$", key):
-            raise ValidationError("Key share must be a hexadecimal string.")
-        if len(key) != 32 and len(key) != 64:
-            raise ValidationError("Key share must be 128 or 256 bits.")
+        self.validate_hex_string(key)
+        self.validate_hex_length(key)
         return key
 
 
-class KeyShareInfoForm(forms.Form, ValidatePGPFiles):
+class KeyShareInfoForm(forms.Form, ValidateCyph3rForms):
     # Key Splitting/Reconstruction Options
     KEY_SPLITTING_SCHEMES = [
         ("", "Select a scheme"),
@@ -386,7 +396,7 @@ class KeyShareInfoForm(forms.Form, ValidatePGPFiles):
 # #######################
 
 
-class DataProtectionForm(forms.Form, ValidatePGPFiles):
+class DataProtectionForm(forms.Form, ValidateCyph3rForms):
     # Key Identifier
     name = forms.CharField(
         label="name",
@@ -480,34 +490,29 @@ class DataProtectionForm(forms.Form, ValidatePGPFiles):
     def clean_aes_key(self):
         # Check if AES key is a hexadecimal string and is 128/192/256 bits
         aes_key = self.cleaned_data.get("aes_key")
-        if not re.match(r"^[0-9a-fA-F]+$", aes_key):
-            raise ValidationError("AES key must be a hexadecimal string.")
-        if len(aes_key) != 32 and len(aes_key) != 64 and len(aes_key) != 48:
-            raise ValidationError("AES key must be 128, 192, or 256 bits.")
+        self.validate_hex_string(aes_key)
+        self.validate_hex_length(aes_key)
         return aes_key
 
     def clean_iv(self):
         # Check if IV is a hexadecimal string and is 128 bits
         iv = self.cleaned_data.get("iv")
         if iv:
-            if not re.match(r"^[0-9a-fA-F]+$", iv):
-                raise ValidationError("IV must be a hexadecimal string.")
+            self.validate_hex_string(iv)
         return iv
 
     def clean_nonce(self):
         # Check if nonce is a hexadecimal string and is 96 bits
         nonce = self.cleaned_data.get("nonce")
         if nonce:
-            if not re.match(r"^[0-9a-fA-F]+$", nonce):
-                raise ValidationError("Nonce must be a hexadecimal string.")
+            self.validate_hex_string(nonce)
         return nonce
 
     def clean_ciphertext(self):
         # Check if ciphertext is a hexadecimal string
         ciphertext = self.cleaned_data.get("ciphertext")
         if ciphertext:
-            if not re.match(r"^[0-9a-fA-F]+$", ciphertext):
-                raise ValidationError("Ciphertext must be a hexadecimal string.")
+            self.validate_hex_string(ciphertext)
         return ciphertext
 
     def clean_public_key(self):
