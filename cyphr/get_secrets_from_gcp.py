@@ -1,5 +1,6 @@
-from cyph3r.gcp import GCPManager
 import os
+from cyph3r.gcp import GCPManager
+
 
 """
 Module to get secrets for the cyph3r project.
@@ -7,7 +8,7 @@ Module to get secrets for the cyph3r project.
 """
 
 
-def get_secret(id=None) -> str:
+def get_secret(id="django_secret") -> str:
     """
     Get secret from secrets manager.
 
@@ -31,4 +32,8 @@ def get_secret(id=None) -> str:
         secret = gcpm.get_secret(secret_id).decode("utf-8")
 
     # Return secret.
-    return secret.decode("utf-8")
+    return secret
+
+
+if __name__ == "__main__":
+    get_secret()
