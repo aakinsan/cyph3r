@@ -173,7 +173,9 @@ class Prod(Dev):
 
     DATABASE_PASSWORD = get_secret(id="postgres_secret")
 
-    DATABASES = f"postgres://cyph3r:!Bn-lahad1@localhost/cyph3r"
+    DATABASES = values.DatabaseURLValue(
+        f"postgres://cyph3r:{DATABASE_PASSWORD}@localhost/cyph3r"
+    )
 
     # Installed Apps and Middleware
     INSTALLED_APPS = [
