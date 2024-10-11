@@ -160,11 +160,19 @@ def data_protect_info(request):
                             "cyph3r/data_protect_templates/data-protect-info.html",
                             {"form": form},
                         )
+                # Update the database with the File Encryption information
+                FileEncryption.objects.create(
+                    key=None,
+                    encryption_algorithm="AES",
+                    number_of_files_encrypted=1,
+                )
 
                 public_key = form.cleaned_data.get("public_key")
                 user_dir = request.session.session_key
-                data_protect_file = (
-                    create_data_protection_pgp_wrapped_file(
+
+                # Wrap the data with encryption PGP key if uploaded
+                if public_key:
+                    data_protect_file = create_data_protection_pgp_wrapped_file(
                         form,
                         cm,
                         task_name,
@@ -175,8 +183,15 @@ def data_protect_info(request):
                         user_dir,
                         aad,
                     )
-                    if public_key
-                    else create_data_protection_unwrapped_file(
+                    # Update the database with the File Encryption information
+                    FileEncryption.objects.create(
+                        key=None,
+                        encryption_algorithm="PGP",
+                        number_of_files_encrypted=1,
+                    )
+                # File is not PGP encrypted
+                else:
+                    data_protect_file = create_data_protection_unwrapped_file(
                         cm,
                         task_name,
                         aes_mode,
@@ -186,7 +201,6 @@ def data_protect_info(request):
                         user_dir,
                         aad,
                     )
-                )
 
                 # Add path to secret files to session
                 request.session["data_protect_file"] = data_protect_file
