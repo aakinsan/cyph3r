@@ -166,7 +166,12 @@ class Prod(Dev):
     DEBUG = False
 
     # Secret Key
-    SECRET_KEY = values.SecretValue()
+    SECRET_KEY = get_secret(id="django_secret")
+
+    # Database
+    # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+
+    DATABASES = get_secret(id="postgres_secret")
 
     # Installed Apps and Middleware
     INSTALLED_APPS = [
