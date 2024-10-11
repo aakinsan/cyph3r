@@ -1,4 +1,5 @@
 import os
+import logging
 from cyph3r.gcp import GCPManager
 
 
@@ -6,34 +7,35 @@ from cyph3r.gcp import GCPManager
 Module to get secrets for the cyph3r project.
 
 """
+# Define the logger for the module
+logger = logging.getLogger(__name__)
 
 
-def get_secret(id="django_secret") -> str:
+def get_secret(id=None) -> str:
     """
     Get secret from secrets manager.
 
     Returns:
         str: Django secret key or PostgreSQL password.
     """
-    # Get Project ID from environment variable.
-    project_id = os.getenv("GCP_PROJECT_ID")
+    try:
+        # Get Project ID from environment variable.
+        project_id = os.getenv("GCP_PROJECT_ID")
 
-    # Initialize GCPManager object.
-    gcpm = GCPManager(project_id)
+        # Initialize GCPManager object.
+        gcpm = GCPManager(project_id)
 
-    # Get django secret key from secrets manager.
-    if id == "django_secret":
-        secret_id = os.getenv("DJANGO_SECRET_KEY_SECRET_ID")
-        secret = gcpm.get_secret(secret_id).decode("utf-8")
+        # Get django secret key from secrets manager.
+        if id == "django_secret":
+            secret_id = os.getenv("DJANGO_SECRET_KEY_SECRET_ID")
+            secret = gcpm.get_secret(secret_id).decode("utf-8")
+            return secret
 
-    # Get PostgreSQL password from secrets manager.
-    if id == "postgres_secret":
-        secret_id = os.getenv("DJANGO_POSTGRES_PASSWORD_SECRET_ID")
-        secret = gcpm.get_secret(secret_id).decode("utf-8")
-
-    # Return secret.
-    return secret
-
-
-if __name__ == "__main__":
-    get_secret()
+        # Get PostgreSQL password from secrets manager.
+        if id == "postgres_secret":
+            secret_id = os.getenv("DJANGO_POSTGRES_PASSWORD_SECRET_ID")
+            secret = gcpm.get_secret(secret_id).decode("utf-8")
+            return f"postgres://cyph3r:{secret}@localhost/cyph3r"
+    except Exception as e:
+        logger.error(f"Error getting secret: {e}")
+        return None

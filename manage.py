@@ -8,6 +8,8 @@ def main():
     """Run administrative tasks."""
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cyphr.settings")
     os.environ.setdefault("DJANGO_CONFIGURATION", "Dev")
+    os.environ.setdefault("GCP_PROJECT_ID", "cyph3r")
+    os.environ.setdefault("DJANGO_SECRET_KEY_SECRET_ID", "cyph3r_dev_secret_key")
     try:
         from configurations.management import execute_from_command_line
     except ImportError as exc:

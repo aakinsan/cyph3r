@@ -29,7 +29,7 @@ from cyph3r.gcp import GCPManager
 from cyph3r.key_tracker import total_key_shares, total_files_encrypted
 from datetime import datetime
 import logging
-
+from django.conf import settings
 
 """
 This module contains the views for the cyph3r app.
@@ -72,14 +72,15 @@ def index(request):
             "key_shares": key_shares,
             "files_encrypted": files_encrypted,
         }
-
-        return render(request, "cyph3r/index.html", data)
     except Exception as e:
         logger.error(f"An error occurred in the index view: {e}", exc_info=True)
-        return render(
-            request,
-            CYPH3R_500_ERROR_PAGE,
-        )
+        data = {
+            "keys_generated": 0,
+            "key_shares": 0,
+            "files_encrypted": 0,
+        }
+
+    return render(request, "cyph3r/index.html", data)
 
 
 #########################
