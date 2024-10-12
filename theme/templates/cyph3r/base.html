@@ -14,18 +14,20 @@
   </head>
 
   <body class="relative min-h-screen">
-    <header class="w-full absolute -z-10 bg-white">
-      <nav class="flex justify-between items-center py-1 px-8">
+    <header class="w-full absolute z-10 h-16 bg-white">
+      <nav class="flex justify-between h-full items-center py-1 px-8">
         <a href="{% url 'index' %}" rel="noopener" class="flex justify-start items-center gap-2">
           <img src="{% static 'images/logo.svg' %}" alt="cyph3r logo" width="40" height="15"/>
           <div class="text-orange-600 font-semibold text-lg font-sans">Cyph3r</div>
         </a>
         <div class="flex justify-between items-center gap-12 md:gap-24">
-          <a href="{% url 'index' %}" class="rounded-full w-12 h-12 hover:bg-orange-100 grid place-content-center">
-            <img src="{% static 'icons/cog.svg' %}" alt="cog logo" width="30" height="30" title="settings" />
+          <a href="{% url 'index' %}" class="relative rounded-full w-12 h-12 group hover:bg-orange-100 grid place-content-center">
+            <img src="{% static 'icons/cog.svg' %}" alt="cog logo" width="30" height="30" />
+            <div class="absolute left-[3.5px] -bottom-4 group-hover:block hidden text-xs text-gray-500">settings</div>
           </a>
-          <a href="{% url 'index' %}" class="rounded-full w-12 h-12 hover:bg-orange-100 grid place-content-center">
-            <img src="{% static 'icons/user.svg' %}" alt="cog logo" width="30" height="30" title="login" />
+          <a href="{% url 'index' %}" class="relative rounded-full w-12 h-12 group hover:bg-orange-100 grid place-content-center">
+            <img src="{% static 'icons/user.svg' %}" alt="cog logo" width="30" height="30" />
+            <div class="absolute left-[10.5px] -bottom-4 group-hover:block hidden text-xs text-gray-500">login</div>
           </a>
         </div>
       </nav> 
