@@ -12,13 +12,13 @@
     <script src="{% static 'js/htmx.min.js' %}" defer></script>
     <script src="{% static 'js/_hyperscript.min.js' %}" defer></script>
   </head>
-  <body class="relative min-h-screen">
-    <main id="main" class="relative w-full min-h-screen">
+  <body id="body" class="relative min-h-screen" _="on load if window.localStorage.getItem('theme') == 'dark' then add .dark to me">
+    <main id="main" class="relative w-full min-h-screen bg-gradient-to-b from-orange-100 via-orange-50 to-white dark:bg-gradient-to-b dark:from-slate-400 dark:via-slate-600 dark:to-slate-800 text-gray-800">
       <header class="w-full absolute z-10 h-16 bg-white">
         <nav class="flex justify-between w-full h-full items-center py-1 px-8">
           <a href="{% url 'index' %}" rel="noopener" class="flex justify-start items-center gap-2">
-            <img src="{% static 'images/logo.svg' %}" alt="cyph3r logo" width="40" height="15"/>
-            <div class="text-orange-600 font-semibold text-lg font-sans">Cyph3r</div>
+            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="35" height="35" x="0" y="0" viewBox="0 0 500 500" style="enable-background:new 0 0 512 512" xml:space="preserve" class="text-orange-600 dark:text-cyan-600 "><g><path fill-rule="evenodd" d="M63.351 379.881h45.719c.474 0 .86-.386.86-.86v-32.14a4.733 4.733 0 0 1 4.733-4.733h40.636a4.734 4.734 0 0 1 4.733 4.733v37.732a4.733 4.733 0 0 1-4.733 4.733h-35.043a.861.861 0 0 0-.86.86v48.816a4.734 4.734 0 0 1-4.733 4.733H63.351a4.734 4.734 0 0 1-4.733-4.733v-54.408a4.734 4.734 0 0 1 4.733-4.733zm200.515-201.82v-27.962c0-32.974 26.979-59.953 59.953-59.953s59.953 26.979 59.953 59.953v27.962c0 .474.386.86.86.86h20.854c3.811 0 7.545.342 11.174.997a.832.832 0 0 0 .704-.186.832.832 0 0 0 .309-.66v-28.973c0-51.62-42.234-93.854-93.854-93.854s-93.854 42.234-93.854 93.854v27.962c0 .474.386.86.86.86h32.181c.473 0 .86-.386.86-.86zm177.043 28.508c-9.095-9.095-21.635-14.74-35.423-14.74H211.158a.861.861 0 0 0-.86.86v55.01c0 .474.386.86.86.86h34.192a6.455 6.455 0 0 1 6.454 6.454v64.104a6.455 6.455 0 0 1-6.454 6.454h-48.169a.861.861 0 0 0-.86.86v45.325c0 .474.386.86.86.86h34.334a6.455 6.455 0 0 1 6.454 6.454v52.639c0 .474.386.86.86.86h166.657c27.577 0 50.163-22.586 50.163-50.163V241.992c0-13.788-5.645-26.328-14.74-35.423zM289.23 275.304c0-19.103 15.486-34.588 34.588-34.588s34.588 15.486 34.588 34.588c0 13.091-7.274 24.481-18 30.355a.841.841 0 0 0-.447.754v65.371c0 4.007-3.278 7.285-7.285 7.285h-17.712c-4.007 0-7.285-3.278-7.285-7.285v-65.371c0-.323-.164-.6-.447-.754-10.725-5.874-18-17.264-18-30.355zm-240.146 7.302h36.894a4.734 4.734 0 0 1 4.733 4.733v36.894a4.734 4.734 0 0 1-4.733 4.733H49.084a4.733 4.733 0 0 1-4.733-4.733v-36.894a4.733 4.733 0 0 1 4.733-4.733zm67.136-55.94h64.565a4.733 4.733 0 0 1 4.733 4.732v64.565a4.734 4.734 0 0 1-4.733 4.733H116.22a4.734 4.734 0 0 1-4.733-4.733v-64.565a4.733 4.733 0 0 1 4.733-4.732zm-13.835-87.677h41.654a4.733 4.733 0 0 1 4.733 4.733v41.654a4.734 4.734 0 0 1-4.733 4.733h-41.654a4.733 4.733 0 0 1-4.733-4.733v-41.654a4.733 4.733 0 0 1 4.733-4.733z" clip-rule="evenodd" fill="currentColor" opacity="1" data-original="#000000"></path></g></svg>
+            <div class="text-orange-600 dark:text-cyan-600 font-semibold text-lgfont-sans">Cyph3r</div>
           </a>
           <div id="settings" class="relative flex justify-between items-center gap-12 md:gap-24">
             <div id="" class="relative rounded-full w-12 h-12 group hover:bg-orange-200 grid place-content-center cursor-pointer" _="on click from #main if event.target is not in me and #settings-menu does not match .hidden then add .hidden to #settings-menu then remove .blur-sm from #main else if event.target is in me and #settings-menu matches .hidden then remove .hidden from #settings-menu then add .blur-sm to #main else if event.target is in me and #settings-menu does not match .hidden then add .hidden to #settings-menu then remove .blur-sm from #main">
@@ -39,16 +39,16 @@
     </main>
     <div id="settings-menu" class="w-1/6 rounded-md hidden flex-col gap-4 ring-1 ring-slate-900/5 min-w-48 min-h-48 max-h-48 max-w-48 shadow-xl absolute right-[30px] top-[60px] z-10 bg-white">
       <div class="flex flex-row bg-slate-100 justify-around rounded-lg items-center m-4 p-0.5 gap-4">
-        <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="currentColor" class="w-8 h-8 text-slate-500 hover:text-orange-600 cursor-pointer">
+        <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="currentColor" class="w-8 h-8 text-slate-500 hover:text-orange-600 cursor-pointer" _="on click if #body matches .dark then call window.localStorage.setItem('theme', 'light') then remove .dark from #body">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
         </svg>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-slate-500 hover:text-blue-900">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-slate-500 hover:text-blue-900 cursor-pointer" _="on click if #body does not match .dark then call window.localStorage.setItem('theme', 'dark') then add .dark to #body">
           <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
         </svg>
       </div>
       <div class="m-4 font-semibold font-sans text-slate-500 hover:text-slate-900 cursor-pointer">EN</div>
       <div class="m-4 font-semibold font-sans text-slate-500 hover:text-slate-900 cursor-pointer">FR</div>
-      <div class="bg-slate-100 text-center text-slate-700 hover:text-slate-900  font-sans font-semibold rounded-lg m-4 p-1 gap-4 cursor-pointer">Support</div>
+      <div class="bg-slate-100 text-center text-slate-500 hover:text-slate-900  font-sans font-semibold rounded-lg m-4 p-1 gap-4 cursor-pointer">Support</div>
     </div>
     <script type="text/hyperscript">
 

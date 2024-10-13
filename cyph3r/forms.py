@@ -371,11 +371,12 @@ class KeyShareInfoForm(forms.Form, ValidateCyph3rForms):
                         "threshold_count",
                         "Threshold count is required for Shamir Secret Shares.",
                     )
-                if threshold_count > share_count:
-                    self.add_error(
-                        None,
-                        "Threshold count must be less than or equal to the share count.",
-                    )
+                if share_count and threshold_count:
+                    if threshold_count > share_count:
+                        self.add_error(
+                            None,
+                            "Threshold count must be less than or equal to the share count.",
+                        )
         elif scheme == "xor" and not share_count:
             self.add_error("share_count", "Share count is required for XOR key shares.")
 
