@@ -12,7 +12,7 @@
     <script src="{% static 'js/htmx.min.js' %}" defer></script>
     <script src="{% static 'js/_hyperscript.min.js' %}" defer></script>
   </head>
-  <body id="body" class="relative min-h-screen" _="on load if window.localStorage.getItem('theme') == 'dark' then add .dark to me">
+  <body id="body" class="relative min-h-screen" _="on load if window.localStorage.getItem('theme') == 'dark' then add .dark to me then remove .text-slate-500 from #darkmode then add .text-blue-800 to #darkmode else if window.localStorage.getItem('theme') == 'light' or window.localStorage.getItem('theme') == null then remove .text-slate-500 from #lightmode then add .text-orange-600 to #lightmode">
     <main id="main" class="relative w-full min-h-screen bg-gradient-to-b from-orange-100 via-orange-50 to-white dark:bg-gradient-to-b dark:from-slate-400 dark:via-slate-600 dark:to-slate-800 text-gray-800">
       <header class="w-full absolute z-10 h-16 bg-white">
         <nav class="flex justify-between w-full h-full items-center py-1 px-8">
@@ -23,12 +23,12 @@
           <div id="settings" class="relative flex justify-between items-center gap-12 md:gap-24">
             <div id="" class="relative rounded-full w-12 h-12 group hover:bg-orange-200 grid place-content-center cursor-pointer" _="on click from #main if event.target is not in me and #settings-menu does not match .hidden then add .hidden to #settings-menu then remove .blur-sm from #main else if event.target is in me and #settings-menu matches .hidden then remove .hidden from #settings-menu then add .blur-sm to #main else if event.target is in me and #settings-menu does not match .hidden then add .hidden to #settings-menu then remove .blur-sm from #main">
               <img src="{% static 'icons/cog.svg' %}" alt="cog icon" width="30" height="30"/>
-              <div class="absolute left-[3.5px] -bottom-4 group-hover:block hidden text-xs text-gray-500">settings</div>
+              <div class="absolute left-[4px] -bottom-9 dark:bg-white bg-gray-500 shadow-sm ring-1 ring-gray-500 text-white rounded-md p-0.5 group-hover:block hidden text-xs dark:text-black">settings</div>
             </div>
             <div>
               <a href="{% url 'index' %}" class="relative rounded-full w-12 h-12 group hover:bg-orange-100 grid place-content-center">
                 <img src="{% static 'icons/user.svg' %}" alt="user icon" width="30" height="30" />
-                <div class="absolute left-[10.5px] -bottom-4 group-hover:block hidden text-xs text-gray-500">login</div>
+                <div class="absolute left-[10.5px] -bottom-9 dark:bg-white bg-gray-500 shadow-sm ring-1 ring-gray-500 text-white rounded-md p-0.5  group-hover:block hidden text-xs dark:text-black ">login</div>
               </a>
             </div>
           </div>  
@@ -37,12 +37,12 @@
     
       {% block content %} {% endblock %}
     </main>
-    <div id="settings-menu" class="w-1/6 rounded-md hidden flex-col gap-4 ring-1 ring-slate-900/5 min-w-48 min-h-48 max-h-48 max-w-48 shadow-xl absolute right-[30px] top-[60px] z-10 bg-white">
+    <div id="settings-menu" class="w-1/6 rounded-md hidden flex-col gap-4 ring-1 ring-slate-900/5 min-w-48 min-h-52 max-h-48 max-w-52 shadow-xl absolute right-[30px] top-[60px] z-10 bg-white">
       <div class="flex flex-row bg-slate-100 justify-around rounded-lg items-center m-4 p-0.5 gap-4">
-        <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="currentColor" class="w-8 h-8 text-slate-500 hover:text-orange-600 cursor-pointer" _="on click if #body matches .dark then call window.localStorage.setItem('theme', 'light') then remove .dark from #body">
+        <svg id="lightmode" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="currentColor" class="w-8 h-8 text-slate-500 hover:text-orange-600 cursor-pointer" _="on click if #body matches .dark then call window.localStorage.setItem('theme', 'light') then remove .dark from #body then remove .text-blue-800 from #darkmode then add .text-slate-500 to #darkmode then remove .text-slate-500 from me then add .text-orange-600 to me">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
         </svg>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-slate-500 hover:text-blue-900 cursor-pointer" _="on click if #body does not match .dark then call window.localStorage.setItem('theme', 'dark') then add .dark to #body">
+        <svg id="darkmode" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-slate-500 hover:text-blue-700 cursor-pointer" _="on click if #body does not match .dark then call window.localStorage.setItem('theme', 'dark') then add .dark to #body then remove .text-orange-600 from #lightmode then add .text-slate-500 to #lightmode then remove .text-slate-500 from me then add .text-blue-800 to me">
           <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
         </svg>
       </div>
