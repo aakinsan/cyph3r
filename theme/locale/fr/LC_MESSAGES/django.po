@@ -181,7 +181,7 @@ msgstr " Séparation secrète de Shamir (SSS)"
 
 #: templates/cyph3r/key_share_templates/key-share-intro.html:13
 msgid "This app only supports splitting"
-msgstr "Cette application prend uniquement en charge le fractionnement"
+msgstr "Cette application prend uniquement en charge le fractionnement "
 
 #: templates/cyph3r/key_share_templates/key-share-intro.html:13
 msgid ""
@@ -258,11 +258,11 @@ msgstr "Commencer"
 
 #: templates/cyph3r/key_share_templates/key-share-reconstruct.html:18
 msgid "SECURITY OFFICER"
-msgstr ""
+msgstr "AGENT DE SÉCURITÉ"
 
 #: templates/cyph3r/key_share_templates/key-share-split.html:20
 msgid "ENTER KEY"
-msgstr ""
+msgstr "ENTRER LA TOUCHE"
 
 #: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:4
 msgid "Key Ceremony"
@@ -367,23 +367,17 @@ msgstr ""
 "fin de ce processus."
 
 #: templates/cyph3r/wireless_templates/wireless-generate-keys.html:6
-#, fuzzy
-#| msgid "Five Security Officer Public Keys"
 msgid "Security Officers Keys"
-msgstr "Trois clés publiques du fournisseur SIM"
+msgstr "Clés des agents de sécurité"
 
 #: templates/cyph3r/wireless_templates/wireless-generate-keys.html:18
-#, fuzzy
-#| msgid "Three SIM Provider Public Keys"
 msgid "Provider Keys"
-msgstr "Trois clés publiques du fournisseur SIM"
+msgstr "Clés du fournisseur"
 
 #: templates/cyph3r/wireless_templates/wireless-generate-keys.html:30
 msgid "Wrapped Key File"
-msgstr ""
+msgstr "Fichier de clé enveloppé"
 
 #: templates/cyph3r/wireless_templates/wireless-generate-keys.html:37
-#, fuzzy
-#| msgid "Wireless Keys"
 msgid "Milenage Keys"
-msgstr "Clés sans fil"
+msgstr "Clés Milenage"
