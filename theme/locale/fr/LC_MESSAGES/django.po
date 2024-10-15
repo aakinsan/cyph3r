@@ -54,7 +54,7 @@ msgstr "soutien"
 #: templates/cyph3r/data_protect_templates/data-protect-download.html:11
 #: templates/cyph3r/key_share_templates/key-share-download.html:11
 msgid "Downloads"
-msgstr ""
+msgstr "Téléchargements"
 
 #: templates/cyph3r/data_protect_templates/data-protect-info.html:111
 #: templates/cyph3r/key_share_templates/key-share-info.html:70

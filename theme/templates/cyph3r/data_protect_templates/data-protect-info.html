@@ -24,7 +24,7 @@
                         {% if field.name == "nonce" %}
                             <div id="aes_gcm_decrypt_parameter" class="mb-4 {% if not field.errors %}hidden{% endif %}">
                                 <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
-                                {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 focus:border-orange-500" }}
+                                {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 dark:focus:border-cyan-500 focus:border-orange-500" }}
                                 <div class="text-xs text-gray-500 dark:text-slate-300">{{ field.help_text }}</div> 
                                 {% if field.errors %}
                                     <span class="text-red-500 text-xs">
@@ -37,7 +37,7 @@
                         {% elif field.name == "iv" %}
                             <div id="aes_cbc_decrypt_parameter" class="mb-4 {% if not field.errors %}hidden{% endif %}">
                                 <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
-                                {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 focus:border-orange-500" }}
+                                {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 dark:focus:border-cyan-500 focus:border-orange-500" }}
                                 <div class="text-xs dark:text-slate-300 text-gray-500">{{ field.help_text }}</div> 
                                 {% if field.errors %}
                                     <span class="text-red-500 text-xs">
@@ -50,7 +50,7 @@
                         {% elif field.name == "ciphertext" %}
                         <div id="aes_decrypt_parameter" class="mb-4 {% if not field.errors %}hidden{% endif %}">
                             <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
-                            {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 focus:border-orange-500" }}
+                            {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 dark:focus:border-cyan-500 focus:border-orange-500" }}
                             <div class="text-xs text-gray-500 dark:text-slate-300">{{ field.help_text }}</div> 
                             {% if field.errors %}
                                 <span class="text-red-500 text-xs">
@@ -63,7 +63,7 @@
                         {% elif field.name == "plaintext" %}
                         <div id="aes_encrypt_parameter" class="mb-4 {% if not field.errors %}hidden{% endif %}">
                             <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
-                            {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 focus:border-orange-500" }}
+                            {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 dark:focus:border-cyan-500 focus:border-orange-500" }}
                             <div class="text-xs text-gray-500 dark:text-slate-300">{{ field.help_text }}</div> 
                             {% if field.errors %}
                                 <span class="text-red-500 text-xs">
@@ -76,7 +76,7 @@
                         {% elif field.name == "aad" %}
                         <div id="aes_gcm_encrypt_decrypt_parameter" class="mb-4 {% if not field.errors %}hidden{% endif %}">
                             <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
-                            {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 focus:border-orange-500" }}
+                            {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 dark:focus:border-cyan-500 focus:border-orange-500" }}
                             <div class="text-xs text-gray-500 dark:text-slate-300">{{ field.help_text }}</div> 
                             {% if field.errors %}
                                 <span class="text-red-500 text-xs">
@@ -91,7 +91,7 @@
                         <div class="mb-4">
                         <!-- Render this field -->
                             <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
-                            {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 focus:border-orange-500" }}
+                            {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 dark:focus:border-cyan-500 focus:border-orange-500" }}
                             <div class="text-xs text-gray-500 dark:text-slate-300">{{ field.help_text }}</div> 
                             {% if field.errors %}
                                 <span class="text-red-500 text-xs">
