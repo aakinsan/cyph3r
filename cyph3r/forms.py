@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from django.core.validators import RegexValidator
+from django.utils.translation import gettext_lazy as _
 import magic
 import re
 
@@ -43,12 +43,12 @@ class ValidateCyph3rForms:
         # Check file size is less than 5KB
         file_size = file.size
         if file_size > 5120:
-            self.add_error(field_name, f"{file.name} must be less than 5KB.")
+            self.add_error(field_name, _("size must be less than 5KB."))
 
         # Check file is a PGP public key file
         file_type = magic.from_buffer(file.read(), mime=False)
         if not file_type.startswith(("PGP public key block", "OpenPGP Public Key")):
-            self.add_error(field_name, f"{file.name} is not a PGP public key")
+            self.add_error(field_name, _("This is not a PGP public key"))
 
         # Check if the PGP key is ASCII armored
         file.seek(0)
@@ -56,7 +56,7 @@ class ValidateCyph3rForms:
         if first_line != b"-----BEGIN PGP PUBLIC KEY BLOCK-----":
             self.add_error(
                 field_name,
-                f"{file.name} is not PGP ASCII armored.",
+                _("This is not PGP ASCII armored."),
             )
 
     def validate_multiple_files_no_count(self, files, field_name):
@@ -67,23 +67,25 @@ class ValidateCyph3rForms:
     def validate_multiple_files(self, files, field_name, count):
         # Check if the correct number of files are uploaded
         if len(files) != count:
-            self.add_error(field_name, f"Upload {count} PGP public keys.")
+            self.add_error(
+                field_name, _("Upload {count} PGP public keys.").format(count=count)
+            )
         self.validate_multiple_files_no_count(files, field_name)
 
     def validate_gcp_resource_name(self, value):
         # Check if GCP Project ID, KMS Keyring, and KMS Key are valid
         if not re.match(r"\b[a-z][a-z0-9-]*\b", value):
-            raise ValidationError("Invalid Name for GCP Resource.")
+            raise ValidationError(_("Invalid Name for GCP Resource."))
 
     def validate_hex_string(self, value):
         # Check if the value is a hexadecimal string
         if not re.match(r"^[0-9a-fA-F]+$", value):
-            raise ValidationError("value must be a hexadecimal string.")
+            raise ValidationError(_("Value must be a hexadecimal string."))
 
     def validate_hex_length(self, value):
         # Check if the value is the correct length
         if len(value) != 32 and len(value) != 64 and len(value) != 48:
-            raise ValidationError("value must be either 128 | 192 | 256 bits.")
+            raise ValidationError(_("Value must be either 128 | 192 | 256 bits."))
 
 
 #################################
@@ -96,23 +98,23 @@ class WirelessKeyInfoForm(forms.Form):
 
     # Key Identifier
     key_identifier = forms.CharField(
-        label="Key Identifier",
+        label=_("Key Identifier"),
         max_length=15,
         min_length=3,
         required=True,
-        help_text="Enter a unique key identifier.",
+        help_text=_("Enter a unique key identifier."),
     )
 
     # Key Type
     KEY_TYPE_CHOICES = [
-        ("transport", "Transport Key"),
-        ("op", "Operator (OP) Key"),
+        ("transport", _("Transport Key")),
+        ("op", _("Operator (OP) Key")),
     ]
 
     key_type = forms.ChoiceField(
         choices=KEY_TYPE_CHOICES,
-        label="Key Type",
-        help_text="Select the key type.",
+        label=_("Key Type"),
+        help_text=_("Select the key type."),
         required=True,
     )
     # Protocol
@@ -123,8 +125,8 @@ class WirelessKeyInfoForm(forms.Form):
 
     protocol = forms.ChoiceField(
         choices=PROTOCOL_TYPE_CHOICES,
-        label="Protocol",
-        help_text="Select the protocol.",
+        label=_("Protocol"),
+        help_text=_("Select the protocol."),
         required=True,
     )
 
@@ -136,8 +138,8 @@ class WirelessKeyInfoForm(forms.Form):
 
     key_size = forms.ChoiceField(
         choices=KEY_SIZE_CHOICES,
-        label="Key Size",
-        help_text="Select the key size.",
+        label=_("Key Size"),
+        help_text=_("Select the key size."),
         required=True,
     )
 
@@ -149,31 +151,33 @@ class WirelessKeyInfoForm(forms.Form):
             and cleaned_data.get("key_type") == "op"
             and cleaned_data.get("key_size") == "256"
         ):
-            self.add_error(None, "The Milenage protocol only supports 128-bit OP keys.")
+            self.add_error(
+                None, _("The Milenage protocol only supports 128-bit OP keys.")
+            )
 
 
 class WirelessGCPStorageForm(forms.Form, ValidateCyph3rForms):
     """Form for GCP Storage Information"""
 
     gcp_project_id = forms.CharField(
-        label="GCP Project ID",
+        label=_("GCP Project ID"),
         max_length=30,
         min_length=6,
-        help_text="Project ID to store secrets and access KMS key",
+        help_text=_("Project ID to store secrets and access KMS key"),
         required=False,
     )
     gcp_kms_keyring = forms.CharField(
-        label="KMS Keyring",
+        label=_("KMS Keyring"),
         max_length=30,
         min_length=6,
-        help_text="GCP KMS key ring name",
+        help_text=_("GCP KMS key ring name"),
         required=False,
     )
     gcp_kms_key = forms.CharField(
-        label="KMS Key",
+        label=_("KMS Key"),
         max_length=30,
         min_length=6,
-        help_text="GCP KMS key name",
+        help_text=_("GCP KMS key name"),
         required=False,
     )
 
@@ -203,16 +207,21 @@ class WirelessPGPUploadForm(forms.Form, ValidateCyph3rForms):
     """Form for PGP Public Key Upload"""
 
     security_officers_public_keys = MultipleFileField(
+        label=_("Security Officers Public Keys"),
         required=True,
-        help_text="Upload 5 PGP Public keys for 3 of 5 shamir secret sharing",
+        help_text=_("Upload 5 PGP Public keys for 3 of 5 shamir secret sharing"),
     )
 
     provider_public_keys = MultipleFileField(
-        required=True, help_text="Upload 3 Provider PGP Public keys"
+        label=_("Provider Public Keys"),
+        required=True,
+        help_text=_("Upload 3 Provider PGP Public keys"),
     )
 
     milenage_public_key = forms.FileField(
-        required=False, help_text="Upload PGP public key to wrap milenage keys"
+        label=_("Milenage Public Key"),
+        required=False,
+        help_text=_("Upload PGP public key to wrap milenage keys"),
     )
 
     def clean_security_officers_public_keys(self):
@@ -242,11 +251,11 @@ class WirelessPGPUploadForm(forms.Form, ValidateCyph3rForms):
 class KeyShareReconstructForm(forms.Form, ValidateCyph3rForms):
     # Key Index for key reconstruction for shamir secret sharing
     key_index = forms.IntegerField(
-        label="Key Index",
+        label=_("Key Index"),
         min_value=1,
         max_value=10,
         required=False,
-        help_text="Shamir key index.",
+        help_text=_("Shamir key index."),
     )
 
     # Key Share field for key reconstruction
@@ -255,8 +264,8 @@ class KeyShareReconstructForm(forms.Form, ValidateCyph3rForms):
         min_length=32,
         max_length=64,
         widget=forms.PasswordInput(),
-        label="Key Share (HEXADECIMAL STRING)",
-        help_text="Enter 128 or 256 (only xor) bit key.",
+        label=_("Key Share (HEXADECIMAL STRING)"),
+        help_text=_("Enter 128 or 256 (only xor) bit key."),
     )
 
     def clean_key_share(self):
@@ -274,8 +283,8 @@ class KeyShareSplitForm(forms.Form, ValidateCyph3rForms):
         min_length=32,
         max_length=64,
         widget=forms.PasswordInput(),
-        label="Key Share (HEXADECIMAL STRING)",
-        help_text="Enter 128 or 256 (only xor) bit key.",
+        label=_("Key Share (HEXADECIMAL STRING)"),
+        help_text=_("Enter 128 or 256 (only xor) bit key."),
     )
 
     def clean_key_share(self):
@@ -289,51 +298,52 @@ class KeyShareSplitForm(forms.Form, ValidateCyph3rForms):
 class KeyShareInfoForm(forms.Form, ValidateCyph3rForms):
     # Key Splitting/Reconstruction Options
     KEY_SPLITTING_SCHEMES = [
-        ("", "Select a scheme"),
+        ("", _("Select a scheme")),
         ("shamir", "Shamir"),
         ("xor", "XOR"),
     ]
     # choice of splitting scheme
     scheme = forms.ChoiceField(
         choices=KEY_SPLITTING_SCHEMES,
-        label="Scheme",
+        label=_("Scheme"),
         required=True,
     )
 
     # XOR Key share choices
     KEY_TASK_CHOICES = [
-        ("", "Select a Task"),
-        ("split", "Split Key"),
-        ("reconstruct", "Reconstruct Key"),
+        ("", _("Select a Task")),
+        ("split", _("Split Key")),
+        ("reconstruct", _("Reconstruct Key")),
     ]
 
     key_task = forms.ChoiceField(
         choices=KEY_TASK_CHOICES,
-        label="Task",
+        label=_("Task"),
         required=True,
     )
 
     # Key Share Count (for key splitting, e.g., Shamir Secret Sharing)
     share_count = forms.IntegerField(
-        label="Share Count",
+        label=_("Share Count"),
         min_value=2,
         max_value=10,
         required=False,
-        help_text="Total number of key shares.",
+        help_text=_("Total number of key shares."),
     )
 
     # Threshold Count (for key splitting, e.g., Shamir Secret Sharing)
     threshold_count = forms.IntegerField(
-        label="Threshold Count",
+        label=_("Threshold Count"),
         min_value=2,
         max_value=10,
         required=False,
-        help_text="Minimum number of key shares for key reconstruction.",
+        help_text=_("Minimum number of key shares for key reconstruction."),
     )
 
     key_share_public_keys = MultipleFileField(
+        label=_("Key Share Public Keys"),
         required=True,
-        help_text="Upload PGP Public key(s)",
+        help_text=_("Upload PGP Public key(s)"),
     )
 
     def clean_key_share_public_keys(self):
@@ -358,37 +368,41 @@ class KeyShareInfoForm(forms.Form, ValidateCyph3rForms):
                 if not threshold_count:
                     self.add_error(
                         "threshold_count",
-                        "Threshold count is required for Shamir Secret Shares.",
+                        _("Threshold count is required for Shamir Secret Shares."),
                     )
             elif key_task == "split":
                 if not share_count:
                     self.add_error(
                         "share_count",
-                        "Share count is required for Shamir Secret Shares.",
+                        _("Share count is required for Shamir Secret Shares."),
                     )
                 if not threshold_count:
                     self.add_error(
                         "threshold_count",
-                        "Threshold count is required for Shamir Secret Shares.",
+                        _("Threshold count is required for Shamir Secret Shares."),
                     )
                 if share_count and threshold_count:
                     if threshold_count > share_count:
                         self.add_error(
                             None,
-                            "Threshold count must be less than or equal to the share count.",
+                            _(
+                                "Threshold count must be less than or equal to the share count."
+                            ),
                         )
         elif scheme == "xor" and not share_count:
-            self.add_error("share_count", "Share count is required for XOR key shares.")
+            self.add_error(
+                "share_count", _("Share count is required for XOR key shares.")
+            )
 
         if key_task == "split" and share_count != len(key_share_public_keys):
             self.add_error(
                 None,
-                "Total number of public key files must be equal to the share count.",
+                _("Total number of public key files must be equal to the share count."),
             )
         if key_task == "reconstruct" and len(key_share_public_keys) != 1:
             self.add_error(
                 "key_share_public_keys",
-                "Only one PGP Public key file is required for reconstruction.",
+                _("Only one PGP Public key file is required for reconstruction."),
             )
 
 
@@ -400,11 +414,11 @@ class KeyShareInfoForm(forms.Form, ValidateCyph3rForms):
 class DataProtectionForm(forms.Form, ValidateCyph3rForms):
     # Key Identifier
     name = forms.CharField(
-        label="name",
+        label=_("name"),
         max_length=15,
         min_length=3,
         required=True,
-        help_text="Identifier for generated file.",
+        help_text=_("Identifier for generated file."),
     )
 
     # AES Mode choices
@@ -416,20 +430,20 @@ class DataProtectionForm(forms.Form, ValidateCyph3rForms):
     # choice of AES mode
     aes_mode = forms.ChoiceField(
         choices=AES_MODE_CHOICES,
-        label="AES Mode",
+        label=_("AES Mode"),
         required=True,
     )
 
     # AES Task choices
     AES_OPERATION_CHOICES = [
         ("", ""),
-        ("encrypt", "Encrypt"),
-        ("decrypt", "Decrypt"),
+        ("encrypt", _("Encrypt")),
+        ("decrypt", _("Decrypt")),
     ]
 
     aes_operation = forms.ChoiceField(
         choices=AES_OPERATION_CHOICES,
-        label="AES Operation",
+        label=_("AES Operation"),
         required=True,
     )
 
@@ -439,7 +453,7 @@ class DataProtectionForm(forms.Form, ValidateCyph3rForms):
         min_length=32,
         max_length=64,
         widget=forms.PasswordInput(),
-        label="AES Key",
+        label=_("AES Key"),
         help_text="128 | 192 | 256 bit (Hex).",
     )
 
@@ -462,7 +476,7 @@ class DataProtectionForm(forms.Form, ValidateCyph3rForms):
 
     # Associated Data for AES GCM encryption/decryption
     aad = forms.CharField(
-        label="ADDITIONAL AUTHENTICATED DATA (AAD)",
+        label=_("ADDITIONAL AUTHENTICATED DATA (AAD)"),
         max_length=100,
         required=False,
     )
@@ -470,22 +484,22 @@ class DataProtectionForm(forms.Form, ValidateCyph3rForms):
     # Cipher Text field for AES decryption
     ciphertext = forms.CharField(
         widget=forms.Textarea(attrs={"rows": 2}),
-        label="CIPHERTEXT (HEX)",
+        label=_("CIPHERTEXT (HEX)"),
         required=False,
     )
 
     # Cipher Text field for AES encryption
     plaintext = forms.CharField(
         widget=forms.Textarea(attrs={"rows": 2}),
-        label="Plaintext",
+        label=_("PLAINTEXT"),
         required=False,
     )
 
     # PGP public key (Optional)
     public_key = forms.FileField(
         required=False,
-        label="PGP Public Key (Optional)",
-        help_text="Upload PGP Public key to encrypt output",
+        label=_("PGP Public Key (Optional)"),
+        help_text=_("Upload PGP Public key to encrypt output"),
     )
 
     def clean_aes_key(self):

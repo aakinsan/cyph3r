@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-14 21:57-0400\n"
+"POT-Creation-Date: 2024-10-15 06:53-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,22 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: templates/cyph3r/500.html:10 templates/cyph3r/500p.html:5
+msgid "Server Error (500)"
+msgstr "Erreur de serveur (500)"
+
+#: templates/cyph3r/500.html:12 templates/cyph3r/500p.html:7
+msgid "Oops, an unexpected error has occured!"
+msgstr "Oups, une erreur inattendue s'est produite !"
+
+#: templates/cyph3r/500.html:14 templates/cyph3r/500p.html:9
+msgid "Please try again sometime later."
+msgstr "Veuillez réessayer plus tard."
+
+#: templates/cyph3r/500.html:17 templates/cyph3r/500p.html:12
+msgid "Go back to the homepage"
+msgstr "Retourner à la page d'accueil"
 
 #: templates/cyph3r/base.html:30
 msgid "settings"
@@ -27,11 +43,36 @@ msgstr "se connecter"
 
 #: templates/cyph3r/base.html:47
 msgid "This work is free to use, copy, and distribute without restriction."
-msgstr "Cette œuvre peut être utilisée, copiée et distribuée librement sans restriction."
+msgstr ""
+"Cette œuvre peut être utilisée, copiée et distribuée librement sans "
+"restriction."
 
 #: templates/cyph3r/base.html:66
 msgid "Support"
 msgstr "soutien"
+
+#: templates/cyph3r/data_protect_templates/data-protect-download.html:11
+#: templates/cyph3r/key_share_templates/key-share-download.html:11
+msgid "Downloads"
+msgstr ""
+
+#: templates/cyph3r/data_protect_templates/data-protect-info.html:111
+#: templates/cyph3r/key_share_templates/key-share-info.html:70
+#: templates/cyph3r/wireless_templates/wireless-gcp-storage.html:38
+#: templates/cyph3r/wireless_templates/wireless-key-info.html:38
+#: templates/cyph3r/wireless_templates/wireless-pgp-upload.html:38
+msgid "Back"
+msgstr "Dos"
+
+#: templates/cyph3r/data_protect_templates/data-protect-info.html:115
+#: templates/cyph3r/key_share_templates/key-share-info.html:74
+#: templates/cyph3r/key_share_templates/key-share-reconstruct.html:54
+#: templates/cyph3r/key_share_templates/key-share-split.html:41
+#: templates/cyph3r/wireless_templates/wireless-gcp-storage.html:43
+#: templates/cyph3r/wireless_templates/wireless-key-info.html:43
+#: templates/cyph3r/wireless_templates/wireless-pgp-upload.html:43
+msgid "Next"
+msgstr "Suivant"
 
 #: templates/cyph3r/index.html:7
 msgid "The Cryptography"
@@ -119,9 +160,10 @@ msgid ""
 "cryptographic technique where a secret (such as a cryptographic key) is "
 "divided into multiple parts, or shares, and distributed among participants."
 msgstr ""
-"Le partage ou fractionnement de clé, également appelé partage de secret, fait référence à un "
-"technique cryptographique où un secret (tel qu'une clé cryptographique) est"
-"divisé en plusieurs parties, ou parts, et distribuées entre les participants."
+"Le partage ou fractionnement de clé, également appelé partage de secret, "
+"fait référence à un technique cryptographique où un secret (tel qu'une clé "
+"cryptographique) estdivisé en plusieurs parties, ou parts, et distribuées "
+"entre les participants."
 
 #: templates/cyph3r/key_share_templates/key-share-intro.html:10
 msgid ""
@@ -129,9 +171,9 @@ msgid ""
 "information to reconstruct the original secret. This app supports the "
 "following schemes for key sharing:"
 msgstr ""
-"L'idée clé derrière ce processus est qu'aucune action n'en révèle suffisamment"
-"informations pour reconstruire le secret original. Cette application prend en charge "
-"schémas suivants pour le partage de clés :"
+"L'idée clé derrière ce processus est qu'aucune action n'en révèle "
+"suffisammentinformations pour reconstruire le secret original. Cette "
+"application prend en charge schémas suivants pour le partage de clés :"
 
 #: templates/cyph3r/key_share_templates/key-share-intro.html:12
 msgid "Shamir's Secrets Sharing"
@@ -147,9 +189,9 @@ msgid ""
 "a minimum of m shares (m < n) otherwise known as the threshold is required "
 "for key reconstruction."
 msgstr ""
-" clés utilisant le partage secret de Shamir. La clé peut être divisée en n partages et "
-"un minimum de m actions (m < n) autrement appelé seuil est requis"
-"pour la reconstruction clé."
+" clés utilisant le partage secret de Shamir. La clé peut être divisée en n "
+"partages et un minimum de m actions (m < n) autrement appelé seuil est "
+"requispour la reconstruction clé."
 
 #: templates/cyph3r/key_share_templates/key-share-intro.html:15
 msgid "Xor-based Key Splitting"
@@ -160,8 +202,9 @@ msgid ""
 "A much simpler approach than Shamir is using the XOR or bitwise operation to "
 "split a secret. All the shares are required to reconstruct the secret."
 msgstr ""
-"Une approche beaucoup plus simple que Shamir consiste à utiliser le XOR ou l'opération au niveau du bit pour"
-"Partagez un secret. Toutes les actions sont nécessaires pour reconstruire le secret."
+"Une approche beaucoup plus simple que Shamir consiste à utiliser le XOR ou "
+"l'opération au niveau du bit pourPartagez un secret. Toutes les actions sont "
+"nécessaires pour reconstruire le secret."
 
 #: templates/cyph3r/key_share_templates/key-share-intro.html:18
 msgid ""
@@ -170,15 +213,17 @@ msgid ""
 "uploaded. The number of files to be uploaded must be the same number as that "
 "of the shares to be created."
 msgstr ""
-"L'hypothèse est que les actions clés devraient également rester secrètes."
-"Par conséquent, chaque opération de fractionnement de clé nécessite que les fichiers publics PGP soient "
-"téléchargé. Le nombre de fichiers à télécharger doit être le même que celui "
-"des actions à créer."
+"L'hypothèse est que les actions clés devraient également rester secrètes.Par "
+"conséquent, chaque opération de fractionnement de clé nécessite que les "
+"fichiers publics PGP soient téléchargé. Le nombre de fichiers à télécharger "
+"doit être le même que celui des actions à créer."
 
 #: templates/cyph3r/key_share_templates/key-share-intro.html:20
 msgid ""
 "Key reconstruction operations require only a single PGP file to be uploaded."
-msgstr "Les opérations de reconstruction de clé nécessitent le téléchargement d’un seul fichier PGP."
+msgstr ""
+"Les opérations de reconstruction de clé nécessitent le téléchargement d’un "
+"seul fichier PGP."
 
 #: templates/cyph3r/key_share_templates/key-share-intro.html:22
 #: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:21
@@ -210,6 +255,14 @@ msgstr " respectivement."
 #: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:30
 msgid "Get Started"
 msgstr "Commencer"
+
+#: templates/cyph3r/key_share_templates/key-share-reconstruct.html:18
+msgid "SECURITY OFFICER"
+msgstr ""
+
+#: templates/cyph3r/key_share_templates/key-share-split.html:20
+msgid "ENTER KEY"
+msgstr ""
 
 #: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:4
 msgid "Key Ceremony"
@@ -312,3 +365,25 @@ msgstr ""
 "encapsulés dans un Coffre-fort du gestionnaire secret. Ceci est facultatif "
 "puisque toutes les clés seront cryptées et disponible en téléchargement à la "
 "fin de ce processus."
+
+#: templates/cyph3r/wireless_templates/wireless-generate-keys.html:6
+#, fuzzy
+#| msgid "Five Security Officer Public Keys"
+msgid "Security Officers Keys"
+msgstr "Trois clés publiques du fournisseur SIM"
+
+#: templates/cyph3r/wireless_templates/wireless-generate-keys.html:18
+#, fuzzy
+#| msgid "Three SIM Provider Public Keys"
+msgid "Provider Keys"
+msgstr "Trois clés publiques du fournisseur SIM"
+
+#: templates/cyph3r/wireless_templates/wireless-generate-keys.html:30
+msgid "Wrapped Key File"
+msgstr ""
+
+#: templates/cyph3r/wireless_templates/wireless-generate-keys.html:37
+#, fuzzy
+#| msgid "Wireless Keys"
+msgid "Milenage Keys"
+msgstr "Clés sans fil"

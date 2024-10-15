@@ -1,4 +1,5 @@
 {% load widget_tweaks %}
+{% load i18n %}
     <div id="form" class="w-full flex justify-center p-2 items-center">
         <!-- Form Start -->
         <form method="POST" hx-post="{% url 'wireless_pgp_upload_form' %}" hx-trigger="submit" hx-swap="outerHTML" hx-target="#form" class="w-full max-w-sm  bg-white  dark:bg-slate-800  shadow-md rounded-lg px-4 pt-4 pb-4 flex-1 overflow-auto">
@@ -34,12 +35,12 @@
                 <div class="flex justify-between">
                     <div class="">
                         <button id="back" type="button" hx-get="{% url 'wireless_key_info_form' %}" hx-trigger="click" hx-swap="outerHTML" hx-target="#form" class="dark:bg-cyan-500 dark:hover:bg-cyan-400 bg-orange-500 hover:bg-orange-400 text-white text-xs mt-2 px-6 py-2 rounded-lg transition">
-                            Back
+                            {% translate "Back" %}
                         </button>
                     </div>
                     <div class="">
                         <button type="submit" class="dark:bg-cyan-500 dark:hover:bg-cyan-400 bg-orange-500 hover:bg-orange-400 text-white text-xs mt-2 px-6 py-2 rounded-lg transition">
-                            Next
+                            {% translate "Next" %}
                         </button>
                     </div>
                 </div>

@@ -1,8 +1,9 @@
 {% extends 'cyph3r/base.html' %}
 {% load static %}
 {% load widget_tweaks %}
-{% block content %}
+{% load i18n %}
 
+{% block content %}
 <div class="bg-gradient-to-b from-orange-100 via-orange-50 to-white dark:bg-gradient-to-b dark:from-slate-400 dark:via-slate-600 dark:to-slate-800  flex flex-col min-h-screen justify-center items-center w-full">
     <div class="relative flex justify-center items-center w-full">        
         <div id="form" class="w-full max-w-lg p-16">
@@ -22,7 +23,7 @@
                         <!-- Hide these fields -->
                         {% if field.name == "nonce" %}
                             <div id="aes_gcm_decrypt_parameter" class="mb-4 {% if not field.errors %}hidden{% endif %}">
-                                <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold">{{ field.label|upper }}</label>
+                                <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
                                 {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 focus:border-orange-500" }}
                                 <div class="text-xs text-gray-500 dark:text-slate-300">{{ field.help_text }}</div> 
                                 {% if field.errors %}
@@ -35,7 +36,7 @@
                             </div>
                         {% elif field.name == "iv" %}
                             <div id="aes_cbc_decrypt_parameter" class="mb-4 {% if not field.errors %}hidden{% endif %}">
-                                <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold">{{ field.label|upper }}</label>
+                                <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
                                 {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 focus:border-orange-500" }}
                                 <div class="text-xs dark:text-slate-300 text-gray-500">{{ field.help_text }}</div> 
                                 {% if field.errors %}
@@ -48,7 +49,7 @@
                             </div>
                         {% elif field.name == "ciphertext" %}
                         <div id="aes_decrypt_parameter" class="mb-4 {% if not field.errors %}hidden{% endif %}">
-                            <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold">{{ field.label|upper }}</label>
+                            <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
                             {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 focus:border-orange-500" }}
                             <div class="text-xs text-gray-500 dark:text-slate-300">{{ field.help_text }}</div> 
                             {% if field.errors %}
@@ -61,7 +62,7 @@
                         </div>
                         {% elif field.name == "plaintext" %}
                         <div id="aes_encrypt_parameter" class="mb-4 {% if not field.errors %}hidden{% endif %}">
-                            <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold">{{ field.label|upper }}</label>
+                            <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
                             {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 focus:border-orange-500" }}
                             <div class="text-xs text-gray-500 dark:text-slate-300">{{ field.help_text }}</div> 
                             {% if field.errors %}
@@ -74,7 +75,7 @@
                         </div>
                         {% elif field.name == "aad" %}
                         <div id="aes_gcm_encrypt_decrypt_parameter" class="mb-4 {% if not field.errors %}hidden{% endif %}">
-                            <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold">{{ field.label|upper }}</label>
+                            <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
                             {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 focus:border-orange-500" }}
                             <div class="text-xs text-gray-500 dark:text-slate-300">{{ field.help_text }}</div> 
                             {% if field.errors %}
@@ -89,7 +90,7 @@
                         
                         <div class="mb-4">
                         <!-- Render this field -->
-                            <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold">{{ field.label|upper }}</label>
+                            <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
                             {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 focus:border-orange-500" }}
                             <div class="text-xs text-gray-500 dark:text-slate-300">{{ field.help_text }}</div> 
                             {% if field.errors %}
@@ -107,11 +108,11 @@
                     <div class="flex justify-between">
                         <a href={% url 'index' %}>
                             <button type="button" class="dark:bg-cyan-500 dark:hover:bg-cyan-400 bg-orange-500 hover:bg-orange-400 text-white text-xs mt-1 px-6 py-2 rounded-lg transition">
-                                Back
+                                {% translate "Back" %}
                             </button>
                         </a>
                         <button type="submit" class="dark:bg-cyan-500 dark:hover:bg-cyan-400 bg-orange-500 hover:bg-orange-400 text-white text-xs mt-1 px-6 py-2 rounded-lg transition">
-                            Next
+                            {% translate "Next" %}
                         </button>
                     </div>
                 </div>

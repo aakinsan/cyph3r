@@ -1,8 +1,9 @@
 {% load widget_tweaks %}
+{% load i18n %}
     
     <div class="justify-center items-start flex flex-col dark:text-slate-200 gap-4 max-w-5xl p-8 shadow-md bg-white dark:bg-slate-800  rounded-lg">
             <div>
-                <p class="text-start font-palanquin font-semibold text-xs">Security Officers Keys</p>
+                <p class="text-start font-palanquin font-semibold text-xs">{% translate "Security Officers Keys" %}</p>
                 <ul>
                 {% for security_officer_file in security_officer_files %}
                     <li>
@@ -14,7 +15,7 @@
                 </ul>
             </div>
             <div>
-                <p class="text-start font-palanquin font-semibold  text-xs">Provider Keys</p>
+                <p class="text-start font-palanquin font-semibold  text-xs">{% translate "Provider Keys" %}</p>
                 <ul>
                 {% for provider_file in provider_files %}
                     <li>
@@ -26,14 +27,14 @@
                 </ul>
             </div>
             <div>
-                <p class="text-start font-palanquin font-semibold text-xs">Wrapped Key File</p>
+                <p class="text-start font-palanquin font-semibold text-xs">{% translate "Wrapped Key File" %}</p>
                     <a href="{{ MEDIA_URL }}{{ wrapped_secret_key_file }}" download="{{ wrapped_secret_key_file }}" class="w-full mt-4 underline underline-offset-4 font-palanquin  decoration-blue-600 text-blue-600 text-xs">
                         {{ wrapped_secret_key_file }}
                     </a>
             </div>
             {% if milenage_file %}
             <div>
-                <p class="text-start font-palanquin font-semibold text-xs">Milenage Keys</p>
+                <p class="text-start font-palanquin font-semibold text-xs">{% translate "Milenage Keys" %}</p>
                 <a href="{{ MEDIA_URL }}{{ milenage_file }}" download="{{ milenage_file }}" class="w-full mt-1 underline font-palanquin underline-offset-4 decoration-blue-600 text-blue-600 text-xs">
                     {{ milenage_file|capfirst }}
                 </a>
