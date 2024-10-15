@@ -30,6 +30,8 @@ from cyph3r.key_tracker import total_key_shares, total_files_encrypted
 from datetime import datetime
 import logging
 from django.conf import settings
+from django.utils.translation import get_language
+from django.utils.translation import activate
 
 """
 This module contains the views for the cyph3r app.
@@ -58,6 +60,7 @@ def index(request):
     Returns the Home Page
     """
     try:
+
         # Get the total number of keys generated
         keys_generated = KeyGeneration.objects.count()
 
