@@ -1,26 +1,3 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-.bg-sunray {
-    background: radial-gradient(circle, rgba(253,186,116,0.6) 0%, rgba(255,235,200,0.2) 100%);
-    animation: sunRayMove 10s infinite ease-in-out;
-  }
-  
-  /* Moonlight Effect */
-  .bg-moonray {
-    background: radial-gradient(circle, rgba(255,165,0,0.2) 0%, rgba(55,65,81,0.4) 100%);
-    animation: moonRayMove 10s infinite ease-in-out;
-  }
-  
-  /* Animation for sunrays */
-  @keyframes sunRayMove {
-    0% { background-position: 0% 0%; }
-    100% { background-position: 100% 100%; }
-  }
-  
-  /* Animation for moonlight */
-  @keyframes moonRayMove {
-    0% { background-position: 100% 100%; }
-    100% { background-position: 0% 0%; }
-  }
