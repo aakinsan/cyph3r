@@ -36,7 +36,7 @@ def cleanup_generated_files():
         if os.path.isdir(path):
             shutil.rmtree(path)
         else:
-            os.remove(os.path.join(settings.MEDIA_ROOT, f))
+            os.remove(path)
 
 
 @pytest.fixture
