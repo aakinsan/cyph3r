@@ -2,7 +2,7 @@
 {% load i18n %}
 
 <!DOCTYPE html>
-<html lang="en">
+<html id="html" lang="en">
   <head>
     <title>Cyph3r</title>
     <meta charset="UTF-8" />
@@ -13,8 +13,16 @@
     {% tailwind_css %}
     <script src="{% static 'js/htmx.min.js' %}" defer></script>
     <script src="{% static 'js/_hyperscript.min.js' %}" defer></script>
+    <script>
+      if (window.localStorage.getItem('theme') === 'dark') {
+        document.querySelector('html').classList.add('dark');
+      } else if (
+          window.localStorage.getItem('theme') === 'light' || window.localStorage.getItem('theme') === null) {
+          document.querySelector('html').classList.remove('dark');
+    }
+    </script>
   </head>
-  <body id="body" class="relative min-h-screen" _="on load if window.localStorage.getItem('theme') == 'dark' then add .dark to me then remove .text-slate-500 from #darkmode then add .text-blue-800 to #darkmode else if window.localStorage.getItem('theme') == 'light' or window.localStorage.getItem('theme') == null then remove .text-slate-500 from #lightmode then add .text-orange-600 to #lightmode">
+  <body id="body" class="relative min-h-screen">
     <main id="main" class="relative w-full min-h-screen bg-gradient-to-b from-orange-100 via-orange-50 to-white dark:bg-gradient-to-b dark:from-slate-600 dark:via-slate-700 dark:to-slate-800 text-gray-800">
       <header class="w-full absolute z-10 h-16 bg-orange-100 dark:bg-slate-600">
         <nav class="flex justify-between w-full h-full items-center py-1 px-8">
@@ -51,10 +59,10 @@
     </main>
     <div id="settings-menu" class="w-1/6 rounded-md hidden flex-col gap-4 ring-1 ring-slate-900/5 min-w-48 min-h-52 max-h-48 max-w-52 shadow-xl absolute right-[30px] top-[60px] z-10 dark:bg-slate-700 bg-white">
       <div class="flex flex-row bg-slate-100 justify-around rounded-lg items-center m-4 p-0.5 gap-4">
-        <svg id="lightmode" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="currentColor" class="w-8 h-8 text-slate-500 hover:text-orange-600 cursor-pointer" _="on click if #body matches .dark then call window.localStorage.setItem('theme', 'light') then remove .dark from #body then remove .text-blue-800 from #darkmode then add .text-slate-500 to #darkmode then remove .text-slate-500 from me then add .text-orange-600 to me">
+        <svg id="lightmode" xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="currentColor" class="w-8 h-8 text-slate-500 hover:text-orange-600 cursor-pointer" _="on click if #html matches .dark then call window.localStorage.setItem('theme', 'light') then remove .dark from #html then remove .text-blue-800 from #darkmode then add .text-slate-500 to #darkmode then remove .text-slate-500 from me then add .text-orange-600 to me">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
         </svg>
-        <svg id="darkmode" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-slate-500 hover:text-blue-700 cursor-pointer" _="on click if #body does not match .dark then call window.localStorage.setItem('theme', 'dark') then add .dark to #body then remove .text-orange-600 from #lightmode then add .text-slate-500 to #lightmode then remove .text-slate-500 from me then add .text-blue-800 to me">
+        <svg id="darkmode" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-slate-500 hover:text-blue-700 cursor-pointer" _="on click if #html does not match .dark then call window.localStorage.setItem('theme', 'dark') then add .dark to #html then remove .text-orange-600 from #lightmode then add .text-slate-500 to #lightmode then remove .text-slate-500 from me then add .text-blue-800 to me">
           <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
         </svg>
       </div>
@@ -66,5 +74,15 @@
       </form>
       <div class="bg-slate-100 text-center text-slate-500 hover:text-slate-900  font-sans font-semibold rounded-lg m-4 p-1 gap-4 cursor-pointer">{% translate "Support" %}</div>
     </div>
+    <script type="text/hyperscript">
+    def checkDarkTheme()
+      if (window.localStorage.getItem('theme') == 'dark') 
+        then remove .text-slate-500 from #darkmode then add .text-blue-800 to #darkmode
+      else if (window.localStorage.getItem('theme') == 'light' or window.localStorage.getItem('theme') == null)
+        then remove .text-slate-500 from #lightmode then add .text-orange-600 to #lightmode
+    end
+
+    on load call checkDarkTheme()
+    </script>
   </body>
 </html>
