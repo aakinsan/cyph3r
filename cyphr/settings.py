@@ -262,6 +262,8 @@ class Prod(Dev):
             },
         },
     }
+    # Set secure proxy header
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
     # Set session cookie age to 8 hours
     SESSION_COOKIE_AGE = 28800
@@ -295,3 +297,15 @@ class Prod(Dev):
 
     # Enables Browser XSS filter
     SECURE_BROWSER_XSS_FILTER = True
+
+    # Enables HTTPOnly for CSRF Cookie
+    CSRF_COOKIE_HTTPONLY = True
+
+    # Enables HTTPOnly for Language Cookie
+    LANGUAGE_COOKIE_HTTPONLY = True
+
+    # Enables Secure for Language Cookie
+    LANGUAGE_COOKIE_SECURE = True
+
+    # Enables Samesote for language cookie
+    LANGUAGE_COOKIE_SAMESITE = "Strict"
