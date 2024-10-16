@@ -42,6 +42,12 @@ class CryptoManager:
     def hex_to_bytes(self, hex_string: str) -> bytes:
         return binascii.unhexlify(hex_string)
 
+    def bytes_to_utf8(self, data: bytes) -> str:
+        try:
+            return data.decode("utf-8")
+        except UnicodeDecodeError:
+            return self.bytes_to_hex(data)
+
     def generate_pgp_key(self, name_email):
         input_data = self.gpg.gen_key_input(name_email=name_email)
         return self.gpg.gen_key(input_data)

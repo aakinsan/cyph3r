@@ -29,6 +29,7 @@ urlpatterns = [
         views.data_protect_download,
         name="data-protect-download",
     ),
+    path("data-protect-result/", views.data_protect_result, name="data-protect-result"),
 ]
 
 htmx_urlpatterns = [

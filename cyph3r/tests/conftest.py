@@ -340,6 +340,14 @@ def data_protect_download_html_page():
 
 
 @pytest.fixture
+def data_protect_result_html_page():
+    """
+    Fixture to return the Data Protect Result (no PGP upload) HTML page.
+    """
+    return "cyph3r/data_protect_templates/data-protect-result.html"
+
+
+@pytest.fixture
 def data_protect_gcm_encrypt_post_data_pgp(pgp_public_keys):
     """
     Fixture to Post data for GCM encryption with PGP public keys.

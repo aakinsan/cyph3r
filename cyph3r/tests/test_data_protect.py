@@ -27,6 +27,7 @@ def test_data_protect_post_response(
     client: Client,
     data_protect_url: str,
     data_protect_download_html_page: str,
+    data_protect_result_html_page: str,
     data_protect_gcm_encrypt_post_data_pgp: dict,
 ):
     """
@@ -36,7 +37,7 @@ def test_data_protect_post_response(
         client,
         data_protect_url,
         data_protect_gcm_encrypt_post_data_pgp,
-        data_protect_download_html_page,
+        data_protect_result_html_page,
     )
 
 

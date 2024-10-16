@@ -194,6 +194,7 @@ def data_protect_info(request):
                     )
                 # File is not PGP encrypted
                 else:
+                    """
                     data_protect_file = create_data_protection_unwrapped_file(
                         cm,
                         task_name,
@@ -204,6 +205,18 @@ def data_protect_info(request):
                         user_dir,
                         aad,
                     )
+                    """
+                    result_no_uploaded_pgp_key = {
+                        "aes_output": cm.bytes_to_utf8(aes_output),
+                        "nonce": cm.bytes_to_hex(nonce),
+                        "aad": cm.bytes_to_utf8(aad),
+                        "aes_mode": aes_mode,
+                    }
+                    request.session["result_no_uploaded_pgp_key"] = (
+                        result_no_uploaded_pgp_key
+                    )
+
+                    return redirect("data-protect-result")
 
                 # Add path to secret files to session
                 request.session["data_protect_file"] = data_protect_file
@@ -242,6 +255,28 @@ def data_protect_download(request):
             request,
             "cyph3r/data_protect_templates/data-protect-download.html",
             {"data_protect_file": data_protect_file},
+        )
+    except Exception as e:
+        logger.error(
+            f"An error occurred in key share download view: {e}", exc_info=True
+        )
+        return render(
+            request,
+            CYPH3R_500_ERROR_PAGE,
+        )
+
+
+@require_http_methods(["GET"])
+def data_protect_result(request):
+    """
+    Returns Encrypt/Decrypt Operation Result when PGP key is not uploaded
+    """
+    try:
+        result_no_uploaded_pgp_key = request.session["result_no_uploaded_pgp_key"]
+        return render(
+            request,
+            "cyph3r/data_protect_templates/data-protect-result.html",
+            {"result_no_uploaded_pgp_key": result_no_uploaded_pgp_key},
         )
     except Exception as e:
         logger.error(
