@@ -283,14 +283,14 @@ class Prod(Dev):
     # Set CSRF cookie to secure
     CSRF_COOKIE_SECURE = True
 
-    # Set secure HSTS max-age to 1 year
-    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    # Disabling as it is set on web-server
+    # SECURE_HSTS_SECONDS = 31536000  # 1 year
 
-    # include subdomains if any as part of HSTS
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    # Disabling as it is set on web-server
+    # SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 
-    # Set HSTS preload to True
-    SECURE_HSTS_PRELOAD = True
+    # Disabling as it is set on web-server
+    # SECURE_HSTS_PRELOAD = True
 
     # MIME type sniffing protection
     SECURE_CONTENT_TYPE_NOSNIFF = True
