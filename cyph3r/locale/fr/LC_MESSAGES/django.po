@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-15 06:25-0400\n"
+"POT-Creation-Date: 2024-10-17 06:03-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31,6 +31,7 @@ msgid "This is not PGP ASCII armored."
 msgstr "Ce n'est pas du PGP ASCII blindé."
 
 #: forms.py:71
+#, python-brace-format
 msgid "Upload {count} PGP public keys."
 msgstr "Téléchargez {count} clés publiques PGP."
 
@@ -136,7 +137,7 @@ msgstr "Clé publique Milenage"
 
 #: forms.py:224
 msgid "Upload PGP public key to wrap milenage keys"
-msgstr "Téléchargez la clé publique PGP pour envelopper les clés de kilométrage"
+msgstr "Téléchargez la clé publique PGP pour envelopper les clés de milenage"
 
 #: forms.py:254
 msgid "Key Index"
@@ -231,8 +232,8 @@ msgid "name"
 msgstr "nom"
 
 #: forms.py:421
-msgid "Identifier for generated file."
-msgstr "Identifiant du fichier généré."
+msgid "Identifier for PGP encrypted file."
+msgstr "Identifiant du fichier chiffré PGP"
 
 #: forms.py:433
 msgid "AES Mode"
@@ -273,3 +274,7 @@ msgstr "Clé publique PGP (facultatif)"
 #: forms.py:502
 msgid "Upload PGP Public key to encrypt output"
 msgstr "Téléchargez la clé publique PGP pour chiffrer la sortie"
+
+#: forms.py:544
+msgid "Name is required when uploading a public key."
+msgstr "Le nom est requis lors du téléchargement d’une clé publique."

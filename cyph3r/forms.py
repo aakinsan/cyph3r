@@ -417,8 +417,8 @@ class DataProtectionForm(forms.Form, ValidateCyph3rForms):
         label=_("name"),
         max_length=15,
         min_length=3,
-        required=True,
-        help_text=_("Identifier for generated file."),
+        required=False,
+        help_text=_("Identifier for PGP encrypted file."),
     )
 
     # AES Mode choices
@@ -535,3 +535,10 @@ class DataProtectionForm(forms.Form, ValidateCyph3rForms):
         if file:
             self.validate_single_file(file, "public_key")
         return file
+
+    def clean(self):
+        cleaned_data = super().clean()
+        public_key = cleaned_data.get("public_key")
+        name = cleaned_data.get("name")
+        if public_key and not name:
+            self.add_error("name", _("Name is required when uploading a public key."))
