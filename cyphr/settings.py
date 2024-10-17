@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 from configurations import Configuration, values
+import google.cloud.logging
+from google.cloud.logging.handlers import CloudLoggingHandler
 from .get_secrets_from_gcp import get_secret
 import os
 
@@ -183,85 +185,6 @@ class Prod(Dev):
     # Secret Key
     SECRET_KEY = get_secret(id="django_secret")
 
-    # Database
-    # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-    DATABASE_PASSWORD = get_secret(id="postgres_secret")
-
-    DATABASES = values.DatabaseURLValue(
-        f"postgres://cyph3r:{DATABASE_PASSWORD}@localhost/cyph3r"
-    )
-
-    # Installed Apps and Middleware
-    INSTALLED_APPS = [
-        "django.contrib.admin",
-        "django.contrib.auth",
-        "django.contrib.contenttypes",
-        "django.contrib.sessions",
-        "django.contrib.messages",
-        "django.contrib.staticfiles",
-        "cyph3r",
-        "aaa",
-        "tailwind",
-        "theme",
-        "widget_tweaks",
-        "django_htmx",
-    ]
-
-    MIDDLEWARE = [
-        "django.middleware.security.SecurityMiddleware",
-        "django.contrib.sessions.middleware.SessionMiddleware",
-        "django.middleware.locale.LocaleMiddleware",
-        "django.middleware.common.CommonMiddleware",
-        "django.middleware.csrf.CsrfViewMiddleware",
-        "django.contrib.auth.middleware.AuthenticationMiddleware",
-        "django.contrib.messages.middleware.MessageMiddleware",
-        "django.middleware.clickjacking.XFrameOptionsMiddleware",
-        "django_htmx.middleware.HtmxMiddleware",
-    ]
-
-    # Remove Internal IPs
-    INTERNAL_IPS = []
-
-    LOGGING = {
-        "version": 1,
-        "disable_existing_loggers": False,
-        "formatters": {
-            "verbose": {
-                "format": "{levelname} {asctime} {module} {message}",
-                "style": "{",
-            },
-        },
-        "handlers": {
-            "default": {
-                "level": "DEBUG",
-                "class": "logging.handlers.RotatingFileHandler",
-                "filename": "/home/cyph3r/logs/root.log",
-                "maxBytes": 1024 * 1024 * 5,
-                "backupCount": 5,
-                "formatter": "verbose",
-            },
-            "django_handler": {
-                "level": "DEBUG",
-                "class": "logging.handlers.RotatingFileHandler",
-                "filename": "/home/cyph3r/logs/django.log",
-                "maxBytes": 1024 * 1024 * 5,
-                "backupCount": 5,
-                "formatter": "verbose",
-            },
-        },
-        "loggers": {
-            "": {
-                "handlers": ["default"],
-                "level": "ERROR",
-            },
-            "django": {
-                "handlers": ["django_handler"],
-                "level": "ERROR",
-                "propagate": False,
-            },
-        },
-    }
     # Set secure proxy header
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
@@ -309,3 +232,105 @@ class Prod(Dev):
 
     # Enables Samesote for language cookie
     LANGUAGE_COOKIE_SAMESITE = "Strict"
+
+    # Database
+    # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+
+    DATABASE_PASSWORD = get_secret(id="postgres_secret")
+
+    DATABASES = values.DatabaseURLValue(
+        f"postgres://cyph3r:{DATABASE_PASSWORD}@localhost/cyph3r"
+    )
+
+    # Installed Apps and Middleware
+    INSTALLED_APPS = [
+        "django.contrib.admin",
+        "django.contrib.auth",
+        "django.contrib.contenttypes",
+        "django.contrib.sessions",
+        "django.contrib.messages",
+        "django.contrib.staticfiles",
+        "cyph3r",
+        "aaa",
+        "tailwind",
+        "theme",
+        "widget_tweaks",
+        "django_htmx",
+    ]
+
+    MIDDLEWARE = [
+        "django.middleware.security.SecurityMiddleware",
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "django.middleware.locale.LocaleMiddleware",
+        "django.middleware.common.CommonMiddleware",
+        "django.middleware.csrf.CsrfViewMiddleware",
+        "django.contrib.auth.middleware.AuthenticationMiddleware",
+        "django.contrib.messages.middleware.MessageMiddleware",
+        "django.middleware.clickjacking.XFrameOptionsMiddleware",
+        "django_htmx.middleware.HtmxMiddleware",
+    ]
+
+    # Remove Internal IPs
+    INTERNAL_IPS = []
+
+    # Logging Settings for Production (to GCP Cloud Logging and to file)
+    # Initialize the Cloud Logging client
+    client = google.cloud.logging.Client()
+
+    # Set up the handler for sending logs to GCP Cloud Logging
+    cloud_logging_handler = CloudLoggingHandler(client)
+
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "verbose": {
+                "format": "{levelname} {asctime} {module} {message}",
+                "style": "{",
+            },
+        },
+        "handlers": {
+            "default": {
+                "level": "DEBUG",
+                "class": "logging.handlers.RotatingFileHandler",
+                "filename": "/home/cyph3r/logs/root.log",
+                "maxBytes": 1024 * 1024 * 5,
+                "backupCount": 5,
+                "formatter": "verbose",
+            },
+            "django_handler": {
+                "level": "DEBUG",
+                "class": "logging.handlers.RotatingFileHandler",
+                "filename": "/home/cyph3r/logs/django.log",
+                "maxBytes": 1024 * 1024 * 5,
+                "backupCount": 5,
+                "formatter": "verbose",
+            },
+            "gcp_handler": {
+                "level": "DEBUG",
+                "class": "google.cloud.logging.handlers.CloudLoggingHandler",
+                "client": client,
+            },
+        },
+        "loggers": {
+            "": {
+                "handlers": ["default", "gcp_handler"],
+                "level": "ERROR",
+            },
+            "django": {
+                "handlers": ["django_handler", "gcp_handler"],
+                "level": "INFO",
+                "propagate": False,
+            },
+            "django.request": {
+                "handlers": ["django_handler", "gcp_handler"],
+                "level": "ERROR",
+                "propagate": False,
+            },
+            "django.db.backends": {
+                "handlers": ["django_handler", "gcp_handler"],
+                "level": "ERROR",
+                "propagate": False,
+            },
+        },
+    }
