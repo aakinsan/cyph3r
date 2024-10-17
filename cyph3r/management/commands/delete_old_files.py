@@ -2,6 +2,8 @@ import time
 from django.core.management.base import BaseCommand
 from django.conf import settings
 import os
+from django.utils._os import safe_join
+from pathlib import Path
 import shutil
 import logging
 
@@ -10,19 +12,16 @@ logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
-    help = "Delete files and folders in /media older than 4 hours."
+    help = "Delete files and folders in /media older than an hour."
 
     def handle(self, *args, **kwargs):
         now = time.time()
-        if settings.DEBUG:
-            media_root = settings.MEDIA_ROOT
-        else:
-            media_root = os.getenv("MEDIA_ROOT")
+        media_root = Path("/var/www/cyph3r/media")
 
-        time_limit = 1 * 60 * 60  # 4 hours in seconds
+        time_limit = 1 * 60 * 60  # 1 hour in seconds
 
         for f in os.listdir(media_root):
-            path = os.path.join(media_root, f)
+            path = safe_join(media_root, f)
 
             # Check last modification time of file or folder has not exceeded time limit
             if now - os.path.getmtime(path) > time_limit:
