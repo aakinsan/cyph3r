@@ -1,8 +1,13 @@
+{% extends 'cyph3r/base.html' %}
+{% load static %}
 {% load widget_tweaks %}
+{% block content %}
 {% load i18n %}
+
+<div class="bg-gradient-to-b from-orange-100 via-orange-50 to-white dark:bg-gradient-to-b dark:from-slate-400 dark:via-slate-600 dark:to-slate-800 flex flex-col min-h-screen justify-center items-center w-full">
     <div id="form" class="w-full flex justify-center items-center p-2">
         <!-- Form Start -->
-        <form method="POST" enctype="multipart/form-data" hx-post="{% url 'wireless_generate_keys' %}" hx-trigger="submit" hx-swap="outerHTML" hx-target="#form" class="w-full max-w-sm bg-white dark:bg-slate-800 shadow-md rounded-lg px-4 pt-4 pb-4">
+        <form method="POST" enctype="multipart/form-data" class="w-full max-w-sm bg-white dark:bg-slate-800 shadow-md rounded-lg px-4 pt-4 pb-4">
             <div class="mb-2">
                 {% csrf_token %}
                 <!-- Hidden Fields -->
@@ -33,11 +38,11 @@
                 {% endfor %}
                 <!-- Buttons -->
                 <div class="flex justify-between">
-                    <div class="">
-                        <button id="back" type="button" hx-get="{% url 'wireless_gcp_storage_form' %}" hx-trigger="click" hx-swap="outerHTML" hx-target="#form" class="bg-orange-500 dark:bg-cyan-500 hover:bg-orange-400 text-white text-xs mt-2 px-6 py-2 rounded-lg transition">
+                    <a href = {% url 'wireless-key-info' %}>
+                        <button id="back" type="button" class="bg-orange-500 dark:bg-cyan-500 hover:bg-orange-400 text-white text-xs mt-2 px-6 py-2 rounded-lg transition">
                             {% translate "Back" %}
                         </button>
-                    </div>
+                    </a>
                     <div class="">
                         <button type="submit" class="dark:bg-cyan-500 dark:hover:bg-cyan-400 bg-orange-500 hover:bg-orange-400 text-white text-xs mt-2 px-6 py-2 rounded-lg transition">
                             {% translate "Next" %}
@@ -47,3 +52,7 @@
             </div>
         </form>
     </div>
+</div>
+{% endblock %}
+
+

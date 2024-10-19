@@ -458,7 +458,23 @@ def pgp_upload_url():
     """
     Fixture to return the URL for the PGP upload form.
     """
-    return reverse("wireless_pgp_upload_form")
+    return reverse("wireless-pgp-upload")
+
+
+@pytest.fixture
+def wireless_key_download_url():
+    """
+    Fixture to return the URL of page to dowload PGP encrypted Keys.
+    """
+    return reverse("wireless-key-download")
+
+
+@pytest.fixture
+def wireless_key_info_url():
+    """
+    Fixture to return the URL of page to Enter Wireless key information.
+    """
+    return reverse("wireless-key-info")
 
 
 @pytest.fixture
@@ -483,6 +499,14 @@ def pgp_upload_html_page():
     Fixture to return the HTML page for the PGP upload form.
     """
     return "cyph3r/wireless_templates/wireless-pgp-upload.html"
+
+
+@pytest.fixture
+def wireless_key_download_html_page():
+    """
+    Fixture to return the Generating key HTML page.
+    """
+    return "cyph3r/wireless_templates/wireless-key-download.html"
 
 
 @pytest.fixture

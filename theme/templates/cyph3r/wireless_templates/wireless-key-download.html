@@ -1,7 +1,11 @@
+{% extends 'cyph3r/base.html' %}
+{% load static %}
 {% load widget_tweaks %}
+{% block content %}
 {% load i18n %}
-    
-    <div class="justify-center items-start flex flex-col dark:text-slate-200 gap-4 max-w-5xl p-8 shadow-md bg-white dark:bg-slate-800  rounded-lg">
+
+<div class="bg-gradient-to-b from-orange-100 via-orange-50 to-white dark:bg-gradient-to-b dark:from-slate-400 dark:via-slate-600 dark:to-slate-800 flex flex-col min-h-screen justify-center items-center w-full">
+     <div class="justify-center items-start flex flex-col dark:text-slate-200 gap-4 max-w-5xl p-8 shadow-md bg-white dark:bg-slate-800  rounded-lg">
             <div>
                 <p class="text-start font-palanquin font-semibold text-xs">{% translate "Security Officers Keys" %}</p>
                 <ul>
@@ -41,3 +45,10 @@
             </div>
             {% endif %}
     </div>
+</div>
+{% endblock %}
+
+
+
+    
+   

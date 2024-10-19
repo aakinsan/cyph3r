@@ -7,8 +7,30 @@ This module contains the URL patterns for the cyph3r app.
 """
 
 urlpatterns = [
+    # Index page
     path("", views.index, name="index"),
-    path("wireless/", views.wireless, name="wireless"),
+    # Wireless pages
+    path(
+        "wireless-ceremony-intro/",
+        views.wireless_ceremony_intro,
+        name="wireless-ceremony-intro",
+    ),
+    path(
+        "wireless-key-info/",
+        views.wireless_key_info,
+        name="wireless-key-info",
+    ),
+    path(
+        "wireless-key-download/",
+        views.wireless_key_download,
+        name="wireless-key-download",
+    ),
+    path(
+        "wireless-pgp-upload/",
+        views.wireless_pgp_upload,
+        name="wireless-pgp-upload",
+    ),
+    # Key Share pages
     path("key-share-info/", views.key_share_info, name="key-share-info"),
     path(
         "key-share-reconstruct/",
@@ -22,6 +44,7 @@ urlpatterns = [
     ),
     path("key-share-download/", views.key_share_download, name="key-share-download"),
     path("key-share-intro/", views.key_share_intro, name="key-share-intro"),
+    # Data Protect pages
     path("data-protect-intro/", views.data_protect_intro, name="data-protect-intro"),
     path("data-protect-info/", views.data_protect_info, name="data-protect-info"),
     path(
@@ -31,33 +54,3 @@ urlpatterns = [
     ),
     path("data-protect-result/", views.data_protect_result, name="data-protect-result"),
 ]
-
-htmx_urlpatterns = [
-    path(
-        "wireless-ceremony-intro/",
-        views.wireless_ceremony_intro,
-        name="wireless_ceremony_intro",
-    ),
-    path(
-        "wireless-key-info/",
-        views.wireless_key_info_form,
-        name="wireless_key_info_form",
-    ),
-    path(
-        "wireless-gcp-storage/",
-        views.wireless_gcp_storage_form,
-        name="wireless_gcp_storage_form",
-    ),
-    path(
-        "wireless-pgp-upload/",
-        views.wireless_pgp_upload_form,
-        name="wireless_pgp_upload_form",
-    ),
-    path(
-        "wireless-generate-keys/",
-        views.wireless_generate_keys,
-        name="wireless_generate_keys",
-    ),
-]
-
-urlpatterns += htmx_urlpatterns

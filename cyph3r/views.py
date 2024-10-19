@@ -646,12 +646,12 @@ def key_share_reconstruct(request):
                     request.session["secret_files"] = secret_files
 
                     # Clear cache data and relevant request session keys
-                    del request.session["submitted_officer_count"]
-                    del request.session["key_shares"]
-                    del request.session["scheme"]
-                    del request.session["key_task"]
-                    del request.session["share_count"]
-                    del request.session["threshold_count"]
+                    request.session.pop("submitted_officer_count", None)
+                    request.session.pop("key_shares", None)
+                    request.session.pop("scheme", None)
+                    request.session.pop("key_task", None)
+                    request.session.pop("share_count", None)
+                    request.session.pop("threshold_count", None)
                     cache.delete(f"encryption_key_{request.session.session_key}")
 
                     # Return page to download the secret file
@@ -722,51 +722,19 @@ def wireless_ceremony_intro(request):
         )
         return render(
             request,
-            CYPH3R_500_ERROR_PAGE_HTMX,
-        )
-
-
-@require_http_methods(["GET"])
-def wireless_key_info_form(request):
-    """
-    Returns partial template for the Wireless Key Information form
-    """
-    try:
-
-        # Clear the session entirely and create a new session
-        # This is to ensure that the session is clean and does not contain any stale data
-        # request.session.flush()
-
-        # Retun the key info form
-        return render(
-            request,
-            "cyph3r/wireless_templates/wireless-key-info.html",
-            {"form": WirelessKeyInfoForm()},
-        )
-    except Exception as e:
-        logger.error(
-            f"An error occurred in the wireless key info form view: {e}", exc_info=True
-        )
-        return render(
-            request,
-            CYPH3R_500_ERROR_PAGE_HTMX,
+            CYPH3R_500_ERROR_PAGE,
         )
 
 
 @require_http_methods(["GET", "POST"])
-def wireless_gcp_storage_form(request):
+def wireless_key_info(request):
     """
-    Validates form POST data from /wireless-key-info.html
-    Returns partial template for the GCP Storage info form
+    Returns Wireless Key Information form template
     """
     try:
-        # Check if the request is a POST request and includes HTMX headers
-        if request.method == "POST" and request.htmx:
-
-            # Bind the form with POST data for the key information
+        # Check if the request is a POST request
+        if request.method == "POST":
             form = WirelessKeyInfoForm(request.POST)
-
-            # Validate the form data
             if form.is_valid():
                 # Ensure that the session is created.
                 if not request.session.session_key:
@@ -781,86 +749,33 @@ def wireless_gcp_storage_form(request):
                         "key_size": form.cleaned_data["key_size"],
                     }
                 )
-
-                # Render the GCP Storage form on successful form validation
-                return render(
-                    request,
-                    CYPH3R_WIRELESS_GCP_STORAGE_PAGE,
-                    {"form": WirelessGCPStorageForm()},
-                )
+                return redirect("wireless-pgp-upload")
             else:
-                # Render the key info form if form validation fails
                 return render(
                     request,
-                    "cyph3r/wireless_templates/wireless-key-info.html",
+                    "cyph3r/wireless_templates/wireless-key-infos.html",
                     {"form": form},
                 )
         else:
-            # Render the GCP Storage form if the request is not a POST request
+            form = WirelessKeyInfoForm()
+            # Return the key info form
             return render(
                 request,
-                CYPH3R_WIRELESS_GCP_STORAGE_PAGE,
-                {"form": WirelessGCPStorageForm()},
+                "cyph3r/wireless_templates/wireless-key-info.html",
+                {"form": WirelessKeyInfoForm()},
             )
     except Exception as e:
         logger.error(
-            f"An error occurred in the wireless gcp storage form view: {e}",
-            exc_info=True,
+            f"An error occurred in the wireless key info form view: {e}", exc_info=True
         )
         return render(
             request,
-            CYPH3R_500_ERROR_PAGE_HTMX,
+            CYPH3R_500_ERROR_PAGE,
         )
 
 
 @require_http_methods(["GET", "POST"])
-def wireless_pgp_upload_form(request):
-    """
-    Validates form POST data from /wireless-pgp-upload.html
-    Returns partial template for the PGP Upload form
-    """
-    try:
-        # Check if the request is a POST request and includes HTMX headers
-        if request.method == "POST" and request.htmx:
-
-            # Bind the form with POST data for the key information
-            form = WirelessGCPStorageForm(request.POST)
-
-            # Validate the form data
-            if form.is_valid():
-                # Store key information into the session
-                request.session.update(
-                    {
-                        "gcp_project_id": form.cleaned_data["gcp_project_id"],
-                        "gcp_kms_keyring": form.cleaned_data["gcp_kms_keyring"],
-                        "gcp_kms_key": form.cleaned_data["gcp_kms_key"],
-                    }
-                )
-                # Render the PGP file upload form on successful form submission
-                return render(
-                    request,
-                    "cyph3r/wireless_templates/wireless-pgp-upload.html",
-                    {"form": WirelessPGPUploadForm()},
-                )
-            else:
-                # Render the gcp stprage form if form validation fails
-                return render(
-                    request,
-                    CYPH3R_WIRELESS_GCP_STORAGE_PAGE,
-                    {"form": form},
-                )
-    except Exception as e:
-        logger.error(
-            f"An error occurred in the wireless pgpupload view: {e}", exc_info=True
-        )
-        return render(
-            request,
-            CYPH3R_500_ERROR_PAGE_HTMX,
-        )
-
-
-@require_http_methods(["GET", "POST"])
-def wireless_generate_keys(request):
+def wireless_pgp_upload(request):
     """
     Validates uploaded PGP public keys
     Generates the secret key and wrap key
@@ -868,8 +783,8 @@ def wireless_generate_keys(request):
     Generates encrypted files for provider and security officers
     """
     try:
-        # Check if the request is a POST request and includes HTMX headers
-        if request.method == "POST" and request.htmx:
+        # Check if the request is a POST request
+        if request.method == "POST":
 
             # Populate the form with POST data and PGP public key files
             form = WirelessPGPUploadForm(request.POST, request.FILES)
@@ -953,6 +868,8 @@ def wireless_generate_keys(request):
                 wrapped_secret_key_file = create_wireless_wrapped_secret_key_file(
                     cm, wrapped_data, protocol, key_type, key_identifier
                 )
+                # Store wrapped secret file path in session
+                request.session["wrapped_secret_key_file"] = wrapped_secret_key_file
 
                 # Calling helper function to generate PGP encrypted files for the external provider
                 # Each file contains the XOR share of the secret key encrypted with a provider's PGP key
@@ -967,6 +884,8 @@ def wireless_generate_keys(request):
                     key_identifier,
                     number_of_shares=3,
                 )
+                # Store Provider file paths in session
+                request.session["provider_files"] = provider_files
 
                 # Update the database with the File encryption information
                 FileEncryption.objects.create(
@@ -988,6 +907,8 @@ def wireless_generate_keys(request):
                         shares,
                     )
                 )
+                # Store SO file paths in session
+                request.session["security_officer_files"] = security_officer_files
 
                 # Update the database with the File encryption information
                 FileEncryption.objects.create(
@@ -1016,6 +937,8 @@ def wireless_generate_keys(request):
                         encryption_algorithm="PGP",
                         number_of_files_encrypted=1,
                     )
+                    # Store milenage file path in session
+                    request.session["milenage_file"] = milenage_file
                 """
                 # Initialize GCP Manager for GCP operations
                 # Wrapped keys will be stored in GCP Secrets Manager and also available for download for backup
@@ -1038,29 +961,8 @@ def wireless_generate_keys(request):
                 cache.delete(f"secret_key_{request.session.session_key}")
                 cache.delete(f"wrap_key_{request.session.session_key}")
 
-                # Render the success page upon successful key generation and encryption if protocol is milenage
-                if milenage_file:
-                    return render(
-                        request,
-                        "cyph3r/wireless_templates/wireless-generate-keys.html",
-                        {
-                            "provider_files": provider_files,
-                            "milenage_file": milenage_file,
-                            "security_officer_files": security_officer_files,
-                            "wrapped_secret_key_file": wrapped_secret_key_file,
-                        },
-                    )
-                else:
-                    # Render the success page upon successful key generation and encryption if protocol is tuak
-                    return render(
-                        request,
-                        "cyph3r/wireless_templates/wireless-generate-keys.html",
-                        {
-                            "provider_files": provider_files,
-                            "security_officer_files": security_officer_files,
-                            "wrapped_secret_key_file": wrapped_secret_key_file,
-                        },
-                    )
+                # Redirect to the key download page
+                return redirect("wireless-key-download")
             else:
                 # Render the PGP Upload form again with validation errors if the form is invalid
                 return render(
@@ -1068,11 +970,74 @@ def wireless_generate_keys(request):
                     "cyph3r/wireless_templates/wireless-pgp-upload.html",
                     {"form": form},
                 )
+        else:
+            # Initialize the form with the PGP Upload form
+            form = WirelessPGPUploadForm()
+            # Return the PGP Upload form
+            return render(
+                request,
+                "cyph3r/wireless_templates/wireless-pgp-upload.html",
+                {"form": form},
+            )
     except Exception as e:
         logger.error(
             f"An error occurred in the wireless generate key view: {e}", exc_info=True
         )
         return render(
             request,
-            CYPH3R_500_ERROR_PAGE_HTMX,
+            CYPH3R_500_ERROR_PAGE,
+        )
+
+
+@require_http_methods(["GET"])
+def wireless_key_download(request):
+    """
+    Returns download page for wireless keys
+    """
+    try:
+        # Get the file paths from the session
+        security_officer_files = request.session.get("security_officer_files")
+        provider_files = request.session.get("provider_files")
+        wrapped_secret_key_file = request.session.get("wrapped_secret_key_file")
+        if request.session.get("milenage_file"):
+            milenage_file = request.session.get("milenage_file")
+
+        # Add file path to be downloaded to the context
+        downloadable_files = (
+            {
+                "security_officer_files": security_officer_files,
+                "provider_files": provider_files,
+                "wrapped_secret_key_file": wrapped_secret_key_file,
+                "milenage_file": milenage_file,
+            }
+            if request.session.get("milenage_file")
+            else {
+                "security_officer_files": security_officer_files,
+                "provider_files": provider_files,
+                "wrapped_secret_key_file": wrapped_secret_key_file,
+            }
+        )
+        # Clear user selection stored in user session.
+        request.session.pop("security_officer_files", None)
+        request.session.pop("provider_files", None)
+        request.session.pop("wrapped_secret_key_file", None)
+        if request.session.get("milenage_file"):
+            request.session.pop("milenage_file", None)
+        request.session.pop("key_identifier", None)
+        request.session.pop("key_type", None)
+        request.session.pop("protocol", None)
+        request.session.pop("key_size", None)
+
+        return render(
+            request,
+            "cyph3r/wireless_templates/wireless-key-download.html",
+            downloadable_files,
+        )
+    except Exception as e:
+        logger.error(
+            f"An error occurred in the wireless key download view: {e}", exc_info=True
+        )
+        return render(
+            request,
+            CYPH3R_500_ERROR_PAGE,
         )

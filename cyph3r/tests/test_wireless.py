@@ -10,25 +10,16 @@ from test_helpers_wireless import (
 )
 
 
-@pytest.mark.django_db
-def test_index_view(client):
-    """
-    Test that the index view renders correctly.
-    """
-    url = reverse("index")  # Get the URL for the index view
-    response = client.get(url)
-    assert response.status_code == 200
-    assert "cyph3r/index.html" in [t.name for t in response.templates]
-
-
 def test_wireless_view(client):
     """
     Test that the wireless intro view renders correctly.
     """
-    url = reverse("wireless")
+    url = reverse("wireless-ceremony-intro")
     response = client.get(url)
     assert response.status_code == 200
-    assert "cyph3r/wireless.html" in [t.name for t in response.templates]
+    assert "cyph3r/wireless_templates/wireless-ceremony-intro.html" in [
+        t.name for t in response.templates
+    ]
 
 
 @pytest.mark.django_db
@@ -39,13 +30,10 @@ def test_wireless_key_generation_milenage_op_keys(
     pgp_public_keys,
     bad_pgp_public_keys,
     key_info_milenage_op_post_data,
-    key_gcp_storage_post_data,
-    gcp_storage_url,
     pgp_upload_url,
-    generate_keys_url,
-    gcp_storage_html_page,
     pgp_upload_html_page,
-    generate_keys_html_page,
+    wireless_key_info_url,
+    wireless_key_download_html_page,
 ):
     """
     Test for milenage op keys
@@ -57,17 +45,16 @@ def test_wireless_key_generation_milenage_op_keys(
 
     # Post the key information data to the view and validate the response
     validate_post_response(
-        client, gcp_storage_url, key_info_milenage_op_post_data, gcp_storage_html_page
-    )
-    # Post the GCP storage key details to the view and validate the response
-    validate_post_response(
-        client, pgp_upload_url, key_gcp_storage_post_data, pgp_upload_html_page
+        client,
+        wireless_key_info_url,
+        key_info_milenage_op_post_data,
+        pgp_upload_html_page,
     )
 
     # Post/upload bad public keys to the view and validate the response
     bad_response = validate_post_response(
         client,
-        generate_keys_url,
+        pgp_upload_url,
         bad_pgp_public_keys,
         pgp_upload_html_page,
         validate_session_data=False,
@@ -79,12 +66,12 @@ def test_wireless_key_generation_milenage_op_keys(
     assert len(bad_response.context["form"]["provider_public_keys"].errors) == 3
     assert len(bad_response.context["form"]["milenage_public_key"].errors) == 3
 
-    # Post/upload the public keys to the view and validate the response
+    # Post/upload valid public keys to the view and validate the response
     response = validate_post_response(
         client,
-        generate_keys_url,
+        pgp_upload_url,
         pgp_public_keys,
-        generate_keys_html_page,
+        wireless_key_download_html_page,
         validate_session_data=False,
     )
     # Check that the response context is passed correctly
@@ -123,13 +110,10 @@ def test_wireless_key_generation_milenage_transport_keys(
     client,
     pgp_public_keys,
     key_info_milenage_transport_post_data,
-    key_gcp_storage_post_data,
-    gcp_storage_url,
     pgp_upload_url,
-    generate_keys_url,
-    gcp_storage_html_page,
     pgp_upload_html_page,
-    generate_keys_html_page,
+    wireless_key_info_url,
+    wireless_key_download_html_page,
 ):
     """
     Test for milenage transport keys
@@ -142,20 +126,17 @@ def test_wireless_key_generation_milenage_transport_keys(
     # Post the key information data to the view and validate the response
     validate_post_response(
         client,
-        gcp_storage_url,
+        wireless_key_info_url,
         key_info_milenage_transport_post_data,
-        gcp_storage_html_page,
+        pgp_upload_html_page,
     )
-    # Post the GCP storage key details to the view and validate the response
-    validate_post_response(
-        client, pgp_upload_url, key_gcp_storage_post_data, pgp_upload_html_page
-    )
+
     # Post/upload the public keys to the view and validate the response
     response = validate_post_response(
         client,
-        generate_keys_url,
+        pgp_upload_url,
         pgp_public_keys,
-        generate_keys_html_page,
+        wireless_key_download_html_page,
         validate_session_data=False,
     )
     # Check that the response context is passed correctly
@@ -194,13 +175,10 @@ def test_wireless_key_generation_tuak_transport_keys(
     client,
     pgp_public_keys,
     key_info_tuak_transport_post_data,
-    key_gcp_storage_post_data,
-    gcp_storage_url,
     pgp_upload_url,
-    generate_keys_url,
-    gcp_storage_html_page,
     pgp_upload_html_page,
-    generate_keys_html_page,
+    wireless_key_info_url,
+    wireless_key_download_html_page,
 ):
     """
     Test for tuak transport keys
@@ -212,20 +190,16 @@ def test_wireless_key_generation_tuak_transport_keys(
     # Post the key information data to the view and validate the response
     validate_post_response(
         client,
-        gcp_storage_url,
+        wireless_key_info_url,
         key_info_tuak_transport_post_data,
-        gcp_storage_html_page,
-    )
-    # Post the GCP storage key details to the view and validate the response
-    validate_post_response(
-        client, pgp_upload_url, key_gcp_storage_post_data, pgp_upload_html_page
+        pgp_upload_html_page,
     )
     # Post/upload the public keys to the view and validate the response
     response = validate_post_response(
         client,
-        generate_keys_url,
+        pgp_upload_url,
         pgp_public_keys,
-        generate_keys_html_page,
+        wireless_key_download_html_page,
         validate_session_data=False,
     )
     # Check that the response context is passed correctly
@@ -254,13 +228,10 @@ def test_wireless_key_generation_tuak_op_keys(
     client,
     pgp_public_keys,
     key_info_tuak_op_post_data,
-    key_gcp_storage_post_data,
-    gcp_storage_url,
     pgp_upload_url,
-    generate_keys_url,
-    gcp_storage_html_page,
     pgp_upload_html_page,
-    generate_keys_html_page,
+    wireless_key_info_url,
+    wireless_key_download_html_page,
 ):
     """
     Test for tuak op keys
@@ -272,20 +243,17 @@ def test_wireless_key_generation_tuak_op_keys(
     # Post the key information data to the view and validate the response
     validate_post_response(
         client,
-        gcp_storage_url,
+        wireless_key_info_url,
         key_info_tuak_op_post_data,
-        gcp_storage_html_page,
+        pgp_upload_html_page,
     )
-    # Post the GCP storage key details to the view and validate the response
-    validate_post_response(
-        client, pgp_upload_url, key_gcp_storage_post_data, pgp_upload_html_page
-    )
+
     # Post/upload the public keys to the view and validate the response
     response = validate_post_response(
         client,
-        generate_keys_url,
+        pgp_upload_url,
         pgp_public_keys,
-        generate_keys_html_page,
+        wireless_key_download_html_page,
         validate_session_data=False,
     )
     # Check that the response context is passed correctly

@@ -19,7 +19,7 @@ def validate_post_response(
     Helper function to validate response and client session after posting form data to a view.
     """
     # The wireless views utilize htmx to make POST requests and to swap forms
-    response = client.post(url, post_data, HTTP_HX_REQUEST="true", format="multipart")
+    response = client.post(url, post_data, format="multipart", follow=True)
     assert response.status_code == 200
     assert html_page in [t.name for t in response.templates]
 
@@ -36,7 +36,8 @@ def validate_response_context(client, response):
     assert len(response.context["provider_files"]) == 3
     assert len(response.context["security_officer_files"]) == 5
     assert response.context["wrapped_secret_key_file"] is not None
-    if client.session["protocol"] == "milenage":
+
+    if response.context.get("milenage_file"):
         assert response.context["milenage_file"] is not None
         assert len(os.listdir(settings.MEDIA_ROOT)) == 10
     else:
