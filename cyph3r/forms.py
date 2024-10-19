@@ -218,6 +218,12 @@ class WirelessPGPUploadForm(forms.Form, ValidateCyph3rForms):
         help_text=_("Upload 3 Provider PGP Public keys"),
     )
 
+    fallback_public_keys = MultipleFileField(
+        label=_("Fallback Public Keys"),
+        required=True,
+        help_text=_("Upload 2 Yubikey PGP Public keys"),
+    )
+
     milenage_public_key = forms.FileField(
         label=_("Milenage Public Key"),
         required=False,
@@ -234,6 +240,12 @@ class WirelessPGPUploadForm(forms.Form, ValidateCyph3rForms):
         """Validate the uploaded provider public keys files are valid PGP public keys"""
         files = self.cleaned_data.get("provider_public_keys")
         self.validate_multiple_files(files, "provider_public_keys", 3)
+        return files
+
+    def clean_fallback_public_keys(self):
+        """Validate the uploaded yubikey public keys files are valid PGP public keys"""
+        files = self.cleaned_data.get("fallback_public_keys")
+        self.validate_multiple_files(files, "fallback_public_keys", 2)
         return files
 
     def clean_milenage_public_key(self):

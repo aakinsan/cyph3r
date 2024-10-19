@@ -732,6 +732,17 @@ def wireless_key_info(request):
     Returns Wireless Key Information form template
     """
     try:
+        # Remove any existing data stored in session to ensure that session is clean and has no stale data.
+        request.session.pop("security_officer_files", None)
+        request.session.pop("provider_files", None)
+        request.session.pop("wrapped_secret_key_file", None)
+        if request.session.get("milenage_file"):
+            request.session.pop("milenage_file", None)
+        request.session.pop("key_identifier", None)
+        request.session.pop("key_type", None)
+        request.session.pop("protocol", None)
+        request.session.pop("key_size", None)
+
         # Check if the request is a POST request
         if request.method == "POST":
             form = WirelessKeyInfoForm(request.POST)
@@ -1017,17 +1028,6 @@ def wireless_key_download(request):
                 "wrapped_secret_key_file": wrapped_secret_key_file,
             }
         )
-        # Clear user selection stored in user session.
-        request.session.pop("security_officer_files", None)
-        request.session.pop("provider_files", None)
-        request.session.pop("wrapped_secret_key_file", None)
-        if request.session.get("milenage_file"):
-            request.session.pop("milenage_file", None)
-        request.session.pop("key_identifier", None)
-        request.session.pop("key_type", None)
-        request.session.pop("protocol", None)
-        request.session.pop("key_size", None)
-
         return render(
             request,
             "cyph3r/wireless_templates/wireless-key-download.html",
