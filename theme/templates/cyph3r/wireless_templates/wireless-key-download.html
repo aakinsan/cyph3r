@@ -30,6 +30,18 @@
                 {% endfor %}
                 </ul>
             </div>
+             <div>
+                <p class="text-start font-palanquin font-semibold  text-xs">{% translate "Yubikey Fallback Keys" %}</p>
+                <ul>
+                {% for fallback_file in fallback_yubikey_files %}
+                    <li>
+                    <a href="{{ MEDIA_URL }}{{ fallback_file }}" download="{{ fallback_file }}" class="w-full mt-4 underline underline-offset-4 font-palanquin  decoration-blue-600 text-blue-600 text-xs">
+                        {{ fallback_file}}
+                    </a>
+                    </li>
+                {% endfor %}
+                </ul>
+            </div>
             <div>
                 <p class="text-start font-palanquin font-semibold text-xs">{% translate "Wrapped Key File" %}</p>
                     <a href="{{ MEDIA_URL }}{{ wrapped_secret_key_file }}" download="{{ wrapped_secret_key_file }}" class="w-full mt-4 underline underline-offset-4 font-palanquin  decoration-blue-600 text-blue-600 text-xs">

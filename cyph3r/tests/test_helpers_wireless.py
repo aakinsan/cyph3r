@@ -35,19 +35,20 @@ def validate_response_context(client, response):
     """
     assert len(response.context["provider_files"]) == 3
     assert len(response.context["security_officer_files"]) == 5
+    assert len(response.context["fallback_yubikey_files"]) == 2
     assert response.context["wrapped_secret_key_file"] is not None
 
-    if response.context.get("milenage_file"):
+    if client.session.get("milenage_file"):
         assert response.context["milenage_file"] is not None
-        assert len(os.listdir(settings.MEDIA_ROOT)) == 10
+        assert len(os.listdir(settings.MEDIA_ROOT)) == 12
     else:
         assert response.context.get("milenage_file") is None
-        assert len(os.listdir(settings.MEDIA_ROOT)) == 9
+        assert len(os.listdir(settings.MEDIA_ROOT)) == 11
 
 
 def process_provider_keys(cm, response):
     """
-    Helper function to process the provider keys.
+    Helper function to decrypt provider key shares and extract the key.
     """
     # Initialize list to store provider key shares
     provider_key_shares = []
@@ -79,7 +80,7 @@ def process_provider_keys(cm, response):
 
 def process_milenage_keys(cm, response):
     """
-    Helper function to process the Milenage keys to be entered at AuC terminal.
+    Helper function to decrypt the Milenage keys to be entered at AuC terminal.
     """
     # Retrieve the milenage key to be entered at terminal
     with open(
@@ -98,9 +99,36 @@ def process_milenage_keys(cm, response):
     return milenage_secret_key
 
 
+def process_yubikey_fallback_keys(cm, response):
+    """
+    Helper function to decrypt the fallback keys.
+    """
+    # Initialize list to store fallback officer keys
+    yubikey_fallback_keys = []
+
+    for file_name in response.context["fallback_yubikey_files"]:
+        with open(os.path.join(settings.MEDIA_ROOT, file_name), "rb") as f:
+            yubikey_encrypted_data = f.read()
+            decrypted_data = cm.gpg.decrypt(yubikey_encrypted_data)
+
+        # Check that the decryption was successful
+        assert decrypted_data.ok == True
+
+        # Retrieve the milenage key from the decrypted data
+        secret_key = str(decrypted_data)
+
+        yubikey_fallback_keys.append(secret_key)
+
+    # Assert both keys are the same
+    assert yubikey_fallback_keys[0] == yubikey_fallback_keys[1]
+
+    # Return secret key
+    return yubikey_fallback_keys[0]
+
+
 def process_security_officer_wrap_keys(cm, response):
     """
-    Helper function to process the security officer wrap keys.
+    Helper function to decryt the Security Officers shamir shares and get the key.
     """
     # Initialize list to store security officer key shares
     # This would be stored as a list of tuples - [(key_index, bytes(key_share))]

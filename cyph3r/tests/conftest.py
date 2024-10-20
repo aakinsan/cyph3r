@@ -68,9 +68,9 @@ def pgp_public_keys():
     ) as fp3, open(
         test_public_keys_dir / "m1_FF18092361401CF1_pubkey.asc", "rb"
     ) as fm1, open(
-        test_public_keys_dir / "ybk1_18F47CA1D9572970_pubkey.asc", "rb"
+        test_public_keys_dir / "ybk1_BB9D6828703D7362_pubkey.asc", "rb"
     ) as fyk1, open(
-        test_public_keys_dir / "ybk2_58770CAE08C0D33D_pubkey.asc", "rb"
+        test_public_keys_dir / "ybk2_243A309C88A8FE47_pubkey.asc", "rb"
     ) as fyk2:
         so1 = SimpleUploadedFile("so1_1C45D386C0FA1F0E_pubkey.asc", fso1.read())
         so2 = SimpleUploadedFile("so2_1302D17D7AB89284_pubkey.asc", fso2.read())
@@ -81,8 +81,8 @@ def pgp_public_keys():
         p2 = SimpleUploadedFile("p2_004B67CF5F45143D_pubkey.asc", fp2.read())
         p3 = SimpleUploadedFile("p3_6190B90847840025_pubkey.asc", fp3.read())
         m1 = SimpleUploadedFile("m1_FF18092361401CF1_pubkey.asc", fm1.read())
-        ybk1 = SimpleUploadedFile("ybk1_18F47CA1D9572970_pubkey.asc", fyk1.read())
-        ybk2 = SimpleUploadedFile("ybk2_58770CAE08C0D33D_pubkey.asc", fyk2.read())
+        ybk1 = SimpleUploadedFile("ybk1_BB9D6828703D7362_pubkey.asc", fyk1.read())
+        ybk2 = SimpleUploadedFile("ybk2_243A309C88A8FE47_pubkey.asc", fyk2.read())
 
     # Create dictionary for uploaded files
     pgp_file_uploads = {

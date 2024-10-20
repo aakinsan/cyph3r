@@ -21,6 +21,7 @@ from cyph3r.files import (
     create_key_share_reconstruct_secret_file,
     create_key_share_split_secret_files,
     create_data_protection_pgp_wrapped_file,
+    create_wireless_fallback_yubikey_encrypted_key_files,
     create_data_protection_unwrapped_file,
 )
 from cryptography.exceptions import InvalidTag
@@ -928,6 +929,28 @@ def wireless_pgp_upload(request):
                     number_of_files_encrypted=len(security_officer_files),
                 )
 
+                # Calling helper function to encrypt secret with Yubikey fallback PGP keys
+                # This returns a list of the file names of the encrypted secrets for download
+                fallback_yubikey_files = (
+                    create_wireless_fallback_yubikey_encrypted_key_files(
+                        form,
+                        cm,
+                        key_type,
+                        key_identifier,
+                        protocol,
+                        secret_key,
+                    )
+                )
+                # Store SO file paths in session
+                request.session["fallback_yubikey_files"] = fallback_yubikey_files
+
+                # Update the database with the File encryption information
+                FileEncryption.objects.create(
+                    key=None,
+                    encryption_algorithm="PGP",
+                    number_of_files_encrypted=len(fallback_yubikey_files),
+                )
+
                 # Check if protocol is milenage
                 # Check that the PGP key of the engineer that will be at the terminal was uploaded
                 # This check is done to prevent tuak keys from being written using the PGP key of the engineer
@@ -1008,6 +1031,7 @@ def wireless_key_download(request):
     try:
         # Get the file paths from the session
         security_officer_files = request.session.get("security_officer_files")
+        fallback_yubikey_files = request.session.get("fallback_yubikey_files")
         provider_files = request.session.get("provider_files")
         wrapped_secret_key_file = request.session.get("wrapped_secret_key_file")
         if request.session.get("milenage_file"):
@@ -1018,6 +1042,7 @@ def wireless_key_download(request):
             {
                 "security_officer_files": security_officer_files,
                 "provider_files": provider_files,
+                "fallback_yubikey_files": fallback_yubikey_files,
                 "wrapped_secret_key_file": wrapped_secret_key_file,
                 "milenage_file": milenage_file,
             }
@@ -1025,6 +1050,7 @@ def wireless_key_download(request):
             else {
                 "security_officer_files": security_officer_files,
                 "provider_files": provider_files,
+                "fallback_yubikey_files": fallback_yubikey_files,
                 "wrapped_secret_key_file": wrapped_secret_key_file,
             }
         )

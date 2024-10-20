@@ -5,6 +5,7 @@ from test_helpers_wireless import (
     validate_response_context,
     process_provider_keys,
     process_milenage_keys,
+    process_yubikey_fallback_keys,
     process_security_officer_wrap_keys,
     get_wrapped_secret_key,
 )
@@ -83,8 +84,12 @@ def test_wireless_key_generation_milenage_op_keys(
     # Process the Milenage keys
     milenage_secret_key = process_milenage_keys(cm, response)
 
-    # Assert the milenage and provider secret keys are the same
+    # Process the Fallback keys
+    fallback_yubi_secret_key = process_yubikey_fallback_keys(cm, response)
+
+    # Assert the milenage, fallback key and provider secret keys are the same
     assert milenage_secret_key == provider_secret_key
+    assert milenage_secret_key == fallback_yubi_secret_key
 
     # Process the security officer wrap keys
     wrap_key = process_security_officer_wrap_keys(cm, response)
@@ -100,6 +105,7 @@ def test_wireless_key_generation_milenage_op_keys(
         decrypted_secret_key
         == cm.hex_to_bytes(provider_secret_key)
         == cm.hex_to_bytes(milenage_secret_key)
+        == cm.hex_to_bytes(fallback_yubi_secret_key)
     )
 
 
@@ -148,8 +154,12 @@ def test_wireless_key_generation_milenage_transport_keys(
     # Process the Milenage keys
     milenage_secret_key = process_milenage_keys(cm, response)
 
-    # Assert the milenage and provider secret keys are the same
+    # Process the Fallback keys
+    fallback_yubi_secret_key = process_yubikey_fallback_keys(cm, response)
+
+    # Assert the milenage, fallback and provider secret keys are the same
     assert milenage_secret_key == provider_secret_key
+    assert milenage_secret_key == fallback_yubi_secret_key
 
     # Process the security officer wrap keys
     wrap_key = process_security_officer_wrap_keys(cm, response)
@@ -208,6 +218,12 @@ def test_wireless_key_generation_tuak_transport_keys(
     # Process the provider keys
     provider_secret_key = process_provider_keys(cm, response)
 
+    # Process the Fallback keys
+    fallback_yubi_secret_key = process_yubikey_fallback_keys(cm, response)
+
+    # Assert the provider and fallback secret keys are the same
+    assert provider_secret_key == fallback_yubi_secret_key
+
     # Process the security officer wrap keys
     wrap_key = process_security_officer_wrap_keys(cm, response)
 
@@ -261,6 +277,12 @@ def test_wireless_key_generation_tuak_op_keys(
 
     # Process the provider keys
     provider_secret_key = process_provider_keys(cm, response)
+
+    # Process the Fallback keys
+    fallback_yubi_secret_key = process_yubikey_fallback_keys(cm, response)
+
+    # Assert the provider and fallback secret keys are the same
+    assert provider_secret_key == fallback_yubi_secret_key
 
     # Process the security officer wrap keys
     wrap_key = process_security_officer_wrap_keys(cm, response)

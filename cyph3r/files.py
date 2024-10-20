@@ -184,6 +184,38 @@ def create_wireless_security_officers_encrypted_key_files(
     return security_officer_file_names
 
 
+def create_wireless_fallback_yubikey_encrypted_key_files(
+    form: forms.Form,
+    cm: CryptoManager,
+    key_type: str,
+    key_identifier: str,
+    protocol: str,
+    secret_key: bytes,
+) -> list:
+    """Encrypts files containing the wireless secrets with the fallback Yubikey PGP keys."""
+    # Initialize the list to store the paths to the encrypted shares for download
+    fallback_yubikey_file_names = []
+
+    # Loop through each uploaded fallback Yubikey public key files and encrypt the secrets
+    for key_index, file in enumerate(
+        form.cleaned_data["fallback_public_keys"], start=1
+    ):
+        fingerprint, keyid = import_pgp_key_from_file(cm, file)
+        fallback_yubikey_file_name = f"fallback-yubikey-{key_identifier}-{protocol}-{key_type}-secret-key-{key_index}-{keyid}{GPG_FILE_EXTENSION}"
+        save_path = safe_join(settings.MEDIA_ROOT, fallback_yubikey_file_name)
+        fallback_yubikey_file_names.append(fallback_yubikey_file_name)
+
+        secret_key_hex = cm.bytes_to_hex(secret_key)
+
+        encrypted_yubikey_fallback_data = cm.gpg.encrypt(
+            secret_key_hex, fingerprint, always_trust=True, armor=False
+        )
+        save_encrypted_data_to_file(save_path, encrypted_yubikey_fallback_data.data)
+
+    # Return the path to the SO encrypted files for download
+    return fallback_yubikey_file_names
+
+
 def create_wireless_milenage_encrypted_file(
     form: forms.Form,
     cm: CryptoManager,
