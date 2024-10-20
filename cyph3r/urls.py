@@ -53,4 +53,7 @@ urlpatterns = [
         name="data-protect-download",
     ),
     path("data-protect-result/", views.data_protect_result, name="data-protect-result"),
+    # Token Gen Info
+    path("token-gen-info/", views.token_gen_info, name="token-gen-info"),
+    path("token-gen-result/", views.token_gen_result, name="token-gen-result"),
 ]

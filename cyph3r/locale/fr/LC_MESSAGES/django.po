@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-17 06:03-0400\n"
+"POT-Creation-Date: 2024-10-20 17:05-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -132,149 +132,195 @@ msgid "Upload 3 Provider PGP Public keys"
 msgstr "Télécharger 3 clés publiques PGP du fournisseur"
 
 #: forms.py:222
+msgid "Fallback Public Keys"
+msgstr "Clés publiques de secours"
+
+#: forms.py:224
+msgid "Upload 2 Yubikey PGP Public keys"
+msgstr "Téléchargez 2 clés publiques Yubikey PGP"
+
+#: forms.py:228
 msgid "Milenage Public Key"
 msgstr "Clé publique Milenage"
 
-#: forms.py:224
+#: forms.py:230
 msgid "Upload PGP public key to wrap milenage keys"
 msgstr "Téléchargez la clé publique PGP pour envelopper les clés de milenage"
 
-#: forms.py:254
+#: forms.py:266
 msgid "Key Index"
 msgstr "Index clé"
 
-#: forms.py:258
+#: forms.py:270
 msgid "Shamir key index."
 msgstr "Index des clés Shamir."
 
-#: forms.py:267 forms.py:286
+#: forms.py:279 forms.py:298
 msgid "Key Share (HEXADECIMAL STRING)"
 msgstr "Partage de clé (CHAÎNE HEXADÉCIMALE)"
 
-#: forms.py:268 forms.py:287
+#: forms.py:280 forms.py:299
 msgid "Enter 128 or 256 (only xor) bit key."
 msgstr "Entrez la clé de bits 128 ou 256 (uniquement xor)."
 
-#: forms.py:301
+#: forms.py:313
 msgid "Select a scheme"
 msgstr "Sélectionnez un schéma"
 
-#: forms.py:308
+#: forms.py:320
 msgid "Scheme"
 msgstr "Schème"
 
-#: forms.py:314
+#: forms.py:326
 msgid "Select a Task"
 msgstr "Sélectionnez une tâche"
 
-#: forms.py:315
+#: forms.py:327
 msgid "Split Key"
 msgstr "Clé partagée"
 
-#: forms.py:316
+#: forms.py:328
 msgid "Reconstruct Key"
 msgstr "Clé de reconstruction"
 
-#: forms.py:321
+#: forms.py:333
 msgid "Task"
 msgstr "Tâche"
 
-#: forms.py:327
+#: forms.py:339
 msgid "Share Count"
 msgstr "Nombre de partages"
 
-#: forms.py:331
+#: forms.py:343
 msgid "Total number of key shares."
 msgstr "Nombre total d'actions clés."
 
-#: forms.py:336
+#: forms.py:348
 msgid "Threshold Count"
 msgstr "Nombre de seuils"
 
-#: forms.py:340
+#: forms.py:352
 msgid "Minimum number of key shares for key reconstruction."
 msgstr "Nombre minimum de partages de clés pour la reconstruction de clé."
 
-#: forms.py:344
+#: forms.py:356
 msgid "Key Share Public Keys"
 msgstr "Clés publiques de partage de clés"
 
-#: forms.py:346
+#: forms.py:358
 msgid "Upload PGP Public key(s)"
 msgstr "Télécharger la ou les clés publiques PGP"
 
-#: forms.py:371 forms.py:382
+#: forms.py:383 forms.py:394
 msgid "Threshold count is required for Shamir Secret Shares."
 msgstr "Un décompte de seuil est requis pour les actions secrètes Shamir."
 
-#: forms.py:377
+#: forms.py:389
 msgid "Share count is required for Shamir Secret Shares."
 msgstr "Le décompte des partages est requis pour les partages secrets Shamir."
 
-#: forms.py:389
+#: forms.py:401
 msgid "Threshold count must be less than or equal to the share count."
 msgstr "Le nombre de seuils doit être inférieur ou égal au nombre de partages."
 
-#: forms.py:394
+#: forms.py:406
 msgid "Share count is required for XOR key shares."
 msgstr "Le nombre de partages est requis pour les partages de clés XOR."
 
-#: forms.py:400
+#: forms.py:412
 msgid "Total number of public key files must be equal to the share count."
-msgstr "Le nombre total de fichiers de clé publique doit être égal au nombre de partages."
+msgstr ""
+"Le nombre total de fichiers de clé publique doit être égal au nombre de "
+"partages."
 
-#: forms.py:405
+#: forms.py:417
 msgid "Only one PGP Public key file is required for reconstruction."
 msgstr "Un seul fichier de clé publique PGP est requis pour la reconstruction."
 
-#: forms.py:417
+#: forms.py:429
 msgid "name"
 msgstr "nom"
 
-#: forms.py:421
+#: forms.py:433
 msgid "Identifier for PGP encrypted file."
 msgstr "Identifiant du fichier chiffré PGP"
 
-#: forms.py:433
+#: forms.py:445
 msgid "AES Mode"
 msgstr "Mode AES"
 
-#: forms.py:440
+#: forms.py:452
 msgid "Encrypt"
 msgstr "Chiffrer"
 
-#: forms.py:441
+#: forms.py:453
 msgid "Decrypt"
 msgstr "Décrypter"
 
-#: forms.py:446
+#: forms.py:458
 msgid "AES Operation"
 msgstr "Opération AES"
 
-#: forms.py:456
+#: forms.py:468
 msgid "AES Key"
 msgstr "Clé AES"
 
-#: forms.py:479
+#: forms.py:491
 msgid "ADDITIONAL AUTHENTICATED DATA (AAD)"
 msgstr "DONNÉES AUTHENTIFIÉES SUPPLÉMENTAIRES (AAD)"
 
-#: forms.py:487
+#: forms.py:499
 msgid "CIPHERTEXT (HEX)"
 msgstr "TEXTE CHIFFRÉ (HEX)"
 
-#: forms.py:494
+#: forms.py:506
 msgid "PLAINTEXT"
 msgstr "TEXTE DE PLAINTE"
 
-#: forms.py:501
+#: forms.py:513
 msgid "PGP Public Key (Optional)"
 msgstr "Clé publique PGP (facultatif)"
 
-#: forms.py:502
+#: forms.py:514
 msgid "Upload PGP Public key to encrypt output"
 msgstr "Téléchargez la clé publique PGP pour chiffrer la sortie"
 
-#: forms.py:544
+#: forms.py:556
 msgid "Name is required when uploading a public key."
 msgstr "Le nom est requis lors du téléchargement d’une clé publique."
+
+#: forms.py:568
+msgid "KEY"
+msgstr "CLÉ"
+
+#: forms.py:569
+msgid "PASSWORD"
+msgstr "MOT DE PASSE"
+
+#: forms.py:570
+msgid "URL STRINGS"
+msgstr "CHAÎNES D'URL"
+
+#: forms.py:575
+msgid "What would you like to generate?"
+msgstr "Que souhaiteriez-vous générer?"
+
+#: forms.py:580
+msgid "Password Length"
+msgstr "Longueur du mot de passe"
+
+#: forms.py:622
+msgid "Token Length"
+msgstr "Longueur du jeton"
+
+#: forms.py:639
+msgid ""
+"At least one of uppercase, lowercase, digits, or special characters must be "
+"selected."
+msgstr ""
+"Au moins un des caractères majuscules, minuscules, chiffres ou spéciaux doit être "
+"choisi."
+
+#: forms.py:645
+msgid "Token length is required."
+msgstr "La longueur du jeton est requise."

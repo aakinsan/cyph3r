@@ -4,12 +4,12 @@ from django.core.cache import cache
 from django.views.decorators.http import require_http_methods
 from cyph3r.forms import (
     WirelessKeyInfoForm,
-    WirelessGCPStorageForm,
     WirelessPGPUploadForm,
     KeyShareInfoForm,
     KeyShareReconstructForm,
     KeyShareSplitForm,
     DataProtectionForm,
+    TokenGenerationForm,
 )
 from cyph3r.models import KeyGeneration, KeySplit, FileEncryption
 from cyph3r.files import (
@@ -735,6 +735,7 @@ def wireless_key_info(request):
     try:
         # Remove any existing data stored in session to ensure that session is clean and has no stale data.
         request.session.pop("security_officer_files", None)
+        request.session.pop("fallback_yubikey_files", None)
         request.session.pop("provider_files", None)
         request.session.pop("wrapped_secret_key_file", None)
         if request.session.get("milenage_file"):
@@ -1063,6 +1064,111 @@ def wireless_key_download(request):
         logger.error(
             f"An error occurred in the wireless key download view: {e}", exc_info=True
         )
+        return render(
+            request,
+            CYPH3R_500_ERROR_PAGE,
+        )
+
+
+####################
+# Token Generation #
+####################
+
+
+@require_http_methods(["GET", "POST"])
+def token_gen_info(request):
+    """
+    Returns Token Generation Info Page
+    """
+    try:
+        # Remove any existing key share session key to ensure that session is clean and has no stale data.
+
+        # Check if the request is a POST request
+        if request.method == "POST":
+
+            # Populate the form with POST data and PGP public key files
+            form = TokenGenerationForm(request.POST, request.FILES)
+
+            # Validate the form data
+            if form.is_valid():
+                # Ensure that the session is created.
+                if not request.session.session_key:
+                    request.session.create()
+
+                # Clear any stale session data
+                request.session.pop("token_generated", None)
+                request.session.pop("token_type", None)
+
+                # Initialize the CryptoManager
+                cm = CryptoManager()
+
+                # Generate the token based on the user's selection
+                if form.cleaned_data.get("token") == "key":
+                    key_size = form.cleaned_data.get("token_length")
+                    token = cm.generate_random_key_hex(int(key_size))
+
+                elif form.cleaned_data.get("token") == "url":
+                    url_length = form.cleaned_data.get("token_length")
+                    token = cm.generate_url_safe_string(int(url_length))
+
+                elif form.cleaned_data.get("token") == "password":
+                    password_length = form.cleaned_data.get("password_length")
+                    special = form.cleaned_data.get("special_chars")
+                    digits = form.cleaned_data.get("digits")
+                    uppercase = form.cleaned_data.get("uppercase")
+                    lowercase = form.cleaned_data.get("lowercase")
+                    token = cm.generate_password(
+                        password_length,
+                        special=special,
+                        digits=digits,
+                        uppercase=uppercase,
+                        lowercase=lowercase,
+                    )
+                request.session["token_generated"] = token
+                request.session["token_type"] = form.cleaned_data.get("token")
+
+                return redirect("token-gen-result")
+
+            else:
+                return render(
+                    request,
+                    "cyph3r/token_gen_templates/token-gen-info.html",
+                    {"form": form},
+                )
+        else:
+            form = TokenGenerationForm()
+            return render(
+                request,
+                "cyph3r/token_gen_templates/token-gen-info.html",
+                {"form": form},
+            )
+    except Exception as e:
+        logger.error(
+            f"An error occurred in the token generation info view: {e}", exc_info=True
+        )
+        return render(
+            request,
+            CYPH3R_500_ERROR_PAGE,
+        )
+
+
+@require_http_methods(["GET"])
+def token_gen_result(request):
+    """
+    Returns Generated Token selected by user
+    """
+    try:
+        token = request.session.get("token_generated")
+        token_type = request.session.get("token_type")
+
+        # Return the token generation result page
+        return render(
+            request,
+            "cyph3r/token_gen_templates/token-gen-result.html",
+            {"token": token, "token_type": token_type},
+        )
+    except Exception as e:
+        logger.error(f"An error occurred in token gen result view: {e}", exc_info=True)
         return render(
             request,
             CYPH3R_500_ERROR_PAGE,

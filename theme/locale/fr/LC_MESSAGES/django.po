@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-17 06:00-0400\n"
+"POT-Creation-Date: 2024-10-20 17:05-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,21 +33,21 @@ msgstr "Veuillez réessayer plus tard."
 msgid "Go back to the homepage"
 msgstr "Retourner à la page d'accueil"
 
-#: templates/cyph3r/base.html:39
+#: templates/cyph3r/base.html:43
 msgid "settings"
 msgstr "paramètres"
 
-#: templates/cyph3r/base.html:46
+#: templates/cyph3r/base.html:51
 msgid "login"
 msgstr "se connecter"
 
-#: templates/cyph3r/base.html:56
+#: templates/cyph3r/base.html:62
 msgid "This work is free to use, copy, and distribute without restriction."
 msgstr ""
 "Cette œuvre peut être utilisée, copiée et distribuée librement sans "
 "restriction."
 
-#: templates/cyph3r/base.html:75
+#: templates/cyph3r/base.html:83
 msgid "Support"
 msgstr "soutien"
 
@@ -58,9 +58,11 @@ msgstr "Téléchargements"
 
 #: templates/cyph3r/data_protect_templates/data-protect-info.html:111
 #: templates/cyph3r/key_share_templates/key-share-info.html:70
+#: templates/cyph3r/sample-htmx.html:38
+#: templates/cyph3r/token_gen_templates/token-gen-info.html:131
 #: templates/cyph3r/wireless_templates/wireless-gcp-storage.html:38
-#: templates/cyph3r/wireless_templates/wireless-key-info.html:38
-#: templates/cyph3r/wireless_templates/wireless-pgp-upload.html:38
+#: templates/cyph3r/wireless_templates/wireless-key-info.html:43
+#: templates/cyph3r/wireless_templates/wireless-pgp-upload.html:43
 msgid "Back"
 msgstr "Dos"
 
@@ -68,9 +70,11 @@ msgstr "Dos"
 #: templates/cyph3r/key_share_templates/key-share-info.html:74
 #: templates/cyph3r/key_share_templates/key-share-reconstruct.html:54
 #: templates/cyph3r/key_share_templates/key-share-split.html:41
+#: templates/cyph3r/sample-htmx.html:43
+#: templates/cyph3r/token_gen_templates/token-gen-info.html:135
 #: templates/cyph3r/wireless_templates/wireless-gcp-storage.html:43
-#: templates/cyph3r/wireless_templates/wireless-key-info.html:43
-#: templates/cyph3r/wireless_templates/wireless-pgp-upload.html:43
+#: templates/cyph3r/wireless_templates/wireless-key-info.html:48
+#: templates/cyph3r/wireless_templates/wireless-pgp-upload.html:48
 msgid "Next"
 msgstr "Suivant"
 
@@ -234,19 +238,19 @@ msgstr ""
 "seul fichier PGP."
 
 #: templates/cyph3r/key_share_templates/key-share-intro.html:22
-#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:21
+#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:27
 msgid "This app only accepts PGP public key files that are in the "
 msgstr ""
 "Cette application accepte uniquement les fichiers de clé publique PGP qui se "
 "trouvent dans le "
 
 #: templates/cyph3r/key_share_templates/key-share-intro.html:22
-#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:21
+#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:27
 msgid "ASCII armored format"
 msgstr "Format blindé ASCII"
 
 #: templates/cyph3r/key_share_templates/key-share-intro.html:22
-#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:21
+#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:27
 msgid ""
 " i.e. the contents of each public key file must have the begin and end "
 "headers of"
@@ -255,12 +259,12 @@ msgstr ""
 "début et la finen-têtes de"
 
 #: templates/cyph3r/key_share_templates/key-share-intro.html:24
-#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:23
+#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:29
 msgid " respectively."
 msgstr " respectivement."
 
 #: templates/cyph3r/key_share_templates/key-share-intro.html:29
-#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:30
+#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:36
 msgid "Get Started"
 msgstr "Commencer"
 
@@ -272,35 +276,43 @@ msgstr "AGENT DE SÉCURITÉ"
 msgid "ENTER KEY"
 msgstr "ENTRER LA TOUCHE"
 
-#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:4
+#: templates/cyph3r/token_gen_templates/token-gen-result.html:10
+msgid "Token Type"
+msgstr "Type de jeton"
+
+#: templates/cyph3r/token_gen_templates/token-gen-result.html:11
+msgid "Token"
+msgstr "Jeton"
+
+#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:10
 msgid "Key Ceremony"
 msgstr "Remise des clés sans fil"
 
-#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:5
+#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:11
 msgid "Objective"
 msgstr "Objective"
 
-#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:6
+#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:12
 msgid "Secure generation and protection of four wireless keys:"
 msgstr "Génération sécurisée et protection de quatre clés sans fil :"
 
-#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:8
+#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:14
 msgid " - Tuak TOP and Transport Keys"
 msgstr " - Tuak TOP et clés de transport"
 
-#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:9
+#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:15
 msgid " - Milenage OP and Transport Keys"
 msgstr " - Milenage OP et clés de transport"
 
-#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:11
+#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:17
 msgid "Requirements"
 msgstr "Requirements"
 
-#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:12
+#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:18
 msgid "Three SIM Provider Public Keys"
 msgstr "Trois clés publiques du fournisseur SIM"
 
-#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:13
+#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:19
 msgid ""
 "The PGP public keys for the SIM provider are required to encrypt the 3 XOR "
 "key shares generated for each wireless keys. The provider will reconstruct "
@@ -311,11 +323,11 @@ msgstr ""
 "reconstruira chaque clé après avoir déchiffré les partages avec leurs clés "
 "privées."
 
-#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:15
+#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:21
 msgid "Five Security Officer Public Keys"
 msgstr "Trois clés publiques du fournisseur SIM"
 
-#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:16
+#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:22
 msgid ""
 "A unique 128-bit wrap key is generated for each wireless key. The wrap key "
 "is used to wrap/encrypt its associated wireless key. Each wrap key is then "
@@ -326,11 +338,11 @@ msgstr ""
 "fil associée. Chaque clé d'enveloppement est alors divisé en 5 parts en "
 "utilisant"
 
-#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:16
+#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:22
 msgid "Shamir Secret Splitting (SSS)"
 msgstr " Séparation secrète de Shamir (SSS)"
 
-#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:16
+#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:22
 msgid ""
 ". Each of these shares will be encrypted with a PGP public key belonging to "
 "a security officer. Three security officers will be required to reconstruct "
@@ -341,11 +353,11 @@ msgstr ""
 "reconstruirecette clé d'enveloppement qui peut à son tour être utilisée pour "
 "déchiffrer sa clé sans fil."
 
-#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:18
+#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:24
 msgid "Two Public Keys for Milenage"
 msgstr "Deux clés publiques pour Milenage"
 
-#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:19
+#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:25
 msgid ""
 "The milenage key will be entered at the terminal of the network provider. To "
 "mitigate the risk of both milenage keys been known by a single resource, two "
@@ -359,11 +371,11 @@ msgstr ""
 "seront fournies. Une à chiffrer la clé de transport du milenage et l'autre "
 "pour chiffrer OP du milenageclé."
 
-#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:23
+#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:29
 msgid " and "
 msgstr " et "
 
-#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:25
+#: templates/cyph3r/wireless_templates/wireless-ceremony-intro.html:31
 msgid ""
 "Finally, a GCP project ID can be specified to store the wrapped secrets in a "
 "secret manager vault. This is optional since all keys will be encrypted and "
@@ -374,18 +386,22 @@ msgstr ""
 "puisque toutes les clés seront cryptées et disponible en téléchargement à la "
 "fin de ce processus."
 
-#: templates/cyph3r/wireless_templates/wireless-generate-keys.html:6
+#: templates/cyph3r/wireless_templates/wireless-key-download.html:10
 msgid "Security Officers Keys"
 msgstr "Clés des agents de sécurité"
 
-#: templates/cyph3r/wireless_templates/wireless-generate-keys.html:18
+#: templates/cyph3r/wireless_templates/wireless-key-download.html:22
 msgid "Provider Keys"
 msgstr "Clés du fournisseur"
 
-#: templates/cyph3r/wireless_templates/wireless-generate-keys.html:30
+#: templates/cyph3r/wireless_templates/wireless-key-download.html:34
+msgid "Yubikey Fallback Keys"
+msgstr "Clés de secours Yubikey"
+
+#: templates/cyph3r/wireless_templates/wireless-key-download.html:46
 msgid "Wrapped Key File"
 msgstr "Fichier de clé enveloppé"
 
-#: templates/cyph3r/wireless_templates/wireless-generate-keys.html:37
+#: templates/cyph3r/wireless_templates/wireless-key-download.html:53
 msgid "Milenage Keys"
 msgstr "Clés Milenage"

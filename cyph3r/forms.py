@@ -554,3 +554,92 @@ class DataProtectionForm(forms.Form, ValidateCyph3rForms):
         name = cleaned_data.get("name")
         if public_key and not name:
             self.add_error("name", _("Name is required when uploading a public key."))
+
+
+##########################
+# Token Generation Forms #
+# ########################
+
+
+class TokenGenerationForm(forms.Form, ValidateCyph3rForms):
+    # Token choices
+    TOKEN_CHOICES = [
+        ("", ""),
+        ("key", _("KEY")),
+        ("password", _("PASSWORD")),
+        ("url", _("URL STRINGS")),
+    ]
+    # choice of Token
+    token = forms.ChoiceField(
+        choices=TOKEN_CHOICES,
+        label=_("What would you like to generate?"),
+        required=True,
+    )
+    # Password Length
+    password_length = forms.IntegerField(
+        label=_("Password Length"),
+        widget=forms.NumberInput(
+            attrs={
+                "type": "range",
+                "min": "8",  # Minimum value for the slider
+                "max": "128",  # Maximum value for the slider
+                "step": "1",  # Step size for the slider
+                "value": "8",  # Default value
+                "_": "on load set #password_length_value's innerHTML to 8 then on input set #password_length_value's innerHTML to my.value",
+            }
+        ),
+    )
+
+    # Uppercase Checkbox (Password)
+    uppercase = forms.BooleanField(
+        label="A-Z",
+        required=False,
+    )
+
+    # Lowercase Checkbox (Password)
+    lowercase = forms.BooleanField(
+        label="a-z",
+        required=False,
+    )
+
+    # Numbers Checkbox (Password)
+    digits = forms.BooleanField(label="0-9", required=False)
+
+    # Special Characters Checkbox (Password)
+    special_chars = forms.BooleanField(label="!@#$%^&*", required=False)
+
+    # Encryption Key Size
+    TOKEN_LENGTH_CHOICES = [
+        ("", ""),
+        (128, "128-bit"),
+        (192, "192-bit"),
+        (256, "256-bit"),
+    ]
+
+    # choice of Key Size
+    token_length = forms.ChoiceField(
+        choices=TOKEN_LENGTH_CHOICES,
+        label=_("Token Length"),
+        required=False,
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        token = cleaned_data.get("token")
+        uppercase = cleaned_data.get("uppercase")
+        lowercase = cleaned_data.get("lowercase")
+        digit = cleaned_data.get("numbers")
+        special_chars = cleaned_data.get("special_chars")
+        token_length = cleaned_data.get("token_length")
+        if token == "password":
+            if not digit and not uppercase and not lowercase and not special_chars:
+                self.add_error(
+                    None,
+                    _(
+                        "At least one of uppercase, lowercase, digits, or special characters must be selected."
+                    ),
+                )
+
+        if token == "key" or token == "url":
+            if not token_length:
+                self.add_error("token_length", _("Token length is required."))
