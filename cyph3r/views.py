@@ -22,7 +22,6 @@ from cyph3r.files import (
     create_key_share_split_secret_files,
     create_data_protection_pgp_wrapped_file,
     create_wireless_fallback_yubikey_encrypted_key_files,
-    create_data_protection_unwrapped_file,
 )
 from cryptography.exceptions import InvalidTag
 from cyph3r.crypto import CryptoManager
