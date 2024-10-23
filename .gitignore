@@ -29,6 +29,7 @@ Pipfile.lock
 .env.*
 production.conf
 development.conf
+staging.conf
 
 # log files for Python
 *.log

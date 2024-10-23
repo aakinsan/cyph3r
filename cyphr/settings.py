@@ -178,8 +178,9 @@ class Dev(Configuration):
     STATIC_ROOT = values.Value()
 
 
-class Prod(Dev):
-    # Debugging is disabled in production
+# Staging Settings
+class Staging(Dev):
+    # Debugging is disabled
     DEBUG = False
 
     # Secret Key
@@ -309,3 +310,8 @@ class Prod(Dev):
             },
         },
     }
+
+
+# Production Settings
+class Prod(Staging):
+    pass  # No changes from Staging for now
