@@ -281,22 +281,6 @@ class Prod(Dev):
             },
         },
         "handlers": {
-            "default": {
-                "level": "DEBUG",
-                "class": "logging.handlers.RotatingFileHandler",
-                "filename": "/home/cyph3r/logs/root.log",
-                "maxBytes": 1024 * 1024 * 5,
-                "backupCount": 5,
-                "formatter": "verbose",
-            },
-            "django_handler": {
-                "level": "DEBUG",
-                "class": "logging.handlers.RotatingFileHandler",
-                "filename": "/home/cyph3r/logs/django.log",
-                "maxBytes": 1024 * 1024 * 5,
-                "backupCount": 5,
-                "formatter": "verbose",
-            },
             "gcp_handler": {
                 "level": "DEBUG",
                 "class": "google.cloud.logging.handlers.CloudLoggingHandler",
@@ -305,21 +289,21 @@ class Prod(Dev):
         },
         "loggers": {
             "": {
-                "handlers": ["default", "gcp_handler"],
+                "handlers": ["gcp_handler"],
                 "level": "ERROR",
             },
             "django": {
-                "handlers": ["django_handler", "gcp_handler"],
+                "handlers": ["gcp_handler"],
                 "level": "INFO",
                 "propagate": False,
             },
             "django.request": {
-                "handlers": ["django_handler", "gcp_handler"],
+                "handlers": ["gcp_handler"],
                 "level": "ERROR",
                 "propagate": False,
             },
             "django.db.backends": {
-                "handlers": ["django_handler", "gcp_handler"],
+                "handlers": ["gcp_handler"],
                 "level": "ERROR",
                 "propagate": False,
             },
