@@ -692,23 +692,6 @@ def key_share_reconstruct(request):
 
 
 @require_http_methods(["GET"])
-def wireless(request):
-    """
-    Returns Wireless Key Ceremony Page
-    """
-    try:
-        return render(request, "cyph3r/wireless.html")
-    except Exception as e:
-        logger.error(
-            f"An error occurred in the wireless key ceremony view: {e}", exc_info=True
-        )
-        return render(
-            request,
-            CYPH3R_500_ERROR_PAGE_HTMX,
-        )
-
-
-@require_http_methods(["GET"])
 def wireless_ceremony_intro(request):
     """
     Returns partial template for the Wireless Key Ceremony Introduction
@@ -1104,6 +1087,14 @@ def token_gen_info(request):
                 if form.cleaned_data.get("token") == "key":
                     key_size = form.cleaned_data.get("token_length")
                     token = cm.generate_random_key_hex(int(key_size))
+
+                    # Update the database with the Key Generation information
+                    KeyGeneration.objects.create(
+                        key_id="generated_key_token",
+                        date_generated=datetime.now(),
+                        key_size=key_size,
+                        is_split=False,
+                    )
 
                 elif form.cleaned_data.get("token") == "url":
                     url_length = form.cleaned_data.get("token_length")
