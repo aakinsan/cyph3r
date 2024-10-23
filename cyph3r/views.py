@@ -42,7 +42,6 @@ logger = logging.getLogger(__name__)
 
 # Constants for HTML templates
 CYPH3R_500_ERROR_PAGE = "cyph3r/500.html"
-CYPH3R_500_ERROR_PAGE_HTMX = "cyph3r/500p.html"
 CYPH3R_KEY_SHARE_SPLIT_PAGE = "cyph3r/key_share_templates/key-share-split.html"
 CYPH3R_KEY_SHARE_RECONSTRUCT_PAGE = (
     "cyph3r/key_share_templates/key-share-reconstruct.html"

@@ -31,7 +31,7 @@ class Dev(Configuration):
     # SECURITY WARNING: don't run with debug turned on in production!
     DEBUG = values.BooleanValue(True)
 
-    ALLOWED_HOSTS = values.ListValue(["192.168.2.121"])
+    ALLOWED_HOSTS = values.ListValue()
 
     # Application definition
 
@@ -205,15 +205,6 @@ class Prod(Dev):
 
     # Set CSRF cookie to secure
     CSRF_COOKIE_SECURE = True
-
-    # Disabling as it is set on web-server
-    # SECURE_HSTS_SECONDS = 31536000  # 1 year
-
-    # Disabling as it is set on web-server
-    # SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-
-    # Disabling as it is set on web-server
-    # SECURE_HSTS_PRELOAD = True
 
     # MIME type sniffing protection
     SECURE_CONTENT_TYPE_NOSNIFF = True
