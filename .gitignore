@@ -96,7 +96,6 @@ coverage/
 *.swp
 
 # Sonarqube files
-sonar-project.properties
 .sonar_lock
 report-task.txt
 .scannerwork/*
