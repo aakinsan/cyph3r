@@ -1,8 +1,0 @@
-[Unit]
-Description=Cyph3r Gunicorn Socket
-[Socket]
-ListenStream=/run/gunicorn-cyph3r.sock
-User=www-data
-Mode=600
-[Install]
-WantedBy=sockets.target
