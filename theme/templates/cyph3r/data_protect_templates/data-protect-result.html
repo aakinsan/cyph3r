@@ -7,12 +7,12 @@
 <div class="bg-gradient-to-b from-orange-100 via-orange-50 to-white dark:bg-gradient-to-b dark:from-slate-400 dark:via-slate-600 dark:to-slate-800 flex flex-col min-h-screen justify-center items-center w-full">
     <div class="w-full justify-center items-start flex flex-col max-w-3xl gap-4 p-8 shadow-md dark:bg-slate-800 bg-white rounded-lg">
         <div class="dark:text-white font-sans text-sm w-full text-start">
-            <p class="pt-2 pb-2"><span class="font-bold">{% translate "Mode" %}:</span><br /> AES-{{ result_no_uploaded_pgp_key.aes_mode | upper }}</p>
-            <p class="pt-2 pb-2"><span class="font-bold">Nonce/IV:</span><br /> {{ result_no_uploaded_pgp_key.nonce }}</p>
-            {% if result_no_uploaded_pgp_key.aad %}
-                <p class="pt-2 pb-2"><span class="font-bold">AAD:</span><br /> {{ result_no_uploaded_pgp_key.aad }}</p>
+            <p class="pt-2 pb-2"><span class="font-bold">{% translate "Mode" %}:</span><br /> AES-{{ operation_output.aead_mode | upper }}</p>
+            <p class="pt-2 pb-2"><span class="font-bold">Nonce:</span><br /> {{ operation_output.nonce }}</p>
+            {% if operation_output.aad %}
+                <p class="pt-2 pb-2"><span class="font-bold">AAD:</span><br /> {{ operation_output.aad }}</p>
             {% endif %}
-            <p class="pt-2 pb-2"><span class="font-bold">{% translate "Output" %}:</span><br /> {{ result_no_uploaded_pgp_key.aes_output }}</p>           
+            <p class="pt-2 pb-2"><span class="font-bold">{% translate "Output" %}:</span><br /> {{ operation_output.aead_output }}</p>           
         </div>              
     </div>
 </div>
