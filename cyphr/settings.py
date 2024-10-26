@@ -300,7 +300,7 @@ class Staging(Dev):
             },
             "django.request": {
                 "handlers": ["gcp_handler"],
-                "level": "ERROR",
+                "level": "INFO",
                 "propagate": False,
             },
             "django.db.backends": {
