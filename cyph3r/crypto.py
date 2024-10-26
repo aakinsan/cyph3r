@@ -152,6 +152,28 @@ class CryptoManager:
         except crypto_exceptions.InvalidTag as err:
             logger.error(f"Decryption failed: {err}", exc_info=True)
 
+    def encrypt_with_chacha20_poly1305(
+        self, key: bytes, nonce: bytes, plaintext: bytes, aad: bytes = None
+    ) -> bytes:
+        """Encrypts data using ChaCha20-Poly1305."""
+        chacha = aead.ChaCha20Poly1305(key)
+        try:
+            ct = chacha.encrypt(nonce, plaintext, aad)
+            return ct
+        except crypto_exceptions.OverflowError as err:
+            logger.error(f"Encryption failed: {err}", exc_info=True)
+
+    def decrypt_with_chacha20_poly1305(
+        self, key: bytes, nonce: bytes, ciphertext: bytes, aad: bytes = None
+    ) -> bytes:
+        """Decrypts data using ChaCha20-Poly1305."""
+        chacha = aead.ChaCha20Poly1305(key)
+        try:
+            pt = chacha.decrypt(nonce, ciphertext, aad)
+            return pt
+        except crypto_exceptions.InvalidTag as err:
+            logger.error(f"Decryption failed: {err}", exc_info=True)
+
     def encrypt_with_aes_cbc(self, key: bytes, iv: bytes, plaintext: bytes) -> bytes:
         """Encrypts data using AES-CBC."""
         cipher = Cipher(algorithms.AES(key), modes.CBC(iv))

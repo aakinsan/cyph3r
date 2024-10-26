@@ -116,39 +116,36 @@ def data_protect_info(request):
                     request.session.create()
 
                 cm = CryptoManager()
-                task_name = form.cleaned_data.get("name")
-                aes_operation = form.cleaned_data.get("aes_operation")
-                aes_mode = form.cleaned_data.get("aes_mode")
-                aes_key = cm.hex_to_bytes(form.cleaned_data.get("aes_key"))
+                aead_operation = form.cleaned_data.get("aead_operation")
+                aead_mode = form.cleaned_data.get("aead_mode")
+                aead_key = cm.hex_to_bytes(form.cleaned_data.get("aead_key"))
 
-                if aes_operation == "encrypt":
+                if aead_operation == "encrypt":
                     plaintext = form.cleaned_data.get("plaintext").encode("utf-8")
-                    if aes_mode == "gcm":
-                        nonce = cm.generate_random_key_bytes(96)
-                        aad = form.cleaned_data.get("aad").encode("utf-8")
-                        aes_output = cm.encrypt_with_aes_gcm(
-                            aes_key, nonce, plaintext, aad
+                    nonce = cm.generate_random_key_bytes(96)
+                    aad = form.cleaned_data.get("aad").encode("utf-8")
+                    if aead_mode == "gcm":
+                        aead_output = cm.encrypt_with_aes_gcm(
+                            aead_key, nonce, plaintext, aad
                         )
-                    if aes_mode == "cbc":
-                        nonce = cm.generate_random_key_bytes(128)
-                        aes_output = cm.encrypt_with_aes_cbc(aes_key, nonce, plaintext)
-                        aad = None
+                    if aead_mode == "chacha":
+                        aead_output = cm.encrypt_with_chacha20_poly1305(
+                            aead_key, nonce, plaintext, aad
+                        )
 
-                if aes_operation == "decrypt":
+                if aead_operation == "decrypt":
                     ciphertext = cm.hex_to_bytes(form.cleaned_data.get("ciphertext"))
+                    nonce = cm.hex_to_bytes(form.cleaned_data.get("nonce"))
+                    aad = form.cleaned_data.get("aad").encode("utf-8")
                     try:
-                        if aes_mode == "gcm":
-                            nonce = cm.hex_to_bytes(form.cleaned_data.get("nonce"))
-                            aad = form.cleaned_data.get("aad").encode("utf-8")
-                            aes_output = cm.decrypt_with_aes_gcm(
-                                aes_key, nonce, ciphertext, aad
+                        if aead_mode == "gcm":
+                            aead_output = cm.decrypt_with_aes_gcm(
+                                aead_key, nonce, ciphertext, aad
                             )
-                        if aes_mode == "cbc":
-                            nonce = iv = cm.hex_to_bytes(form.cleaned_data.get("iv"))
-                            aes_output = cm.decrypt_with_aes_cbc(
-                                aes_key, iv, ciphertext
+                        if aead_mode == "chacha":
+                            aead_output = cm.decrypt_with_chacha20_poly1305(
+                                aead_key, nonce, ciphertext, aad
                             )
-                            aad = None
                     except (ValueError, InvalidTag) as e:
                         form.add_error(
                             None,
@@ -166,19 +163,20 @@ def data_protect_info(request):
                     number_of_files_encrypted=1,
                 )
 
-                public_key = form.cleaned_data.get("public_key")
-                user_dir = request.session.session_key
+                pgp_encrypt = form.cleaned_data.get("pgp_encrypt")
 
-                # Wrap the data with encryption PGP key if uploaded
-                if public_key:
+                # Encrypt data with PGP if requested.
+                if pgp_encrypt:
+                    user_dir = request.session.session_key
+                    task_name = form.cleaned_data.get("name")
                     data_protect_file = create_data_protection_pgp_wrapped_file(
                         form,
                         cm,
                         task_name,
-                        aes_mode,
-                        aes_operation,
+                        aead_mode,
+                        aead_operation,
                         nonce,
-                        aes_output,
+                        aead_output,
                         user_dir,
                         aad,
                     )
@@ -188,36 +186,22 @@ def data_protect_info(request):
                         encryption_algorithm="PGP",
                         number_of_files_encrypted=1,
                     )
-                # File is not PGP encrypted
+                    # Add path to secret files to session
+                    request.session["data_protect_file"] = data_protect_file
+
+                    return redirect("data-protect-download")
+
                 else:
-                    """
-                    data_protect_file = create_data_protection_unwrapped_file(
-                        cm,
-                        task_name,
-                        aes_mode,
-                        aes_operation,
-                        nonce,
-                        aes_output,
-                        user_dir,
-                        aad,
-                    )
-                    """
-                    result_no_uploaded_pgp_key = {
-                        "aes_output": cm.bytes_to_utf8(aes_output),
+                    # File is not PGP encrypted
+                    operation_output = {
+                        "aead_output": cm.bytes_to_utf8(aead_output),
                         "nonce": cm.bytes_to_hex(nonce),
                         "aad": cm.bytes_to_utf8(aad),
-                        "aes_mode": aes_mode,
+                        "aead_mode": aead_mode,
                     }
-                    request.session["result_no_uploaded_pgp_key"] = (
-                        result_no_uploaded_pgp_key
-                    )
+                    request.session["operation_output"] = operation_output
 
                     return redirect("data-protect-result")
-
-                # Add path to secret files to session
-                request.session["data_protect_file"] = data_protect_file
-
-                return redirect("data-protect-download")
             else:
                 return render(
                     request,
@@ -268,11 +252,11 @@ def data_protect_result(request):
     Returns Encrypt/Decrypt Operation Result when PGP key is not uploaded
     """
     try:
-        result_no_uploaded_pgp_key = request.session["result_no_uploaded_pgp_key"]
+        operation_output = request.session["operation_output"]
         return render(
             request,
             "cyph3r/data_protect_templates/data-protect-result.html",
-            {"result_no_uploaded_pgp_key": result_no_uploaded_pgp_key},
+            {"operation_output": operation_output},
         )
     except Exception as e:
         logger.error(

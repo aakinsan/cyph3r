@@ -20,9 +20,8 @@
 
                     {% for field in form.visible_fields %}
                         
-                        <!-- Hide these fields -->
                         {% if field.name == "nonce" %}
-                            <div id="aes_gcm_decrypt_parameter" class="mb-4 {% if not field.errors %}hidden{% endif %}">
+                            <div id="nonce" class="mb-4 {% if not field.errors %}hidden{% endif %}">
                                 <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
                                 {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 dark:focus:border-cyan-500 focus:border-orange-500" }}
                                 <div class="text-xs text-gray-500 dark:text-slate-300">{{ field.help_text }}</div> 
@@ -34,11 +33,11 @@
                                     </span>
                                 {% endif %}
                             </div>
-                        {% elif field.name == "iv" %}
-                            <div id="aes_cbc_decrypt_parameter" class="mb-4 {% if not field.errors %}hidden{% endif %}">
+                        {% elif field.name == "public_key" %}
+                            <div id="public_key" class="mb-4 {% if not field.errors %}hidden{% endif %}">
                                 <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
                                 {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 dark:focus:border-cyan-500 focus:border-orange-500" }}
-                                <div class="text-xs dark:text-slate-300 text-gray-500">{{ field.help_text }}</div> 
+                                <div class="text-xs text-gray-500 dark:text-slate-300">{{ field.help_text }}</div> 
                                 {% if field.errors %}
                                     <span class="text-red-500 text-xs">
                                         {% for error in field.errors %}
@@ -47,8 +46,22 @@
                                     </span>
                                 {% endif %}
                             </div>
+                        {% elif field.name == "name" %}
+                            <div id="name" class="mb-4 {% if not field.errors %}hidden{% endif %}">
+                                <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
+                                {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 dark:focus:border-cyan-500 focus:border-orange-500" }}
+                                <div class="text-xs text-gray-500 dark:text-slate-300">{{ field.help_text }}</div> 
+                                {% if field.errors %}
+                                    <span class="text-red-500 text-xs">
+                                        {% for error in field.errors %}
+                                        {{ error }}
+                                        {% endfor %}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        
                         {% elif field.name == "ciphertext" %}
-                        <div id="aes_decrypt_parameter" class="mb-4 {% if not field.errors %}hidden{% endif %}">
+                        <div id="ciphertext" class="mb-4 {% if not field.errors %}hidden{% endif %}">
                             <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
                             {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 dark:focus:border-cyan-500 focus:border-orange-500" }}
                             <div class="text-xs text-gray-500 dark:text-slate-300">{{ field.help_text }}</div> 
@@ -61,7 +74,7 @@
                             {% endif %}
                         </div>
                         {% elif field.name == "plaintext" %}
-                        <div id="aes_encrypt_parameter" class="mb-4 {% if not field.errors %}hidden{% endif %}">
+                        <div id="plaintext" class="mb-4 {% if not field.errors %}hidden{% endif %}">
                             <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
                             {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 dark:focus:border-cyan-500 focus:border-orange-500" }}
                             <div class="text-xs text-gray-500 dark:text-slate-300">{{ field.help_text }}</div> 
@@ -73,23 +86,25 @@
                                 </span>
                             {% endif %}
                         </div>
-                        {% elif field.name == "aad" %}
-                        <div id="aes_gcm_encrypt_decrypt_parameter" class="mb-4 {% if not field.errors %}hidden{% endif %}">
-                            <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
-                            {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 dark:focus:border-cyan-500 focus:border-orange-500" }}
-                            <div class="text-xs text-gray-500 dark:text-slate-300">{{ field.help_text }}</div> 
-                            {% if field.errors %}
-                                <span class="text-red-500 text-xs">
-                                    {% for error in field.errors %}
-                                    {{ error }}
-                                    {% endfor %}
-                                </span>
-                            {% endif %}
-                        </div>
+                        {% elif field.name == "pgp_encrypt" %}
+                            <div id="pgp_encrypt" class="mb-4">
+                                <div class="flex gap-2">
+                                    <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
+                                    {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 dark:focus:border-cyan-500 focus:border-orange-500" }}
+                                </div>
+                                <div class="text-xs dark:text-slate-300 text-gray-500">{{ field.help_text }}</div> 
+                                {% if field.errors %}
+                                    <span class="text-red-500 text-xs">
+                                        {% for error in field.errors %}
+                                        {{ error }}
+                                        {% endfor %}
+                                    </span>
+                                {% endif %}
+                            </div>
+
                         {% else %}
                         
-                        <div class="mb-4">
-                        <!-- Render this field -->
+                        <div class="mb-4">                        
                             <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
                             {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 dark:focus:border-cyan-500 focus:border-orange-500" }}
                             <div class="text-xs text-gray-500 dark:text-slate-300">{{ field.help_text }}</div> 
@@ -122,41 +137,39 @@
 </div>
 <!-- Script to show/hide share count and threshold count fields based on user selection -->
 <script type="text/hyperscript">
-    def checkAESSelections() 
-        if (#id_aes_operation.value == "encrypt" and #id_aes_mode.value == "gcm")
-            then remove .hidden from #aes_gcm_encrypt_decrypt_parameter
-            then remove .hidden from #aes_encrypt_parameter
-            then add .hidden to #aes_decrypt_parameter
-            then add .hidden to #aes_gcm_decrypt_parameter
-            then add .hidden to #aes_cbc_decrypt_parameter
-        else if (#id_aes_operation.value == "decrypt" and #id_aes_mode.value == "gcm")
-            then remove .hidden from #aes_decrypt_parameter
-            then remove .hidden from #aes_gcm_decrypt_parameter
-            then remove .hidden from #aes_gcm_encrypt_decrypt_parameter
-            then add .hidden to #aes_encrypt_parameter
-            then add .hidden to #aes_cbc_decrypt_parameter
-        else if (#id_aes_operation.value == "encrypt" and #id_aes_mode.value == "cbc")
-            then remove .hidden from #aes_encrypt_parameter
-            then add .hidden to #aes_gcm_decrypt_parameter
-            then add .hidden to #aes_gcm_encrypt_decrypt_parameter
-            then add .hidden to #aes_decrypt_parameter
-            then add .hidden to #aes_cbc_decrypt_parameter
-        else if (#id_aes_operation.value == "decrypt" and #id_aes_mode.value == "cbc")
-            then remove .hidden from #aes_decrypt_parameter
-            then remove .hidden from #aes_cbc_decrypt_parameter
-            then add .hidden to #aes_gcm_encrypt_decrypt_parameter
-            then add .hidden to #aes_encrypt_parameter
-            then add .hidden to #aes_gcm_decrypt_parameter
+    def check_AEAD_Operation() 
+        if (#id_aead_operation.value == "encrypt")
+            then remove .hidden from #plaintext
+            then add .hidden to #ciphertext
+            then add .hidden to #nonce
+            
+        else if (#id_aead_operation.value == "decrypt")
+            then remove .hidden from #ciphertext
+            then remove .hidden from #nonce
+            then add .hidden to #plaintext
+
         else
-            add .hidden to #aes_encrypt_parameter 
-            add .hidden to #aes_decrypt_parameter
-            add .hidden to #aes_gcm_encrypt_decrypt_parameter
-            add .hidden to #aes_gcm_decrypt_parameter
-            add .hidden to #aes_cbc_decrypt_parameter
+            add .hidden to #plaintext
+            add .hidden to #ciphertext
+            add .hidden to #nonce
     end
 
-    on change from #id_aes_operation or change from #id_aes_mode call checkAESSelections()
-    on load call checkAESSelections()
+    def check_PGP_Encrypt()
+        on click from #id_pgp_encrypt
+            if (#id_pgp_encrypt.checked)
+                then remove .hidden from #public_key
+                then remove .hidden from #name
+            else
+                add .hidden to #public_key
+                add .hidden to #name
+        end
+    end
+
+    on change from #id_aead_operation call check_AEAD_Operation() 
+    on load call check_AEAD_Operation()
+
+    on change from #id_pgp_encrypt call check_PGP_Encrypt() 
+    on load call check_PGP_Encrypt()
 </script>
 
 {% endblock %}

@@ -87,6 +87,11 @@ class ValidateCyph3rForms:
         if len(value) != 32 and len(value) != 64 and len(value) != 48:
             raise ValidationError(_("Value must be either 128 | 192 | 256 bits."))
 
+    def validate_hex_nonce_length(self, value):
+        # Check if the value is the correct length
+        if len(value) != 24:
+            raise ValidationError(_("Value must be either 96 bits."))
+
 
 #################################
 # Wireless Key Management Forms #
@@ -424,7 +429,81 @@ class KeyShareInfoForm(forms.Form, ValidateCyph3rForms):
 
 
 class DataProtectionForm(forms.Form, ValidateCyph3rForms):
-    # Key Identifier
+    # AEAD Scheme choices
+    AEAD_SCHEME_CHOICES = [
+        ("", ""),
+        ("gcm", "AES-GCM"),
+        ("chacha", "ChaCha20-Poly1305"),
+    ]
+    # choice of AEAD mode
+    aead_mode = forms.ChoiceField(
+        choices=AEAD_SCHEME_CHOICES,
+        label=_("AEAD Scheme"),
+        required=True,
+    )
+
+    # AEAD Operation choices
+    AEAD_OPERATION_CHOICES = [
+        ("", ""),
+        ("encrypt", _("Encrypt")),
+        ("decrypt", _("Decrypt")),
+    ]
+
+    # AEAD Operation
+    aead_operation = forms.ChoiceField(
+        choices=AEAD_OPERATION_CHOICES,
+        label=_("Operation"),
+        required=True,
+    )
+
+    # Encryption Key
+    aead_key = forms.CharField(
+        required=True,
+        min_length=32,
+        max_length=64,
+        widget=forms.PasswordInput(),
+        label=_("Key"),
+        help_text=_("Encryption | Decryption Key."),
+    )
+
+    # Associated Data for encryption/decryption
+    aad = forms.CharField(
+        label=_("ADDITIONAL AUTHENTICATED DATA (AAD)"),
+        max_length=100,
+        required=False,
+    )
+
+    # Nonce field for decryption
+    nonce = forms.CharField(
+        label="Nonce",
+        max_length=24,
+        min_length=24,
+        help_text=_("12 bytes Nonce (Hex)"),
+        required=False,
+    )
+
+    # Cipher Text field for decryption
+    ciphertext = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 2}),
+        label=_("CIPHERTEXT (HEX)"),
+        required=False,
+    )
+
+    # Cipher Text field for AEAD encryption
+    plaintext = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 2}),
+        label=_("PLAINTEXT"),
+        required=False,
+    )
+
+    # PGP Encrypt Checkbox
+    pgp_encrypt = forms.BooleanField(
+        label="PGP Encrypt",
+        required=False,
+        help_text=_("Encrypt output with PGP public key."),
+    )
+
+    # Key Identifier for PGP encrypted file
     name = forms.CharField(
         label=_("name"),
         max_length=15,
@@ -433,106 +512,26 @@ class DataProtectionForm(forms.Form, ValidateCyph3rForms):
         help_text=_("Identifier for PGP encrypted file."),
     )
 
-    # AES Mode choices
-    AES_MODE_CHOICES = [
-        ("", ""),
-        ("gcm", "GCM"),
-        ("cbc", "CBC"),
-    ]
-    # choice of AES mode
-    aes_mode = forms.ChoiceField(
-        choices=AES_MODE_CHOICES,
-        label=_("AES Mode"),
-        required=True,
-    )
-
-    # AES Task choices
-    AES_OPERATION_CHOICES = [
-        ("", ""),
-        ("encrypt", _("Encrypt")),
-        ("decrypt", _("Decrypt")),
-    ]
-
-    aes_operation = forms.ChoiceField(
-        choices=AES_OPERATION_CHOICES,
-        label=_("AES Operation"),
-        required=True,
-    )
-
-    # Encryption Key
-    aes_key = forms.CharField(
-        required=True,
-        min_length=32,
-        max_length=64,
-        widget=forms.PasswordInput(),
-        label=_("AES Key"),
-        help_text="128 | 192 | 256 bit (Hex).",
-    )
-
-    # Nonce field for AES GCM decryption
-    nonce = forms.CharField(
-        label="Nonce",
-        max_length=24,
-        min_length=24,
-        help_text="12 bytes Nonce (Hex)",
-        required=False,
-    )
-
-    iv = forms.CharField(
-        label="IV",
-        max_length=32,
-        min_length=32,
-        help_text="16 bytes IV (Hex)",
-        required=False,
-    )
-
-    # Associated Data for AES GCM encryption/decryption
-    aad = forms.CharField(
-        label=_("ADDITIONAL AUTHENTICATED DATA (AAD)"),
-        max_length=100,
-        required=False,
-    )
-
-    # Cipher Text field for AES decryption
-    ciphertext = forms.CharField(
-        widget=forms.Textarea(attrs={"rows": 2}),
-        label=_("CIPHERTEXT (HEX)"),
-        required=False,
-    )
-
-    # Cipher Text field for AES encryption
-    plaintext = forms.CharField(
-        widget=forms.Textarea(attrs={"rows": 2}),
-        label=_("PLAINTEXT"),
-        required=False,
-    )
-
     # PGP public key (Optional)
     public_key = forms.FileField(
         required=False,
-        label=_("PGP Public Key (Optional)"),
+        label=_("PGP Public Key"),
         help_text=_("Upload PGP Public key to encrypt output"),
     )
 
-    def clean_aes_key(self):
-        # Check if AES key is a hexadecimal string and is 128/192/256 bits
-        aes_key = self.cleaned_data.get("aes_key")
-        self.validate_hex_string(aes_key)
-        self.validate_hex_length(aes_key)
-        return aes_key
-
-    def clean_iv(self):
-        # Check if IV is a hexadecimal string and is 128 bits
-        iv = self.cleaned_data.get("iv")
-        if iv:
-            self.validate_hex_string(iv)
-        return iv
+    def clean_aead_key(self):
+        # Check if AEAD key is a hexadecimal string and is 128/192/256 bits
+        aead_key = self.cleaned_data.get("aead_key")
+        self.validate_hex_string(aead_key)
+        self.validate_hex_length(aead_key)
+        return aead_key
 
     def clean_nonce(self):
         # Check if nonce is a hexadecimal string and is 96 bits
         nonce = self.cleaned_data.get("nonce")
         if nonce:
             self.validate_hex_string(nonce)
+            self.validate_hex_nonce_length(nonce)
         return nonce
 
     def clean_ciphertext(self):
@@ -552,8 +551,22 @@ class DataProtectionForm(forms.Form, ValidateCyph3rForms):
         cleaned_data = super().clean()
         public_key = cleaned_data.get("public_key")
         name = cleaned_data.get("name")
-        if public_key and not name:
-            self.add_error("name", _("Name is required when uploading a public key."))
+        aead_mode = cleaned_data.get("aead_mode")
+        aead_key = cleaned_data.get("aead_key")
+        pgp_encrypt = cleaned_data.get("pgp_encrypt")
+
+        if pgp_encrypt:
+            if not public_key and not name:
+                self.add_error(None, _("Provide name and public key."))
+            if not public_key:
+                self.add_error("public_key", _("Provide public key."))
+            if not name:
+                self.add_error("name", _("Provide name."))
+        if aead_key:
+            if aead_mode == "chacha" and len(aead_key) != 64:
+                self.add_error(
+                    "aead_key", _("ChaCha20-Poly1305 supports only 256 bit keys")
+                )
 
 
 ##########################
