@@ -4,6 +4,8 @@ from django.conf import settings
 from django import forms
 from django.utils._os import safe_join
 
+""" File manipulation functions for writing files and preparing files for download. """
+
 # Constants for file extensions
 GPG_FILE_EXTENSION = ".txt.gpg"
 
@@ -43,6 +45,7 @@ def data_protection_file_processing(
     file_name: str,
     aad: bytes = None,
 ) -> tuple:
+    """Process data protection (encrypt/decrypt operations) file creation."""
     create_directory_if_not_exists(safe_join(settings.MEDIA_ROOT, user_directory))
     save_path = safe_join(settings.MEDIA_ROOT, user_directory, file_name)
 
@@ -55,27 +58,27 @@ def data_protection_file_processing(
             data = cm.data_protection_text_format(
                 mode,
                 cm.bytes_to_hex(nonce),
-                aes_output.decode("utf-8"),  # convert bytes to unicode text string
+                aes_output.decode("utf-8"),
                 aad.decode("utf-8"),
             )
         else:
             data = cm.data_protection_text_format(
                 mode,
                 cm.bytes_to_hex(nonce),
-                cm.bytes_to_hex(aes_output),  # convert bytes to base 16 hex string
+                cm.bytes_to_hex(aes_output),
                 aad.decode("utf-8"),
             )
     if operation == "encrypt":
         data = cm.data_protection_text_format(
             mode,
             cm.bytes_to_hex(nonce),
-            cm.bytes_to_hex(aes_output),  # convert bytes to base 16 hex string
+            cm.bytes_to_hex(aes_output),
             aad.decode("utf-8"),
         )
     return data, save_path
 
 
-def try_decode_bytes_to_utf8(data: bytes) -> str:
+def try_decode_bytes_to_utf8(data: bytes) -> str | None:
     """Try to decode bytes to utf-8 string."""
     try:
         return data.decode("utf-8")
@@ -223,7 +226,7 @@ def create_wireless_milenage_encrypted_file(
     key_type: str,
     key_identifier: str,
 ) -> str:
-    """Wraps the secret key with PGP public key of engineer entering milenage keys in provider terminal and saves it to file."""
+    """Wraps the secret key with PGP public key of engineer handling milenage keys"""
     file = form.cleaned_data["milenage_public_key"]
     fingerprint, keyid = import_pgp_key_from_file(cm, file)
 

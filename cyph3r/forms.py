@@ -4,10 +4,7 @@ from django.utils.translation import gettext_lazy as _
 import magic
 import re
 
-"""
-This module contains the forms used in the Cyph3r application.
-
-"""
+"""This module contains the forms used in the Cyph3r application."""
 
 ######################################
 # Helper Classes for Form Validation #
@@ -266,7 +263,9 @@ class WirelessPGPUploadForm(forms.Form, ValidateCyph3rForms):
 
 
 class KeyShareReconstructForm(forms.Form, ValidateCyph3rForms):
-    # Key Index for key reconstruction for shamir secret sharing
+    """Form for Key Share Reconstruction"""
+
+    # Key Index field for key reconstruction (Shamir Secret Sharing)
     key_index = forms.IntegerField(
         label=_("Key Index"),
         min_value=1,
@@ -294,6 +293,8 @@ class KeyShareReconstructForm(forms.Form, ValidateCyph3rForms):
 
 
 class KeyShareSplitForm(forms.Form, ValidateCyph3rForms):
+    """Form for Key Share Splitting"""
+
     # Key Share field for key reconstruction
     key = forms.CharField(
         required=True,
@@ -313,6 +314,8 @@ class KeyShareSplitForm(forms.Form, ValidateCyph3rForms):
 
 
 class KeyShareInfoForm(forms.Form, ValidateCyph3rForms):
+    """Form for entering Key Share Information"""
+
     # Key Splitting/Reconstruction Options
     KEY_SPLITTING_SCHEMES = [
         ("", _("Select a scheme")),
