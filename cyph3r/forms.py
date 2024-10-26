@@ -557,15 +557,15 @@ class DataProtectionForm(forms.Form, ValidateCyph3rForms):
 
         if pgp_encrypt:
             if not public_key and not name:
-                self.add_error(None, _("Provide name and public key."))
+                self.add_error(None, _("Provide a name and upload a public key."))
             if not public_key:
-                self.add_error("public_key", _("Provide public key."))
+                self.add_error("public_key", _("Upload a public key."))
             if not name:
-                self.add_error("name", _("Provide name."))
+                self.add_error("name", _("Provide a name."))
         if aead_key:
             if aead_mode == "chacha" and len(aead_key) != 64:
                 self.add_error(
-                    "aead_key", _("ChaCha20-Poly1305 supports only 256 bit keys")
+                    "aead_key", _("ChaCha20-Poly1305 supports only 256 bit keys.")
                 )
 
 

@@ -296,13 +296,14 @@ def data_protect_post_long_hex_string(pgp_public_keys):
     Fixture to test app rejects invalid post data to data protect view.
     """
     return {
-        "name": "test123",
-        "aes_mode": "gcm",
-        "aes_operation": "encrypt",
-        "aes_key": "12345cbfefee0a387b8443b1a859b36b1b71d8",
+        "aead_mode": "gcm",
+        "aead_operation": "encrypt",
+        "aead_key": "12345cbfefee0a387b8443b1a859b36b1b71d8",
         "aad": "Hello",
-        "plain_text": "cyph3r",
-        "public_keys": pgp_public_keys["milenage_public_key"],
+        "plaintext": "cyph3r",
+        "pgp_encrypt": True,
+        "name": "test123",
+        "public_key": pgp_public_keys["milenage_public_key"],
     }
 
 
@@ -312,13 +313,76 @@ def data_protect_post_bad_hex_string(pgp_public_keys):
     Fixture to test app rejects invalid post data to data protect view.
     """
     return {
-        "name": "test123",
-        "aes_mode": "gcm",
-        "aes_operation": "encrypt",
-        "aes_key": "1YYZZ45cbfefee0a387b8443b1a859b36b1b71d8",
+        "aead_mode": "gcm",
+        "aead_operation": "encrypt",
+        "aead_key": "1YYZZ45cbfefee0a387b8443b1a859b36b1b71d8",
         "aad": "Hello",
-        "plain_text": "cyph3r",
-        "public_keys": pgp_public_keys["milenage_public_key"],
+        "plaintext": "cyph3r",
+        "pgp_encrypt": True,
+        "public_key": pgp_public_keys["milenage_public_key"],
+        "name": "test123",
+    }
+
+
+@pytest.fixture
+def data_protect_gcm_encrypt_post_data_pgp(pgp_public_keys):
+    """
+    Fixture to Post data for GCM encryption with PGP public keys.
+    """
+    return {
+        "aead_mode": "gcm",
+        "aead_operation": "encrypt",
+        "aead_key": "5b5239115089e0f9678ea6e49ef07b6a",
+        "aad": "Hello",
+        "plaintext": "cyph3r",
+        "pgp_encrypt": True,
+        "name": "test123",
+        "public_key": pgp_public_keys["milenage_public_key"],
+    }
+
+
+@pytest.fixture
+def data_protect_chacha_encrypt_post_data_nopgp():
+    """
+    Fixture to Post data for Chacha encryption without PGP public keys.
+    """
+    return {
+        "aead_mode": "chacha",
+        "aead_operation": "encrypt",
+        "aead_key": "8b7a760f18c47d98f6428416c37c50141e1614e2f78211e7e6cc027325456e28",
+        "aad": "Hello",
+        "plaintext": "cyph3r",
+        "pgp_encrypt": False,
+    }
+
+
+@pytest.fixture
+def data_protect_post_enable_pgp_encrypt_no_publickeys():
+    """
+    Fixture to test app returns errors when pgp_encrypt is enabled with no public keys uploaded.
+    """
+    return {
+        "aead_mode": "gcm",
+        "aead_operation": "encrypt",
+        "aead_key": "bfefee0a387b8443b1a859b36b1b71d8",
+        "aad": "Hello",
+        "plaintext": "cyph3r",
+        "pgp_encrypt": True,
+    }
+
+
+@pytest.fixture
+def data_protect_post_128key_chacha_string():
+    """
+    Fixture to test app rejects Chacha keys that are not 256 bits.
+    """
+    return {
+        "aead_mode": "chacha",
+        "aead_operation": "encrypt",
+        "aead_key": "bfefee0a387b8443b1a859b36b1b71d8",
+        "aad": "Hello",
+        "plaintext": "cyph3r",
+        "pgp_encrypt": False,
     }
 
 
@@ -352,22 +416,6 @@ def data_protect_result_html_page():
     Fixture to return the Data Protect Result (no PGP upload) HTML page.
     """
     return "cyph3r/data_protect_templates/data-protect-result.html"
-
-
-@pytest.fixture
-def data_protect_gcm_encrypt_post_data_pgp(pgp_public_keys):
-    """
-    Fixture to Post data for GCM encryption with PGP public keys.
-    """
-    return {
-        "name": "test123",
-        "aes_mode": "gcm",
-        "aes_operation": "encrypt",
-        "aes_key": "5b5239115089e0f9678ea6e49ef07b6a",
-        "aad": "Hello",
-        "plain_text": "cyph3r",
-        "public_keys": pgp_public_keys["milenage_public_key"],
-    }
 
 
 #######################

@@ -26,8 +26,7 @@ class Dev(Configuration):
     # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
     # SECURITY WARNING: keep the secret key used in production secret!
-    # SECRET_KEY = get_secret(id="django_secret")
-    SECRET_KEY = "django-insecure-xv4lnz$#1#k)lj3a+mz9i6y1n&swfexqfboa&q(%pbj53u#9bv"
+    SECRET_KEY = get_secret(id="django_secret")
 
     # SECURITY WARNING: don't run with debug turned on in production!
     DEBUG = values.BooleanValue(True)
@@ -185,7 +184,7 @@ class Staging(Dev):
     DEBUG = False
 
     # Secret Key
-    # SECRET_KEY = get_secret(id="django_secret")
+    SECRET_KEY = get_secret(id="django_secret")
 
     # Set secure proxy header
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -229,11 +228,11 @@ class Staging(Dev):
     # Database
     # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-    # DATABASE_PASSWORD = get_secret(id="postgres_secret")
+    DATABASE_PASSWORD = get_secret(id="postgres_secret")
 
-    # DATABASES = values.DatabaseURLValue(
-    #    f"postgres://cyph3r:{DATABASE_PASSWORD}@localhost/cyph3r"
-    # )
+    DATABASES = values.DatabaseURLValue(
+        f"postgres://cyph3r:{DATABASE_PASSWORD}@localhost/cyph3r"
+    )
 
     # Installed Apps and Middleware
     INSTALLED_APPS = [

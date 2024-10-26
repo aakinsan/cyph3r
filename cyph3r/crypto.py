@@ -275,5 +275,5 @@ class CryptoManager:
 
     def data_protection_text_format(self, mode, nonce, text, aad=None):
         """Prepare the data in the data protection text format."""
-        data = f"AES Mode: {mode.upper()}\n\nNonce/IV: {nonce.upper()}\n\nAAD: {aad}\n\nText: {text}"
+        data = f"AEAD Mode: {mode.upper()}\n\nNonce: {nonce.upper()}\n\nAAD: {aad}\n\nText: {text}"
         return data.encode("utf-8")
