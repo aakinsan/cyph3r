@@ -174,24 +174,6 @@ class CryptoManager:
         except crypto_exceptions.InvalidTag as err:
             logger.error(f"Decryption failed: {err}", exc_info=True)
 
-    def encrypt_with_aes_cbc(self, key: bytes, iv: bytes, plaintext: bytes) -> bytes:
-        """Encrypts data using AES-CBC."""
-        cipher = Cipher(algorithms.AES(key), modes.CBC(iv))
-        encryptor = cipher.encryptor()
-        padder = padding.PKCS7(128).padder()
-        padded_data = padder.update(plaintext) + padder.finalize()
-        ct = encryptor.update(padded_data) + encryptor.finalize()
-        return ct
-
-    def decrypt_with_aes_cbc(self, key: bytes, iv: bytes, ciphertext: bytes) -> bytes:
-        """Decrypts data using AES-CBC."""
-        cipher = Cipher(algorithms.AES(key), modes.CBC(iv))
-        decryptor = cipher.decryptor()
-        decrypted_padded_data = decryptor.update(ciphertext) + decryptor.finalize()
-        unpadder = padding.PKCS7(128).unpadder()
-        pt = unpadder.update(decrypted_padded_data) + unpadder.finalize()
-        return pt
-
     def shamir_split_secret(
         self, threshold_shares: int, total_shares: int, secret: bytes
     ) -> list:
