@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-20 17:05-0400\n"
+"POT-Creation-Date: 2024-10-27 12:50-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,37 +17,33 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: templates/cyph3r/500.html:10 templates/cyph3r/500p.html:5
+#: templates/cyph3r/500.html:10
 msgid "Server Error (500)"
 msgstr "Erreur de serveur (500)"
 
-#: templates/cyph3r/500.html:12 templates/cyph3r/500p.html:7
+#: templates/cyph3r/500.html:12
 msgid "Oops, an unexpected error has occured!"
 msgstr "Oups, une erreur inattendue s'est produite !"
 
-#: templates/cyph3r/500.html:14 templates/cyph3r/500p.html:9
+#: templates/cyph3r/500.html:14
 msgid "Please try again sometime later."
 msgstr "Veuillez réessayer plus tard."
 
-#: templates/cyph3r/500.html:17 templates/cyph3r/500p.html:12
+#: templates/cyph3r/500.html:17
 msgid "Go back to the homepage"
 msgstr "Retourner à la page d'accueil"
 
-#: templates/cyph3r/base.html:43
+#: templates/cyph3r/base.html:41
 msgid "settings"
 msgstr "paramètres"
 
-#: templates/cyph3r/base.html:51
-msgid "login"
-msgstr "se connecter"
-
-#: templates/cyph3r/base.html:62
+#: templates/cyph3r/base.html:50
 msgid "This work is free to use, copy, and distribute without restriction."
 msgstr ""
 "Cette œuvre peut être utilisée, copiée et distribuée librement sans "
 "restriction."
 
-#: templates/cyph3r/base.html:83
+#: templates/cyph3r/base.html:71
 msgid "Support"
 msgstr "soutien"
 
@@ -56,9 +52,8 @@ msgstr "soutien"
 msgid "Downloads"
 msgstr "Téléchargements"
 
-#: templates/cyph3r/data_protect_templates/data-protect-info.html:111
+#: templates/cyph3r/data_protect_templates/data-protect-info.html:126
 #: templates/cyph3r/key_share_templates/key-share-info.html:70
-#: templates/cyph3r/sample-htmx.html:38
 #: templates/cyph3r/token_gen_templates/token-gen-info.html:131
 #: templates/cyph3r/wireless_templates/wireless-gcp-storage.html:38
 #: templates/cyph3r/wireless_templates/wireless-key-info.html:43
@@ -66,11 +61,10 @@ msgstr "Téléchargements"
 msgid "Back"
 msgstr "Dos"
 
-#: templates/cyph3r/data_protect_templates/data-protect-info.html:115
+#: templates/cyph3r/data_protect_templates/data-protect-info.html:130
 #: templates/cyph3r/key_share_templates/key-share-info.html:74
 #: templates/cyph3r/key_share_templates/key-share-reconstruct.html:54
 #: templates/cyph3r/key_share_templates/key-share-split.html:41
-#: templates/cyph3r/sample-htmx.html:43
 #: templates/cyph3r/token_gen_templates/token-gen-info.html:135
 #: templates/cyph3r/wireless_templates/wireless-gcp-storage.html:43
 #: templates/cyph3r/wireless_templates/wireless-key-info.html:48
@@ -83,8 +77,8 @@ msgid "Mode"
 msgstr "Mode"
 
 #: templates/cyph3r/data_protect_templates/data-protect-result.html:15
-msgid "Output"
-msgstr "Sortir"
+msgid "Result"
+msgstr "Résultat"
 
 #: templates/cyph3r/index.html:7
 msgid "The Cryptography"
@@ -98,29 +92,25 @@ msgstr " de cryptographie"
 msgid "Your cryptography tooklit, simplified!"
 msgstr "Votre cryptographie prend vie, simplifiée!"
 
-#: templates/cyph3r/index.html:12
+#: templates/cyph3r/index.html:12 templates/cyph3r/index.html:16
 msgid "Keys"
 msgstr "Clés"
 
 #: templates/cyph3r/index.html:12
-msgid "generated"
-msgstr "généré"
+msgid "Generated"
+msgstr "Généré"
 
 #: templates/cyph3r/index.html:16
-msgid "Key"
-msgstr "Clé"
-
-#: templates/cyph3r/index.html:16
-msgid "shares"
-msgstr "répartir"
+msgid "Reconstructed | Split"
+msgstr "Reconstruit | Diviser"
 
 #: templates/cyph3r/index.html:20
-msgid "Files"
-msgstr "Fichiers"
+msgid "Data Contents"
+msgstr "Contenu des données"
 
 #: templates/cyph3r/index.html:20
-msgid "encrypted"
-msgstr "fichiers"
+msgid "Encrypted | Decrypted"
+msgstr "Cryptage | Décryptage"
 
 #: templates/cyph3r/index.html:28
 msgid "Token Generation"
@@ -139,26 +129,18 @@ msgid "Splitting | Reconstruction"
 msgstr "Fractionnement | Reconstruction"
 
 #: templates/cyph3r/index.html:40
-msgid "Key Storage"
-msgstr "Stockage des clés"
-
-#: templates/cyph3r/index.html:42
-msgid "Secure Vaults"
-msgstr "Coffres-forts sécurisés"
-
-#: templates/cyph3r/index.html:46
 msgid "Data Protection"
 msgstr "Protection des données"
 
-#: templates/cyph3r/index.html:48
+#: templates/cyph3r/index.html:42
 msgid "Encryption | Decryption"
 msgstr "Cryptage | Décryptage"
 
-#: templates/cyph3r/index.html:52
+#: templates/cyph3r/index.html:46
 msgid "Wireless Keys"
 msgstr "Clés sans fil"
 
-#: templates/cyph3r/index.html:54
+#: templates/cyph3r/index.html:48
 msgid "Wireless key ceremony"
 msgstr "Remise des clés sans fil"
 
@@ -405,3 +387,27 @@ msgstr "Fichier de clé enveloppé"
 #: templates/cyph3r/wireless_templates/wireless-key-download.html:53
 msgid "Milenage Keys"
 msgstr "Clés Milenage"
+
+#~ msgid "login"
+#~ msgstr "se connecter"
+
+#~ msgid "Output"
+#~ msgstr "Sortir"
+
+#~ msgid "Key"
+#~ msgstr "Clé"
+
+#~ msgid "shares"
+#~ msgstr "répartir"
+
+#~ msgid "Files"
+#~ msgstr "Fichiers"
+
+#~ msgid "encrypted"
+#~ msgstr "fichiers"
+
+#~ msgid "Key Storage"
+#~ msgstr "Stockage des clés"
+
+#~ msgid "Secure Vaults"
+#~ msgstr "Coffres-forts sécurisés"
