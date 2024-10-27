@@ -87,7 +87,7 @@ class ValidateCyph3rForms:
     def validate_hex_nonce_length(self, value):
         # Check if the value is the correct length
         if len(value) != 24:
-            raise ValidationError(_("Value must be either 96 bits."))
+            raise ValidationError(_("Value must be 96 bits."))
 
 
 #################################

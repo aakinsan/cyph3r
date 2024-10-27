@@ -166,10 +166,8 @@
     end
 
     on change from #id_aead_operation call check_AEAD_Operation() 
-    on load call check_AEAD_Operation()
-
-    on change from #id_pgp_encrypt call check_PGP_Encrypt() 
-    on load call check_PGP_Encrypt()
+    on change from #id_pgp_encrypt call check_PGP_Encrypt()
+    on load call check_AEAD_Operation() then call check_PGP_Encrypt()
 </script>
 
 {% endblock %}
