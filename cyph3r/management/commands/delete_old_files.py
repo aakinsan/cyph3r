@@ -1,5 +1,5 @@
 import time
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 import os
 from django.utils._os import safe_join
@@ -34,5 +34,5 @@ class Command(BaseCommand):
                     logger.info(f"Successfully deleted {path}")
                 except Exception as e:
                     logger.error(
-                        f"An error occurred in the index view: {e}", exc_info=True
+                        f"An error occurred deleting media files in {e}", exc_info=True
                     )
