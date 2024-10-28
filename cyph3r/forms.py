@@ -478,9 +478,9 @@ class DataProtectionForm(forms.Form, ValidateCyph3rForms):
 
     # Nonce field for decryption
     nonce = forms.CharField(
-        label="Nonce",
         max_length=24,
         min_length=24,
+        label=_("NONCE"),
         help_text=_("12 bytes Nonce (Hex)"),
         required=False,
     )
@@ -501,8 +501,8 @@ class DataProtectionForm(forms.Form, ValidateCyph3rForms):
 
     # PGP Encrypt Checkbox
     pgp_encrypt = forms.BooleanField(
-        label="PGP Encrypt",
         required=False,
+        label=_("PGP Encrypt"),
         help_text=_("Encrypt output with PGP public key."),
     )
 
