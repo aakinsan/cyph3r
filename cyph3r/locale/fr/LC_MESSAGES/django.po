@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-27 12:55-0400\n"
+"POT-Creation-Date: 2024-10-28 11:41-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -269,6 +269,10 @@ msgstr "Cryptage | Clé de décryptage"
 msgid "ADDITIONAL AUTHENTICATED DATA (AAD)"
 msgstr "DONNÉES AUTHENTIFIÉES SUPPLÉMENTAIRES (AAD)"
 
+#: forms.py:483
+msgid "NONCE"
+msgstr "NONCE"
+
 #: forms.py:484
 msgid "12 bytes Nonce (Hex)"
 msgstr "12 octets Nonce (Hex)"
@@ -280,6 +284,10 @@ msgstr "TEXTE CHIFFRÉ (HEX)"
 #: forms.py:498
 msgid "PLAINTEXT"
 msgstr "TEXTE DE PLAINTE"
+
+#: forms.py:505
+msgid "PGP Encrypt"
+msgstr "Chiffrement PGP"
 
 #: forms.py:506
 msgid "Encrypt output with PGP public key."
@@ -294,10 +302,8 @@ msgid "Identifier for PGP encrypted file."
 msgstr "Identifiant du fichier chiffré PGP"
 
 #: forms.py:521
-#, fuzzy
-#| msgid "PGP Public Key (Optional)"
 msgid "PGP Public Key"
-msgstr "Clé publique PGP (facultatif)"
+msgstr "Clé publique PGP"
 
 #: forms.py:522
 msgid "Upload PGP Public key to encrypt output"
