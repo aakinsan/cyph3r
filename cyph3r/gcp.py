@@ -1,22 +1,38 @@
 from google.cloud import kms_v1
 from google.cloud import secretmanager
-from google.api_core.exceptions import AlreadyExists, PermissionDenied, DeadlineExceeded
+from google.cloud.storage import Blob
+from google.cloud import storage
+from google.cloud.storage import Bucket
+from google.api_core.exceptions import (
+    GoogleAPIError,
+    AlreadyExists,
+    PermissionDenied,
+    DeadlineExceeded,
+)
+import logging
 
 
 """
 This module provides a class for managing Google Cloud Platform (GCP) Secrets.
 
 """
+# Define the logger for the module
+logger = logging.getLogger(__name__)
 
 
 class GCPManager:
     def __init__(
-        self, project_id: str, kms_keyring_name: str = None, kms_key_name: str = None
+        self,
+        project_id: str,
+        kms_keyring_name: str = None,
+        kms_key_name: str = None,
+        storage_bucket: str = None,
     ):
         # initialize attributes
         self.project_id = project_id
         self.kms_keyring_name = kms_keyring_name
         self.kms_key_name = kms_key_name
+        self.storage_bucket = storage_bucket
         self.location = "global"
 
         # Initialize KMS client
@@ -53,15 +69,15 @@ class GCPManager:
 
         # If permission denied, print error message.
         except PermissionDenied as err:
-            print(f"Permission denied: {err}")
+            logger.error(f"Permission denied: {err}", exc_info=True)
 
         # If deadline exceeded, print error message.
         except DeadlineExceeded as err:
-            print(f"communication failure on server side: {err}")
+            logger.error(f"communication failure on server side: {err}", exc_info=True)
 
         # If any other error occurs, print error message.
         except Exception as err:
-            print(f"An error occurred: {err}")
+            logger.error(f"An error occurred: {err}", exc_info=True)
 
     def add_secret_version(self, secret_id: str, payload: bytes) -> None:
         """Add secret version to secrets manager."""
@@ -76,15 +92,15 @@ class GCPManager:
 
         # If permission denied, print error message.
         except PermissionDenied as err:
-            print(f"Permission denied: {err}")
+            logger.error(f"Permission denied: {err}", exc_info=True)
 
         # If deadline exceeded, print error message.
         except DeadlineExceeded as err:
-            print(f"communication failure on server side: {err}")
+            logger.error(f"communication failure on server side: {err}", exc_info=True)
 
         # If any other error occurs, print error message.
         except Exception as err:
-            print(f"An error occurred: {err}")
+            logger.error(f"An error occurred: {err}", exc_info=True)
 
     def get_secret(self, secret_id: str, version_id="latest") -> bytes:
         # Get secret (private key or passphrase) from secrets manager.
@@ -107,15 +123,15 @@ class GCPManager:
 
         # If permission denied, print error message.
         except PermissionDenied as err:
-            print(f"Permission denied: {err}")
+            logger.error(f"Permission denied: {err}", exc_info=True)
 
         # If deadline exceeded, print error message.
         except DeadlineExceeded as err:
-            print(f"communication failure on server side: {err}")
+            logger.error(f"communication failure on server side: {err}", exc_info=True)
 
         # If any other error occurs, print error message.
         except Exception as err:
-            print(f"An error occurred: {err}")
+            logger.error(f"An error occurred: {err}", exc_info=True)
 
     def encrypt_secret(self, payload: bytes) -> bytes:
         """Encrypts a secret using Cloud KMS key."""
@@ -130,15 +146,15 @@ class GCPManager:
 
         # If permission denied, print error message.
         except PermissionDenied as err:
-            print(f"Permission denied: {err}")
+            logger.error(f"Permission denied: {err}", exc_info=True)
 
         # If deadline exceeded, print error message.
         except DeadlineExceeded as err:
-            print(f"communication failure on server side: {err}")
+            logger.error(f"communication failure on server side: {err}", exc_info=True)
 
         # If any other error occurs, print error message.
         except Exception as err:
-            print(f"An error occurred: {err}")
+            logger.error(f"An error occurred: {err}", exc_info=True)
 
     def decrypt_secret(self, encrypted_payload: bytes) -> bytes:
         """Decrypts a secret using Cloud KMS key."""
@@ -154,12 +170,22 @@ class GCPManager:
 
         # If permission denied, print error message.
         except PermissionDenied as err:
-            print(f"Permission denied: {err}")
+            logger.error(f"Permission denied: {err}", exc_info=True)
 
         # If deadline exceeded, print error message.
         except DeadlineExceeded as err:
-            print(f"communication failure on server side: {err}")
+            logger.error(f"communication failure on server side: {err}", exc_info=True)
 
         # If any other error occurs, print error message.
         except Exception as err:
-            print(f"An error occurred: {err}")
+            logger.error(f"An error occurred: {err}", exc_info=True)
+
+    def store_in_bucket(self, path: str, payload: bytes) -> None:
+        """Stores a secret in a GCP bucket."""
+        storage_client = storage.Client(project=self.project_id)
+        storage_bucket = storage_client.get_bucket(self.storage_bucket)
+        blob = Blob(path, storage_bucket)
+        try:
+            blob.upload_from_string(payload)
+        except GoogleAPIError as err:
+            logger.error(f"An error occurred with the API: {err}", exc_info=True)

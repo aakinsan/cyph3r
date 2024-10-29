@@ -90,6 +90,7 @@ def pgp_public_keys():
         "provider_public_keys": [p1, p2, p3],
         "fallback_public_keys": [ybk1, ybk2],
         "milenage_public_key": m1,
+        "upload_to_cloud_storage": False,
     }
 
     return pgp_file_uploads

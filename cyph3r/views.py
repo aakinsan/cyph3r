@@ -29,6 +29,7 @@ from cyph3r.gcp import GCPManager
 from cyph3r.key_tracker import total_key_shares, total_files_encrypted
 from datetime import datetime
 import logging
+import os
 
 """
 This module contains the views for the cyph3r app.
@@ -839,9 +840,35 @@ def wireless_pgp_upload(request):
                 # Nonce is required for AES GCM decryption
                 wrapped_data = nonce + wrapped_secret_key
 
+                # Check if user wants artifacts stored in GCP Storage Bucket
+                gcp_storage = form.cleaned_data.get("upload_to_cloud_storage")
+
+                # Initialize GCPManager object if user wants to write files to GCP Storage
+                gcpm = (
+                    GCPManager(
+                        project_id=os.getenv("GCP_PROJECT_ID"),
+                        storage_bucket=os.getenv("GCP_STORAGE_BUCKET"),
+                    )
+                    if gcp_storage
+                    else None
+                )
+
+                # Use datetime to create unique blob path if file is to be written to GCP Storage
+                datetime_format = (
+                    datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+                    if gcp_storage
+                    else None
+                )
+
                 # Calling helper function to write the encrypted secret key to a file and return the file name
                 wrapped_secret_key_file = create_wireless_wrapped_secret_key_file(
-                    cm, wrapped_data, protocol, key_type, key_identifier
+                    cm,
+                    gcpm,
+                    wrapped_data,
+                    protocol,
+                    key_type,
+                    key_identifier,
+                    datetime_format,
                 )
                 # Store wrapped secret file path in session
                 request.session["wrapped_secret_key_file"] = wrapped_secret_key_file
@@ -876,10 +903,12 @@ def wireless_pgp_upload(request):
                     create_wireless_security_officers_encrypted_key_files(
                         form,
                         cm,
+                        gcpm,
                         key_type,
                         key_identifier,
                         protocol,
                         shares,
+                        datetime_format,
                     )
                 )
                 # Store SO file paths in session
@@ -898,10 +927,12 @@ def wireless_pgp_upload(request):
                     create_wireless_fallback_yubikey_encrypted_key_files(
                         form,
                         cm,
+                        gcpm,
                         key_type,
                         key_identifier,
                         protocol,
                         secret_key,
+                        datetime_format,
                     )
                 )
                 # Store SO file paths in session
@@ -936,23 +967,6 @@ def wireless_pgp_upload(request):
                     )
                     # Store milenage file path in session
                     request.session["milenage_file"] = milenage_file
-                """
-                # Initialize GCP Manager for GCP operations
-                # Wrapped keys will be stored in GCP Secrets Manager and also available for download for backup
-                # The use of KMS is optional
-                gcp_project_id = request.session["gcp_project_id"]
-                gcp_kms_keyring = request.session["gcp_kms_keyring"]
-                gcp_kms_key = request.session["gcp_kms_key"]
-                secret_id = f"{protocol}-{key_type}-{key_identifier}"
-
-                if gcp_kms_keyring == "":
-                    gm = GCPManager(gcp_project_id)
-                else:
-                    gm = GCPManager(gcp_project_id, gcp_kms_keyring, gcp_kms_key)
-
-                # Store Encrypted data (nonce + key) in GCP Secrets Manager
-                gm.create_secret(secret_id=secret_id, payload=wrapped_data)
-                """
 
                 # Clear secret and wrap key from cache
                 cache.delete(f"secret_key_{request.session.session_key}")
