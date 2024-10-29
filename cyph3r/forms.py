@@ -232,6 +232,12 @@ class WirelessPGPUploadForm(forms.Form, ValidateCyph3rForms):
         help_text=_("Upload PGP public key to wrap milenage keys"),
     )
 
+    upload_to_cloud_storage = forms.BooleanField(
+        label=_("Cloud Storage"),
+        required=False,
+        help_text=_("Store encrypted secrets in GCP Storage Bucket"),
+    )
+
     def clean_security_officers_public_keys(self):
         """validate the uploaded security officer public keys files are valid PGP public keys"""
         files = self.cleaned_data.get("security_officers_public_keys")
