@@ -1,7 +1,10 @@
 import os
 from .crypto import CryptoManager
+from .gcp import GCPManager
+from datetime import datetime
 from django.conf import settings
 from django import forms
+import logging
 from django.utils._os import safe_join
 
 """ File manipulation functions for writing files and preparing files for download. """
@@ -9,6 +12,8 @@ from django.utils._os import safe_join
 # Constants for file extensions
 GPG_FILE_EXTENSION = ".txt.gpg"
 
+# Define the logger for the module
+logger = logging.getLogger(__name__)
 
 ##########################################
 # Helper Functions for File Manipulation #
@@ -25,6 +30,24 @@ def save_encrypted_data_to_file(file_path: str, encrypted_data: bytes):
     """Saves encrypted data to a file."""
     with open(file_path, "wb") as fp:
         fp.write(encrypted_data)
+
+
+def save_encrypted_data_to_blob(
+    gcpm: GCPManager,
+    key_identifier: str,
+    datetime_format: str,
+    file_name: str,
+    encrypted_data: bytes,
+):
+    """Saves encrypted data to a blob in GCP Storage."""
+    blob_path = f"{key_identifier}-{datetime_format}/{file_name}"
+    try:
+        gcpm.store_in_bucket(blob_path, encrypted_data)
+    except Exception as e:
+        logger.error(
+            f"An error occured when uploading to Cloud Storage bucket: {e}",
+            exc_info=True,
+        )
 
 
 def import_pgp_key_from_file(cm: CryptoManager, file):
@@ -93,10 +116,12 @@ def try_decode_bytes_to_utf8(data: bytes) -> str | None:
 
 def create_wireless_wrapped_secret_key_file(
     cm: CryptoManager,
+    gcpm: GCPManager,
     wrapped_data: bytes,
     protocol: str,
     key_type: str,
     key_identifier: str,
+    datetime_format: str,
 ) -> str:
     """Writes Encrypted key to a file for download."""
     wrapped_data_file_name = (
@@ -109,6 +134,16 @@ def create_wireless_wrapped_secret_key_file(
             protocol, key_type, cm.bytes_to_hex(wrapped_data)
         )
         fp.write(data)
+
+    # Check if user wants file written to GCP Storage
+    if gcpm:
+        save_encrypted_data_to_blob(
+            gcpm,
+            key_identifier,
+            datetime_format,
+            wrapped_data_file_name,
+            data,
+        )
 
     return wrapped_data_file_name
 
@@ -156,10 +191,12 @@ def create_wireless_provider_encrypted_key_files(
 def create_wireless_security_officers_encrypted_key_files(
     form: forms.Form,
     cm: CryptoManager,
+    gcpm: GCPManager,
     key_type: str,
     key_identifier: str,
     protocol: str,
     shares: list,
+    datetime_format: str,
 ) -> list:
     """Encrypts files containing the Shamir wrap key share with security officer (SO) PGP keys."""
     # Initialize the list to store the paths to the encrypted shares for download
@@ -183,6 +220,16 @@ def create_wireless_security_officers_encrypted_key_files(
         )
         save_encrypted_data_to_file(save_path, encrypted_so_wrap_key_share_data.data)
 
+        # Check if user wants file written to GCP Storage
+        if gcpm:
+            save_encrypted_data_to_blob(
+                gcpm,
+                key_identifier,
+                datetime_format,
+                security_officer_file_name,
+                encrypted_so_wrap_key_share_data.data,
+            )
+
     # Return the path to the SO encrypted files for download
     return security_officer_file_names
 
@@ -190,10 +237,12 @@ def create_wireless_security_officers_encrypted_key_files(
 def create_wireless_fallback_yubikey_encrypted_key_files(
     form: forms.Form,
     cm: CryptoManager,
+    gcpm: GCPManager,
     key_type: str,
     key_identifier: str,
     protocol: str,
     secret_key: bytes,
+    datetime_format: str,
 ) -> list:
     """Encrypts files containing the wireless secrets with the fallback Yubikey PGP keys."""
     # Initialize the list to store the paths to the encrypted shares for download
@@ -214,6 +263,16 @@ def create_wireless_fallback_yubikey_encrypted_key_files(
             secret_key_hex, fingerprint, always_trust=True, armor=False
         )
         save_encrypted_data_to_file(save_path, encrypted_yubikey_fallback_data.data)
+
+        # Check if user wants file written to GCP Storage
+        if gcpm:
+            save_encrypted_data_to_blob(
+                gcpm,
+                key_identifier,
+                datetime_format,
+                fallback_yubikey_file_name,
+                encrypted_yubikey_fallback_data.data,
+            )
 
     # Return the path to the SO encrypted files for download
     return fallback_yubikey_file_names

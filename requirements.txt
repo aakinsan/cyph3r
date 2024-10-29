@@ -11,6 +11,7 @@ chardet==5.2.0
 charset-normalizer==3.3.2
 click==8.1.7
 cookiecutter==2.6.0
+coverage==7.6.4
 cryptography==43.0.1
 curtsies==0.4.2
 cwcwidth==0.1.9
@@ -35,6 +36,9 @@ google-cloud-core==2.4.1
 google-cloud-kms==3.0.0
 google-cloud-logging==3.11.3
 google-cloud-secret-manager==2.20.2
+google-cloud-storage==2.18.2
+google-crc32c==1.6.0
+google-resumable-media==2.7.2
 googleapis-common-protos==1.65.0
 greenlet==3.1.1
 grpc-google-iam-v1==0.13.1
@@ -61,6 +65,7 @@ pycparser==2.22
 pycryptodome==3.20.0
 Pygments==2.18.0
 pytest==8.3.3
+pytest-cov==5.0.0
 pytest-django==4.9.0
 pytest-env==1.1.5
 python-dateutil==2.9.0.post0
