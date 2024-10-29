@@ -20,7 +20,7 @@ def get_secret(id=None) -> str:
     """
     try:
         # Get Project ID from environment variable.
-        project_id = os.getenv("GCP_PROJECT_ID")
+        project_id = os.getenv("GCP_SECRET_PROJECT_ID")
 
         # Initialize GCPManager object.
         gcpm = GCPManager(project_id)

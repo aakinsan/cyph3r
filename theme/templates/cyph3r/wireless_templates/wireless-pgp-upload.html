@@ -22,19 +22,37 @@
 
                 <!-- Visible Fields -->
                 {% for field in form.visible_fields %}
-                    <div class="mb-4">
-                        <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
-                        {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full dark:text-black text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 dark:focus:border-cyan-500 focus:border-orange-500" }}
-                        <div class="text-xs dark:text-slate-300 text-gray-500">{{ field.help_text }}</div> 
+                    {% if field.name == "upload_to_cloud_storage" %}
+                        <div class="mb-4">
+                            <div class="flex flex-row gap-2">
+                                <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
+                                {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded dark:text-black text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 dark:focus:border-cyan-500 focus:border-orange-500" }}
+                            </div>
+                            <div class="text-xs dark:text-slate-300 text-gray-500">{{ field.help_text }}</div> 
 
-                        {% if field.errors %}
-                        <span class="text-red-500 text-xs">
-                            {% for error in field.errors %}
-                            {{ error }}<br />
-                            {% endfor %}
-                        </span>
-                        {% endif %}
-                    </div>
+                            {% if field.errors %}
+                            <span class="text-red-500 text-xs">
+                                {% for error in field.errors %}
+                                {{ error }}<br />
+                                {% endfor %}
+                            </span>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="mb-4">
+                            <label for="{{ field.id_for_label}}" class="block text-gray-500 dark:text-slate-300 text-xs font-semibold mb-1">{{ field.label|upper }}</label>
+                            {{ field|add_class:"bg-gray-200 text-xs appearance-none border-2 border-gray-200 px-2 py-1 rounded w-full dark:text-black text-gray-500 leading-tight focus:outline-none focus:bg-white focus:ring-0 dark:focus:border-cyan-500 focus:border-orange-500" }}
+                            <div class="text-xs dark:text-slate-300 text-gray-500">{{ field.help_text }}</div> 
+
+                            {% if field.errors %}
+                            <span class="text-red-500 text-xs">
+                                {% for error in field.errors %}
+                                {{ error }}<br />
+                                {% endfor %}
+                            </span>
+                            {% endif %}
+                        </div>
+                    {% endif %}
                 {% endfor %}
                 <!-- Buttons -->
                 <div class="flex justify-between">
