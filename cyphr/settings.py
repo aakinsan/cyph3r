@@ -186,6 +186,12 @@ class Staging(Dev):
     # Secret Key
     SECRET_KEY = get_secret(id="django_secret")
 
+    # Static files Root folder
+    STATIC_ROOT = "/var/www/cyph3r/static"
+
+    # Media Root folder
+    MEDIA_ROOT = "/var/www/cyph3r/media"
+
     # Set secure proxy header
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
