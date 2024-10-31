@@ -228,11 +228,9 @@ class Staging(Dev):
     # Database
     # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-    DATABASE_PASSWORD = get_secret(id="postgres_secret")
+    # DATABASE_PASSWORD = get_secret(id="postgres_secret")
 
-    DATABASES = values.DatabaseURLValue(
-        f"postgres://cyph3r:{DATABASE_PASSWORD}@localhost/cyph3r"
-    )
+    DATABASES = values.DatabaseURLValue(f"postgres://cyph3r@localhost/cyph3r")
 
     # Installed Apps and Middleware
     INSTALLED_APPS = [
