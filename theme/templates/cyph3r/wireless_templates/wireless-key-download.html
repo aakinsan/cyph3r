@@ -43,14 +43,14 @@
                 </ul>
             </div>
             <div>
-                <p class="text-start font-palanquin font-semibold text-xs">{% translate "Wrapped Key File" %}</p>
+                <p class="text-start font-palanquin font-semibold text-xs">{% translate "Wrapped Key" %}</p>
                     <a href="{{ MEDIA_URL }}{{ wrapped_secret_key_file }}" download="{{ wrapped_secret_key_file }}" class="w-full mt-4 underline underline-offset-4 font-palanquin  decoration-blue-600 text-blue-600 text-xs">
                         {{ wrapped_secret_key_file }}
                     </a>
             </div>
             {% if milenage_file %}
             <div>
-                <p class="text-start font-palanquin font-semibold text-xs">{% translate "Milenage Keys" %}</p>
+                <p class="text-start font-palanquin font-semibold text-xs">{% translate "Milenage Key" %}</p>
                 <a href="{{ MEDIA_URL }}{{ milenage_file }}" download="{{ milenage_file }}" class="w-full mt-1 underline font-palanquin underline-offset-4 decoration-blue-600 text-blue-600 text-xs">
                     {{ milenage_file|capfirst }}
                 </a>
