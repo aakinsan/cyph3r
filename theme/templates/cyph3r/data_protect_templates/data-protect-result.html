@@ -13,7 +13,14 @@
                 <p class="pt-2 pb-2"><span class="font-bold">AAD:</span><br /> {{ operation_output.aad }}</p>
             {% endif %}
             <p class="pt-2 pb-2 whitespace-normal break-words"><span class="font-bold">{% translate "Result" %}:</span><br /> {{ operation_output.aead_output }}</p>           
-        </div>              
+        </div>     
+        <div class="flex self-end"> 
+            <a href={% url 'index' %}>
+                <button type="button" class="dark:bg-cyan-500 dark:hover:bg-cyan-400 bg-orange-500 hover:bg-orange-400 text-white text-xs mt-2 px-6 py-2 rounded-lg transition">
+                    {% translate "Home" %}
+                </button>
+            </a>            
+        </div>            
     </div>
 </div>
 {% endblock %}

@@ -155,14 +155,12 @@
     end
 
     def check_PGP_Encrypt()
-        on click from #id_pgp_encrypt
-            if (#id_pgp_encrypt.checked)
-                then remove .hidden from #public_key
-                then remove .hidden from #name
-            else
-                add .hidden to #public_key
-                add .hidden to #name
-        end
+        if (#id_pgp_encrypt.checked)
+            then remove .hidden from #public_key
+            then remove .hidden from #name
+        else
+            add .hidden to #public_key
+            add .hidden to #name
     end
 
     on change from #id_aead_operation call check_AEAD_Operation() 
