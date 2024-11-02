@@ -141,6 +141,7 @@ def key_share_info_post_bad_data(bad_pgp_public_keys):
         "scheme": "shamir",
         "key_task": "reconstruct",
         "threshold_count": 3,
+        "pgp_encrypt": True,
         "key_share_public_keys": [bad_pgp_public_keys["milenage_public_key"]],
     }
 
@@ -154,6 +155,7 @@ def key_share_info_shamir_reconstruct_post_data(pgp_public_keys):
         "scheme": "shamir",
         "key_task": "reconstruct",
         "threshold_count": 3,
+        "pgp_encrypt": True,
         "key_share_public_keys": [pgp_public_keys["milenage_public_key"]],
     }
 
@@ -167,6 +169,7 @@ def key_share_info_xor_reconstruct_post_data(pgp_public_keys):
         "scheme": "xor",
         "key_task": "reconstruct",
         "share_count": 5,
+        "pgp_encrypt": True,
         "key_share_public_keys": [pgp_public_keys["milenage_public_key"]],
     }
 
@@ -185,6 +188,33 @@ def key_share_reconstruct_shamir_key_shares():
     ]
     # randomly select 3 shares
     return random.sample(shamir_key_shares, 3)
+
+
+@pytest.fixture
+def key_share_info_xor_split_post_data():
+    """
+    Fixture to post key information data for Xor Key Split.
+    """
+    return {
+        "scheme": "xor",
+        "key_task": "split",
+        "share_count": 5,
+        "pgp_encrypt": False,
+    }
+
+
+@pytest.fixture
+def key_share_info_shamir_split_post_data():
+    """
+    Fixture to post key information data for Xor Key Split.
+    """
+    return {
+        "scheme": "shamir",
+        "key_task": "split",
+        "share_count": 5,
+        "threshold_count": 3,
+        "pgp_encrypt": False,
+    }
 
 
 @pytest.fixture
@@ -223,7 +253,7 @@ def key_share_reconstruct_xor_post_data(key_share_reconstruct_xor_key_shares):
 
 
 @pytest.fixture
-def key_share_reconstruct_shamir_secret_key():
+def key_share_shamir_secret_key():
     """
     Fixture to return shamir secret.
     """
@@ -231,11 +261,27 @@ def key_share_reconstruct_shamir_secret_key():
 
 
 @pytest.fixture
-def key_share_reconstruct_xor_secret_key():
+def key_share_split_shamir_secret_key_post_data(key_share_shamir_secret_key):
+    """
+    Fixture to return xor secret key post data.
+    """
+    return {"key": key_share_shamir_secret_key}
+
+
+@pytest.fixture
+def key_share_xor_secret_key():
     """
     Fixture to return xor secret.
     """
     return "224bf03c918154989fb50bf145bae8d22afbcc0e352a0cea3cf66549d5cb6a47"
+
+
+@pytest.fixture
+def key_share_split_xor_secret_key_post_data(key_share_xor_secret_key):
+    """
+    Fixture to return xor secret key post data.
+    """
+    return {"key": key_share_xor_secret_key}
 
 
 @pytest.fixture
@@ -263,6 +309,14 @@ def key_share_split_url():
 
 
 @pytest.fixture
+def key_share_result_url():
+    """
+    Fixture to return the URL for the Key share result page
+    """
+    return reverse("key-share-result")
+
+
+@pytest.fixture
 def key_share_info_html_page():
     """
     Fixture to return the Key Share Info HTML page.
@@ -273,17 +327,33 @@ def key_share_info_html_page():
 @pytest.fixture
 def key_share_reconstruct_html_page():
     """
-    Fixture to return the Generating key HTML page.
+    Fixture to return the key share reconstruct HTML page.
     """
     return "cyph3r/key_share_templates/key-share-reconstruct.html"
 
 
 @pytest.fixture
+def key_share_split_html_page():
+    """
+    Fixture to return the key share split HTML page.
+    """
+    return "cyph3r/key_share_templates/key-share-split.html"
+
+
+@pytest.fixture
 def key_share_download_html_page():
     """
-    Fixture to return the Generating key HTML page.
+    Fixture to return the key share download HTML page.
     """
     return "cyph3r/key_share_templates/key-share-download.html"
+
+
+@pytest.fixture
+def key_share_result_html_page():
+    """
+    Fixture to return the key share result HTML page.
+    """
+    return "cyph3r/key_share_templates/key-share-result.html"
 
 
 ##################
