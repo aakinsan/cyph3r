@@ -43,6 +43,7 @@ urlpatterns = [
         name="key-share-split",
     ),
     path("key-share-download/", views.key_share_download, name="key-share-download"),
+    path("key-share-result/", views.key_share_result, name="key-share-result"),
     path("key-share-intro/", views.key_share_intro, name="key-share-intro"),
     # Data Protect pages
     path("data-protect-intro/", views.data_protect_intro, name="data-protect-intro"),
