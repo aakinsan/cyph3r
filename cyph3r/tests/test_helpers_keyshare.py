@@ -26,8 +26,9 @@ def validate_key_share_info_post_response(
                 pass  # Ignore key_share_public_keys for the key-share-flow for now since files cannot be stored in the session
             else:
                 assert client.session[key] == value
-        # Assert public key files are written to disk
-        assert client.session["public_key_files"] is not None
+        if client.session["pgp_encrypt"]:
+            # Assert public key files are written to disk
+            assert client.session["public_key_files"] is not None
     return response
 
 
@@ -58,7 +59,20 @@ def validate_key_reconstruction_post_response(
             assert html_page_download in [t.name for t in response.templates]
         else:
             assert html_page_reconstruct in [t.name for t in response.templates]
-    assert client.session["public_key_files"] is not None
+    if client.session["pgp_encrypt"]:
+        assert client.session["public_key_files"] is not None
+    return response
+
+
+def validate_key_split_post_response(client, url, html_page_result, post_data):
+    """
+    Helper function to validate response and client session after posting form to the key-share-split view.
+    """
+    # client posts key for splitting
+    response = client.post(url, post_data, follow=True)
+    assert response.status_code == 200
+    # Check that the result page is displayed after the last post, otherwise continue displaying the reconstruction page
+    assert html_page_result in [t.name for t in response.templates]
     return response
 
 
