@@ -366,9 +366,16 @@ class KeyShareInfoForm(forms.Form, ValidateCyph3rForms):
         help_text=_("Minimum number of key shares for key reconstruction."),
     )
 
+    # PGP Encrypt Checkbox
+    pgp_encrypt = forms.BooleanField(
+        required=False,
+        label=_("PGP Encrypt"),
+        help_text=_("Encrypt output with PGP public key(s)."),
+    )
+
     key_share_public_keys = MultipleFileField(
         label=_("Key Share Public Keys"),
-        required=True,
+        required=False,
         help_text=_("Upload PGP Public key(s)"),
     )
 
@@ -376,7 +383,8 @@ class KeyShareInfoForm(forms.Form, ValidateCyph3rForms):
         # Get uploaded files
         files = self.cleaned_data.get("key_share_public_keys")
         # Validate uploaded files
-        self.validate_multiple_files_no_count(files, "key_share_public_keys")
+        if files:
+            self.validate_multiple_files_no_count(files, "key_share_public_keys")
         # Return files
         return files
 
@@ -387,6 +395,7 @@ class KeyShareInfoForm(forms.Form, ValidateCyph3rForms):
         key_task = cleaned_data.get("key_task")
         share_count = cleaned_data.get("share_count")
         threshold_count = cleaned_data.get("threshold_count")
+        pgp_encrypt = cleaned_data.get("pgp_encrypt")
         key_share_public_keys = cleaned_data.get("key_share_public_keys")
 
         if scheme == "shamir":
@@ -420,12 +429,20 @@ class KeyShareInfoForm(forms.Form, ValidateCyph3rForms):
                 "share_count", _("Share count is required for XOR key shares.")
             )
 
-        if key_task == "split" and share_count != len(key_share_public_keys):
+        if (
+            key_task == "split"
+            and pgp_encrypt == True
+            and share_count != len(key_share_public_keys)
+        ):
             self.add_error(
                 None,
                 _("Total number of public key files must be equal to the share count."),
             )
-        if key_task == "reconstruct" and len(key_share_public_keys) != 1:
+        if (
+            key_task == "reconstruct"
+            and pgp_encrypt == True
+            and len(key_share_public_keys) != 1
+        ):
             self.add_error(
                 "key_share_public_keys",
                 _("Only one PGP Public key file is required for reconstruction."),

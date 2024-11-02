@@ -96,7 +96,9 @@ def data_protect_intro(request):
     try:
         return render(request, "cyph3r/data_protect_templates/data-protect-intro.html")
     except Exception as e:
-        logger.error(f"An error occurred in the index view: {e}", exc_info=True)
+        logger.error(
+            f"An error occurred in the data protect intro view: {e}", exc_info=True
+        )
         return render(
             request,
             CYPH3R_500_ERROR_PAGE,
@@ -217,7 +219,9 @@ def data_protect_info(request):
             {"form": form},
         )
     except Exception as e:
-        logger.error(f"An error occurred in the index view: {e}", exc_info=True)
+        logger.error(
+            f"An error occurred in the data protect info view: {e}", exc_info=True
+        )
         return render(
             request,
             CYPH3R_500_ERROR_PAGE,
@@ -239,7 +243,7 @@ def data_protect_download(request):
         )
     except Exception as e:
         logger.error(
-            f"An error occurred in key share download view: {e}", exc_info=True
+            f"An error occurred in data protect download view: {e}", exc_info=True
         )
         return render(
             request,
@@ -261,7 +265,7 @@ def data_protect_result(request):
         )
     except Exception as e:
         logger.error(
-            f"An error occurred in key share download view: {e}", exc_info=True
+            f"An error occurred in the data protect result view: {e}", exc_info=True
         )
         return render(
             request,
@@ -314,6 +318,26 @@ def key_share_download(request):
         )
 
 
+@require_http_methods(["GET"])
+def key_share_result(request):
+    """
+    Returns Key Share Result when PGP key is not uploaded
+    """
+    try:
+        key_list = request.session["key_list"]
+        return render(
+            request,
+            "cyph3r/key_share_templates/key-share-result.html",
+            {"key_list": key_list},
+        )
+    except Exception as e:
+        logger.error(f"An error occurred in key share result view: {e}", exc_info=True)
+        return render(
+            request,
+            CYPH3R_500_ERROR_PAGE,
+        )
+
+
 @require_http_methods(["GET", "POST"])
 def key_share_info(request):
     """
@@ -327,6 +351,7 @@ def key_share_info(request):
         request.session.pop("key_task", None)
         request.session.pop("share_count", None)
         request.session.pop("threshold_count", None)
+        request.session.pop("key_list", None)
 
         # Check if the request is a POST request
         if request.method == "POST":
@@ -346,27 +371,30 @@ def key_share_info(request):
                 session_id = request.session.session_key
 
                 # Store the form data in the session
+                pgp_encrypt = form.cleaned_data.get("pgp_encrypt")
+                key_task = form.cleaned_data.get("key_task")
+                request.session["pgp_encrypt"] = pgp_encrypt
+                request.session["key_task"] = key_task
                 request.session["scheme"] = form.cleaned_data.get("scheme")
-                request.session["key_task"] = form.cleaned_data.get("key_task")
                 request.session["share_count"] = form.cleaned_data.get("share_count")
                 request.session["threshold_count"] = form.cleaned_data.get(
                     "threshold_count"
                 )
 
-                # write uploaded public keys to directory name session_id on the server and get list of file names
-                public_key_files = write_key_share_so_public_keys_to_disk(
-                    form, session_id
-                )
-
-                # Store the file names in the session
-                request.session["public_key_files"] = public_key_files
+                # write uploaded public keys to directory name session_id on the server and get list of file names if pgp_encrypt is True
+                if pgp_encrypt:
+                    public_key_files = write_key_share_so_public_keys_to_disk(
+                        form, session_id
+                    )
+                    # Store the file names in the session
+                    request.session["public_key_files"] = public_key_files
 
                 # Redirect to the key share reconstruction page if the key task is 'reconstruct'
-                if form.cleaned_data.get("key_task") == "reconstruct":
+                if key_task == "reconstruct":
                     return redirect("key-share-reconstruct")
 
                 # Redirect to the key share split page if the key task is 'split'
-                if form.cleaned_data.get("key_task") == "split":
+                if key_task == "split":
                     return redirect("key-share-split")
             else:
                 return render(
@@ -425,7 +453,10 @@ def key_share_split(request):
                 # Get the secret key from the form and convert to bytes
                 secret_key = cm.hex_to_bytes(form.cleaned_data["key"])
 
-                if request.session.get("scheme") == "shamir":
+                # Get the scheme from the session
+                scheme = request.session.get("scheme")
+
+                if scheme == "shamir":
                     # Retrieve the threshold number required to restore the secret
                     threshold_count = request.session.get("threshold_count")
 
@@ -438,7 +469,7 @@ def key_share_split(request):
                         key=None, number_of_shares=share_count, type="SHAMIR"
                     )
 
-                if request.session.get("scheme") == "xor":
+                if scheme == "xor":
                     # Determine length of the secret key (bytes) e.g. 16 bytes = 128 bits
                     key_size = len(secret_key) * 8
 
@@ -450,25 +481,43 @@ def key_share_split(request):
                         key=None, number_of_shares=share_count, type="XOR"
                     )
 
-                secret_files = create_key_share_split_secret_files(
-                    cm,
-                    shares,
-                    request.session.session_key,
-                    request.session["public_key_files"],
-                )
+                # If PGP encryption is requested, encrypt the key shares with the public keys
+                pgp_encrypt = request.session.get("pgp_encrypt")
+                if pgp_encrypt:
+                    secret_files = create_key_share_split_secret_files(
+                        cm,
+                        shares,
+                        request.session.session_key,
+                        request.session["public_key_files"],
+                    )
 
-                # Update the database with the File Encryption information
-                FileEncryption.objects.create(
-                    key=None,
-                    encryption_algorithm="PGP",
-                    number_of_files_encrypted=len(secret_files),
-                )
+                    # Update the database with the File Encryption information
+                    FileEncryption.objects.create(
+                        key=None,
+                        encryption_algorithm="PGP",
+                        number_of_files_encrypted=len(secret_files),
+                    )
 
-                # Add path to secret files to session
-                request.session["secret_files"] = secret_files
+                    # Add path to secret files to session
+                    request.session["secret_files"] = secret_files
 
-                # Return page to download the secret file
-                return redirect("key-share-download")
+                    # Return page to download the secret file
+                    return redirect("key-share-download")
+                else:
+                    key_shares_list = []
+                    for idx, share in enumerate(shares, start=1):
+                        # Shamir shares are tuples with index and share
+                        if isinstance(share, tuple):
+                            key_shares_list.append((idx, cm.bytes_to_hex(share[1])))
+                        # XOR Shares
+                        else:
+                            key_shares_list.append((cm.bytes_to_hex(share)))
+
+                    # Store the key shares in the session
+                    request.session["key_list"] = key_shares_list
+
+                    # Redirect to the key share result page
+                    return redirect("key-share-result")
 
             else:
                 return render(
@@ -564,7 +613,7 @@ def key_share_reconstruct(request):
                     token = f.encrypt(cm.hex_to_bytes(form.cleaned_data["key_share"]))
                     request.session["key_shares"].append(
                         (key_index, cm.bytes_to_hex(token))
-                    )  # Only JSON serializable data can be stored in session/ Bytes are not / converting to hex
+                    )  # Only JSON serializable data can be stored in session; bytes are not serializable; converting to hex
 
                 if request.session.get("scheme") == "xor":
                     # Retrieve the share count required to restore the secret
@@ -574,7 +623,7 @@ def key_share_reconstruct(request):
                     token = f.encrypt(cm.hex_to_bytes(form.cleaned_data["key_share"]))
                     request.session["key_shares"].append(
                         (cm.bytes_to_hex(token))
-                    )  # Only JSON serializable data can be stored in session/ Bytes are not / converting to hex
+                    )  # Only JSON serializable data can be stored in session; bytes are not serializable; converting to hex
 
                 # Update the database with the data encryption information
                 FileEncryption.objects.create(
@@ -596,8 +645,8 @@ def key_share_reconstruct(request):
                             share = f.decrypt(cm.hex_to_bytes(encrypted_share))
                             shares.append((idx, share))
 
-                        # Reconstruct the secret using the Shamir key shares
-                        secret = cm.shamir_reconstruct_secret(shares)
+                        # Reconstruct the key using Shamir Scheme
+                        key_bytes = cm.shamir_reconstruct_secret(shares)
 
                     if request.session.get("scheme") == "xor":
                         # Decrypt the encrypted key shares and store in the list
@@ -605,38 +654,44 @@ def key_share_reconstruct(request):
                             share = f.decrypt(cm.hex_to_bytes(encrypted_share))
                             shares.append((share))
 
-                        # Reconstruct the secret using the xor key shares
-                        secret = cm.xor_reconstruct_secret(shares)
-
-                    # Write the secret to a file and encrypt with PGP public keys
-                    secret_files = create_key_share_reconstruct_secret_file(
-                        cm,
-                        secret,
-                        request.session.session_key,
-                        request.session["public_key_files"],
-                    )
-
-                    # Update the database with the data encryption information
-                    FileEncryption.objects.create(
-                        key=None,
-                        encryption_algorithm="PGP",
-                        number_of_files_encrypted=len(secret_files),
-                    )
-
-                    # Add path to secret files to session
-                    request.session["secret_files"] = secret_files
+                        # Reconstruct the key using the xor scheme
+                        key_bytes = cm.xor_reconstruct_secret(shares)
 
                     # Clear cache data and relevant request session keys
                     request.session.pop("submitted_officer_count", None)
                     request.session.pop("key_shares", None)
-                    request.session.pop("scheme", None)
-                    request.session.pop("key_task", None)
-                    request.session.pop("share_count", None)
-                    request.session.pop("threshold_count", None)
                     cache.delete(f"encryption_key_{request.session.session_key}")
 
-                    # Return page to download the secret file
-                    return redirect("key-share-download")
+                    # Check if PGP encryption is requested
+                    pgp_encrypt = request.session.get("pgp_encrypt")
+
+                    # Write the secret to a file and encrypt with PGP public keys if requested
+                    if pgp_encrypt:
+                        secret_files = create_key_share_reconstruct_secret_file(
+                            cm,
+                            key_bytes,
+                            request.session.session_key,
+                            request.session["public_key_files"],
+                        )
+
+                        # Update the database with the data encryption information
+                        FileEncryption.objects.create(
+                            key=None,
+                            encryption_algorithm="PGP",
+                            number_of_files_encrypted=len(secret_files),
+                        )
+
+                        # Add path to secret files to session
+                        request.session["secret_files"] = secret_files
+
+                        # Return page to download the secret file
+                        return redirect("key-share-download")
+                    else:
+                        # Store the secret in the session
+                        request.session["key_list"] = [cm.bytes_to_hex(key_bytes)]
+
+                        # Redirect to the key share result page
+                        return redirect("key-share-result")
                 else:
                     return redirect("key-share-reconstruct")
 
