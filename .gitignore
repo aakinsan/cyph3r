@@ -95,9 +95,3 @@ coverage/
 *.tmp
 *.swp
 
-# Sonarqube files
-.sonar_lock
-report-task.txt
-.scannerwork/*
-.scannerwork/
-.scannerwork/report-task.txt
