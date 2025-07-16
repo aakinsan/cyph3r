@@ -183,9 +183,6 @@ class Staging(Dev):
     # Debugging is disabled
     DEBUG = False
 
-    # Secret Key
-    SECRET_KEY = get_secret(id="django_secret")
-
     # Static files Root folder
     STATIC_ROOT = "/var/www/cyph3r/static"
 
@@ -269,51 +266,54 @@ class Staging(Dev):
     # Remove Internal IPs
     INTERNAL_IPS = []
 
-    # Logging Settings for Production (to GCP Cloud Logging and to file)
-    # Initialize the Cloud Logging client
-    client = google.cloud.logging.Client()
+    @classmethod
+    def post_setup(cls):
+        super().post_setup()
+        # Load secret key
+        cls.SECRET_KEY = get_secret(id="django_secret")
 
-    # Set up the handler for sending logs to GCP Cloud Logging
-    cloud_logging_handler = CloudLoggingHandler(client)
+        # Setup Cloud Cloud Logging
+        client = google.cloud.logging.Client()
+        cloud_logging_handler = CloudLoggingHandler(client)
 
-    LOGGING = {
-        "version": 1,
-        "disable_existing_loggers": False,
-        "formatters": {
-            "verbose": {
-                "format": "{levelname} {asctime} {module} {message}",
-                "style": "{",
+        cls.LOGGING = {
+            "version": 1,
+            "disable_existing_loggers": False,
+            "formatters": {
+                "verbose": {
+                    "format": "{levelname} {asctime} {module} {message}",
+                    "style": "{",
+                },
             },
-        },
-        "handlers": {
-            "gcp_handler": {
-                "level": "DEBUG",
-                "class": "google.cloud.logging.handlers.CloudLoggingHandler",
-                "client": client,
+            "handlers": {
+                "gcp_handler": {
+                    "level": "DEBUG",
+                    "class": "google.cloud.logging.handlers.CloudLoggingHandler",
+                    "client": client,
+                },
             },
-        },
-        "loggers": {
-            "": {
-                "handlers": ["gcp_handler"],
-                "level": "ERROR",
+            "loggers": {
+                "": {
+                    "handlers": ["gcp_handler"],
+                    "level": "ERROR",
+                },
+                "django": {
+                    "handlers": ["gcp_handler"],
+                    "level": "INFO",
+                    "propagate": False,
+                },
+                "django.request": {
+                    "handlers": ["gcp_handler"],
+                    "level": "INFO",
+                    "propagate": False,
+                },
+                "django.db.backends": {
+                    "handlers": ["gcp_handler"],
+                    "level": "ERROR",
+                    "propagate": False,
+                },
             },
-            "django": {
-                "handlers": ["gcp_handler"],
-                "level": "INFO",
-                "propagate": False,
-            },
-            "django.request": {
-                "handlers": ["gcp_handler"],
-                "level": "INFO",
-                "propagate": False,
-            },
-            "django.db.backends": {
-                "handlers": ["gcp_handler"],
-                "level": "ERROR",
-                "propagate": False,
-            },
-        },
-    }
+        }
 
 
 # Production Settings
