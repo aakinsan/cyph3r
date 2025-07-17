@@ -55,7 +55,6 @@ python manage.py migrate
  ```
 
 ### Usage
-Open 2 terminals and enter the following in each one
 
 1. Start the Django dev server. By default it runs on 127.0.0.1:8000
 
