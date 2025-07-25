@@ -31,7 +31,7 @@ class Dev(Configuration):
     # SECURITY WARNING: don't run with debug turned on in production!
     DEBUG = values.BooleanValue(True)
 
-    ALLOWED_HOSTS = values.ListValue()
+    ALLOWED_HOSTS = ["*"]
 
     # Application definition
 
@@ -182,6 +182,9 @@ class Dev(Configuration):
 class Staging(Dev):
     # Debugging is disabled
     DEBUG = False
+    
+    # Set Allowed Hosts (domain or IP address in staging/production)
+    ALLOWED_HOSTS = values.ListValue()
 
     # Static files Root folder
     STATIC_ROOT = "/var/www/cyph3r/static"
