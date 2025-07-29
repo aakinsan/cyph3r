@@ -5,7 +5,7 @@ on:
 jobs:
   lint-and-security:
     runs-on: ubuntu-latest
-    continue-on-error: true
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,12 +22,15 @@ jobs:
 
       - name: Run Black (check formatting)
         run: black --check .
+        continue-on-error: true
 
       - name: Run Ruff (linting)
         run: ruff check .
+        continue-on-error: true
 
       - name: Run Bandit (security analysis)
         run: bandit -r cyph3r --severity-level high --format json --output bandit-report.json
+        continue-on-error: true
         
       - name: Upload Bandit Report
         uses: actions/upload-artifact@v4
