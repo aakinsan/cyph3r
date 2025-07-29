@@ -31,7 +31,7 @@ class CryptoManager:
 
     @staticmethod
     def generate_random_key_bytes(key_size: int) -> bytes:
-        """Generates a random key of the specified size in bytes."""
+        """Generates a random key of the specified size (e.g. 128 or 256) in bytes."""
         if key_size % 8 != 0:
             raise ValueError(MULTIPLEEIGHTBITS)
         bytes_length = int(key_size / 8)
@@ -39,7 +39,7 @@ class CryptoManager:
 
     @staticmethod
     def generate_random_key_hex(key_size: int) -> str:
-        """Generates a random key of the specified size in hexadecimal format."""
+        """Generates a random key of the specified size (e.g. 128 or 256) in hexadecimal format."""
         if key_size % 8 != 0:
             raise ValueError(MULTIPLEEIGHTBITS)
         bytes_length = int(key_size / 8)
