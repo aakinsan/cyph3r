@@ -95,3 +95,5 @@ coverage/
 *.tmp
 *.swp
 
+# google-github-actions/auth
+gha-creds-*.json
