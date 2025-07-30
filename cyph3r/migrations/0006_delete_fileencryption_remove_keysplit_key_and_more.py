@@ -6,21 +6,21 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cyph3r', '0005_remove_fileencryption_encrypted_with_key_and_more'),
+        ("cyph3r", "0005_remove_fileencryption_encrypted_with_key_and_more"),
     ]
 
     operations = [
         migrations.DeleteModel(
-            name='FileEncryption',
+            name="FileEncryption",
         ),
         migrations.RemoveField(
-            model_name='keysplit',
-            name='key',
+            model_name="keysplit",
+            name="key",
         ),
         migrations.DeleteModel(
-            name='KeyGeneration',
+            name="KeyGeneration",
         ),
         migrations.DeleteModel(
-            name='KeySplit',
+            name="KeySplit",
         ),
     ]

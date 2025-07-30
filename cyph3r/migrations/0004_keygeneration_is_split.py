@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cyph3r', '0003_initial'),
+        ("cyph3r", "0003_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='keygeneration',
-            name='is_split',
+            model_name="keygeneration",
+            name="is_split",
             field=models.BooleanField(default=False),
         ),
     ]

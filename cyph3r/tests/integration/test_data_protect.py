@@ -162,7 +162,7 @@ def test_data_protect_gcm_post_response(
         aead_key, cm.hex_to_bytes(nonce_hex), cm.hex_to_bytes(ct_hex), aad
     )
     assert cm.bytes_to_utf8(pt) == "cyph3r"
-    
+
 
 @pytest.mark.integration
 @pytest.mark.django_db

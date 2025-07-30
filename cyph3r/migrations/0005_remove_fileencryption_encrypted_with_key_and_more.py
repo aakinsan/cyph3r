@@ -8,41 +8,51 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cyph3r', '0004_keygeneration_is_split'),
+        ("cyph3r", "0004_keygeneration_is_split"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='fileencryption',
-            name='encrypted_with_key',
+            model_name="fileencryption",
+            name="encrypted_with_key",
         ),
         migrations.RemoveField(
-            model_name='fileencryption',
-            name='file_id',
+            model_name="fileencryption",
+            name="file_id",
         ),
         migrations.RemoveField(
-            model_name='keygeneration',
-            name='algorithm',
+            model_name="keygeneration",
+            name="algorithm",
         ),
         migrations.AddField(
-            model_name='keygeneration',
-            name='date_generated',
-            field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now),
+            model_name="keygeneration",
+            name="date_generated",
+            field=models.DateTimeField(
+                auto_now_add=True, default=django.utils.timezone.now
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='keysplit',
-            name='type',
-            field=models.CharField(choices=[('XOR', 'xor'), ('SHAMIR', 'shamir')], default='SHAMIR', max_length=10),
+            model_name="keysplit",
+            name="type",
+            field=models.CharField(
+                choices=[("XOR", "xor"), ("SHAMIR", "shamir")],
+                default="SHAMIR",
+                max_length=10,
+            ),
         ),
         migrations.AlterField(
-            model_name='keygeneration',
-            name='key_id',
+            model_name="keygeneration",
+            name="key_id",
             field=models.CharField(max_length=255),
         ),
         migrations.AlterField(
-            model_name='keysplit',
-            name='key',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='cyph3r.keygeneration'),
+            model_name="keysplit",
+            name="key",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="cyph3r.keygeneration",
+            ),
         ),
     ]

@@ -10,6 +10,7 @@ from test_helpers_wireless import (
     get_wrapped_secret_key,
 )
 
+
 @pytest.mark.integration
 def test_wireless_view(client):
     """
@@ -21,6 +22,7 @@ def test_wireless_view(client):
     assert "cyph3r/wireless_templates/wireless-ceremony-intro.html" in [
         t.name for t in response.templates
     ]
+
 
 @pytest.mark.integration
 @pytest.mark.django_db
@@ -108,6 +110,7 @@ def test_wireless_key_generation_milenage_op_keys(
         == cm.hex_to_bytes(fallback_yubi_secret_key)
     )
 
+
 @pytest.mark.integration
 @pytest.mark.django_db
 def test_wireless_key_generation_milenage_transport_keys(
@@ -177,6 +180,7 @@ def test_wireless_key_generation_milenage_transport_keys(
         == cm.hex_to_bytes(milenage_secret_key)
     )
 
+
 @pytest.mark.integration
 @pytest.mark.django_db
 def test_wireless_key_generation_tuak_transport_keys(
@@ -235,6 +239,7 @@ def test_wireless_key_generation_tuak_transport_keys(
 
     # Assert the decrypted secret key is the same as the provider secret key
     assert decrypted_secret_key == cm.hex_to_bytes(provider_secret_key)
+
 
 @pytest.mark.integration
 @pytest.mark.django_db

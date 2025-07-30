@@ -9,34 +9,70 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('cyph3r', '0002_delete_user'),
+        ("cyph3r", "0002_delete_user"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='KeyGeneration',
+            name="KeyGeneration",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('key_id', models.CharField(max_length=255, unique=True)),
-                ('algorithm', models.CharField(max_length=50)),
-                ('key_size', models.IntegerField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("key_id", models.CharField(max_length=255, unique=True)),
+                ("algorithm", models.CharField(max_length=50)),
+                ("key_size", models.IntegerField()),
             ],
         ),
         migrations.CreateModel(
-            name='FileEncryption',
+            name="FileEncryption",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('file_id', models.CharField(max_length=255)),
-                ('encryption_algorithm', models.CharField(max_length=50)),
-                ('encrypted_with_key', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='cyph3r.keygeneration')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("file_id", models.CharField(max_length=255)),
+                ("encryption_algorithm", models.CharField(max_length=50)),
+                (
+                    "encrypted_with_key",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="cyph3r.keygeneration",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='KeySplit',
+            name="KeySplit",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('number_of_shares', models.IntegerField()),
-                ('key', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='cyph3r.keygeneration')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("number_of_shares", models.IntegerField()),
+                (
+                    "key",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="cyph3r.keygeneration",
+                    ),
+                ),
             ],
         ),
     ]

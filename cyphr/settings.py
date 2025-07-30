@@ -182,7 +182,7 @@ class Dev(Configuration):
 class Staging(Dev):
     # Debugging is disabled
     DEBUG = False
-    
+
     # Set Allowed Hosts (domain or IP address in staging/production)
     ALLOWED_HOSTS = values.ListValue()
 

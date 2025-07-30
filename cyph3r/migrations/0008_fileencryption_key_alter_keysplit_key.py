@@ -7,18 +7,26 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('cyph3r', '0007_initial'),
+        ("cyph3r", "0007_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='fileencryption',
-            name='key',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='cyph3r.keygeneration'),
+            model_name="fileencryption",
+            name="key",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="cyph3r.keygeneration",
+            ),
         ),
         migrations.AlterField(
-            model_name='keysplit',
-            name='key',
-            field=models.OneToOneField(null=True, on_delete=django.db.models.deletion.CASCADE, to='cyph3r.keygeneration'),
+            model_name="keysplit",
+            name="key",
+            field=models.OneToOneField(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="cyph3r.keygeneration",
+            ),
         ),
     ]
