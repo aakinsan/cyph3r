@@ -1,0 +1,16 @@
+# This configuration file is for Bandit, a security linter for Python code.
+# It specifies which directories and files to exclude from the checks,
+# as well as which specific checks to skip.
+
+# Exclude tests folder from checks
+exclude_dirs: ['tests']
+
+# Excluding specific tests
+# B101 - assert used in test files, acceptable for pytest
+# B413 - Using PyCryptodome's Shamir implementation and not the unmaintained pyCrypto library.
+# B311 - Selecting a subset of test data and not using it for key generation
+# B105 - Passwords are not hardcoded in the code, form field names are been referenced
+# B305 - ECB is used for Key Checksum Value (KCV) calculation
+skips: ['B101', 'B413', 'B311', 'B105', 'B305']
+   
+
