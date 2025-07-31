@@ -1,6 +1,7 @@
 name: cyph3r-workflow-jobs
 on:
   push:
+  workflow_dispatch:
 
 jobs:
   lint-and-security:
