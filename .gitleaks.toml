@@ -1,0 +1,6 @@
+title = "Gitleaks Configuration"
+version = 2
+
+[allowlist]
+description = "Global allow rules"
+files = ["tests/"]

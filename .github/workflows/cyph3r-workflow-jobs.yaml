@@ -31,7 +31,10 @@ jobs:
       - name: Run Gitleaks (secret scanning)
         uses: gitleaks/gitleaks-action@v2
         with:
-          args: detect --source=. --exclude-path=tests/ --report-path=gitleaks-report.json
+          config: .gitleaks.toml
+          fail_on: 'all'
+          report_format: 'json'
+          report_path: gitleaks-report.json
 
       - name: Run Bandit (security analysis)
         run: bandit -c bandit.yaml -r . -f json -o bandit-report.json
