@@ -2,7 +2,6 @@ from google.cloud import kms_v1
 from google.cloud import secretmanager
 from google.cloud.storage import Blob
 from google.cloud import storage
-from google.cloud.storage import Bucket
 from google.api_core.exceptions import (
     GoogleAPIError,
     AlreadyExists,

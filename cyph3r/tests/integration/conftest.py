@@ -108,16 +108,10 @@ def bad_pgp_public_keys(pgp_public_keys):
     # Read public keys from disk
     with open(test_public_keys_dir / "alex.jpg", "rb") as fbad1, open(
         test_public_keys_dir / "loremipsum.txt", "rb"
-    ) as fbad2, open(test_public_keys_dir / "hxx.jpg", "rb") as fbad3, open(
-        test_public_keys_dir / "key.png", "rb"
-    ) as fbad4, open(
-        test_public_keys_dir / "otp2.webp", "rb"
-    ) as fbad5:
+    ) as fbad2, open(test_public_keys_dir / "hxx.jpg", "rb") as fbad3:
         badpgp1 = SimpleUploadedFile("alex.jpg", fbad1.read())
         badpgp2 = SimpleUploadedFile("loremipsum.txt", fbad2.read())
         badpgp3 = SimpleUploadedFile("hxx.jpg", fbad3.read())
-        badpgp4 = SimpleUploadedFile("key.png", fbad4.read())
-        badpgp5 = SimpleUploadedFile("otp2.webp", fbad5.read())
 
     bad_pgp_file_uploads = copy.deepcopy(pgp_public_keys)
     bad_pgp_file_uploads["provider_public_keys"][1] = badpgp2

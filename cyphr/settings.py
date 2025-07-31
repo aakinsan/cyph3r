@@ -236,7 +236,7 @@ class Staging(Dev):
 
     # DATABASE_PASSWORD = get_secret(id="postgres_secret")
 
-    DATABASES = values.DatabaseURLValue(f"postgres://cyph3r@localhost/cyph3r")
+    DATABASES = values.DatabaseURLValue("postgres://cyph3r@localhost/cyph3r")
 
     # Installed Apps and Middleware
     INSTALLED_APPS = [
@@ -277,7 +277,7 @@ class Staging(Dev):
 
         # Setup Cloud Cloud Logging
         client = google.cloud.logging.Client()
-        cloud_logging_handler = CloudLoggingHandler(client)
+        cloud_logging_handler = CloudLoggingHandler(client)  # noqa: F841
 
         cls.LOGGING = {
             "version": 1,

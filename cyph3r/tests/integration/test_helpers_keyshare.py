@@ -90,7 +90,7 @@ def get_key_share_secret_key_and_validate(cm, client, response, secret_key):
             decrypted_secret = cm.gpg.decrypt(encrypted_secret)
 
             # Check that the decryption was successful
-            assert decrypted_secret.ok == True
+            assert decrypted_secret.ok
 
     # Check that the decrypted secret key is the same secret key used to create the key shares
     assert decrypted_secret.data.decode() == secret_key

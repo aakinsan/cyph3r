@@ -431,7 +431,7 @@ class KeyShareInfoForm(forms.Form, ValidateCyph3rForms):
 
         if (
             key_task == "split"
-            and pgp_encrypt == True
+            and pgp_encrypt
             and share_count != len(key_share_public_keys)
         ):
             self.add_error(
@@ -440,7 +440,7 @@ class KeyShareInfoForm(forms.Form, ValidateCyph3rForms):
             )
         if (
             key_task == "reconstruct"
-            and pgp_encrypt == True
+            and pgp_encrypt
             and len(key_share_public_keys) != 1
         ):
             self.add_error(

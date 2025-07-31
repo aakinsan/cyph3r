@@ -59,7 +59,7 @@ def process_provider_keys(cm, response):
             provider_decrypted_data = cm.gpg.decrypt(provider_encrypted_data)
 
             # Check that the decryption was successful
-            assert provider_decrypted_data.ok == True
+            assert provider_decrypted_data.ok
 
             # Retrieve the provider key shares from the decrypted data
             provider_key_share = str(provider_decrypted_data).split("\n")[5]
@@ -90,7 +90,7 @@ def process_milenage_keys(cm, response):
         milenage_decrypted_data = cm.gpg.decrypt(milenage_encrypted_data)
 
     # Check that the decryption was successful
-    assert milenage_decrypted_data.ok == True
+    assert milenage_decrypted_data.ok
 
     # Retrieve the milenage key from the decrypted data
     milenage_secret_key = str(milenage_decrypted_data)
@@ -112,7 +112,7 @@ def process_yubikey_fallback_keys(cm, response):
             decrypted_data = cm.gpg.decrypt(yubikey_encrypted_data)
 
         # Check that the decryption was successful
-        assert decrypted_data.ok == True
+        assert decrypted_data.ok
 
         # Retrieve the milenage key from the decrypted data
         secret_key = str(decrypted_data)
@@ -142,7 +142,7 @@ def process_security_officer_wrap_keys(cm, response):
             decrypted_data = cm.gpg.decrypt(encrypted_data)
 
             # Check that the decryption was successful
-            assert decrypted_data.ok == True
+            assert decrypted_data.ok
 
             # Retrieve the security officer shares from the decrypted data
             key_share = str(decrypted_data).split("\n")[7]

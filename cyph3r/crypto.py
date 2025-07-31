@@ -5,7 +5,6 @@ import logging
 import binascii
 import string
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes, aead
-from cryptography.hazmat.primitives import padding
 from cryptography import exceptions as crypto_exceptions
 from Crypto.Protocol.SecretSharing import Shamir
 

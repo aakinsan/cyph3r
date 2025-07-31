@@ -149,7 +149,7 @@ def data_protect_info(request):
                             aead_output = cm.decrypt_with_chacha20_poly1305(
                                 aead_key, nonce, ciphertext, aad
                             )
-                    except (ValueError, InvalidTag) as e:
+                    except (ValueError, InvalidTag):
                         form.add_error(
                             None,
                             "Decryption failed - Ensure all parameters entered are valid",

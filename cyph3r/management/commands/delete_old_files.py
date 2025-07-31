@@ -1,6 +1,5 @@
 import time
-from django.core.management.base import BaseCommand, CommandError
-from django.conf import settings
+from django.core.management.base import BaseCommand
 import os
 from django.utils._os import safe_join
 from pathlib import Path

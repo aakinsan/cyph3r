@@ -147,7 +147,7 @@ def test_data_protect_gcm_post_response(
         encrypted_data = f.read()
         decrypted_data = cm.gpg.decrypt(encrypted_data)
 
-    assert decrypted_data.ok == True
+    assert decrypted_data.ok
 
     # Get the AEAD Key
     aead_key = cm.hex_to_bytes("5b5239115089e0f9678ea6e49ef07b6a")

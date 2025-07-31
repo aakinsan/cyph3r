@@ -1,5 +1,3 @@
-from django.conf import settings
-
 """
 Helper functions for testing data protect views.
 
