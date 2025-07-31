@@ -97,3 +97,7 @@ coverage/
 
 # google-github-actions/auth
 gha-creds-*.json
+
+# SonarQube
+.sonarqube/
+sonar-project.properties
