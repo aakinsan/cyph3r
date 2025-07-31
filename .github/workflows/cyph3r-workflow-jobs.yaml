@@ -29,7 +29,7 @@ jobs:
         continue-on-error: true
 
       - name: Run Bandit (security analysis)
-        run: bandit -r cyph3r --severity-level high --format json --output bandit-report.json
+        run: bandit -c bandit.yaml -r . -f json -o bandit-report.json
         continue-on-error: true
         
       - name: Upload Bandit Report
