@@ -27,13 +27,19 @@ jobs:
       - name: Run Ruff (linting)
         run: ruff check .
         continue-on-error: true
+      
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          args: detect --source=. --report-path=gitleaks-report.json
 
       - name: Run Bandit (security analysis)
         run: bandit -c bandit.yaml -r . -f json -o bandit-report.json
-        continue-on-error: true
         
       - name: Upload Bandit Report
         uses: actions/upload-artifact@v4
         with:
           name: bandit-report
-          path: bandit-report.json
+          path: | 
+            bandit-report.json
+            gitleaks-report.json
