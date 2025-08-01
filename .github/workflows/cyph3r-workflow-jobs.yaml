@@ -13,9 +13,9 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
-      - name: install django and generate django secret key
+      - name: install Dependencies and generate django secret key
         run: |
-          python -m pip install django
+          python -m pip install -r requirements.txt
           DJANGO_DEV_SECRET_KEY=$(python3 -c 'import django.utils.crypto; print(django.utils.crypto.get_random_string(50, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-="))')
                     echo "DJANGO_DEV_SECRET_KEY=$DJANGO_DEV_SECRET_KEY" >> $GITHUB_ENV
 
