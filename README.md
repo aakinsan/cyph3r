@@ -11,9 +11,10 @@ It consists of the following modules:
 
 ## Usage (in the development environment only!)
 The docker image built is not production ready 
-- Docker is running the django dev and redis server
-- Allowed hosts is set to any
-- Django secret generated is stored as an env var
+- Single Container is running the django dev, db.sqlite and redis server.
+- Django allowed hosts is set to any.
+- Django secret key generated is stored as an env var.
+- Django is running in debug mode etc.
 
 1. Install docker - https://docs.docker.com/
 
