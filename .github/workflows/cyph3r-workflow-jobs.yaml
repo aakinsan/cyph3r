@@ -35,7 +35,7 @@ jobs:
         run: python manage.py migrate --noinput
 
       - name: Create Media Folder to store test artifacts
-        run: mkdir -p medi
+        run: mkdir -p media
 
       - name: Run unit and integration tests
         run: pytest --cov=cyph3r --cov-report=xml --cov-report=html --cov-report=term-missing
