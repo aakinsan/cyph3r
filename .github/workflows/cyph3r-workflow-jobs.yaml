@@ -13,9 +13,10 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
-      - name: install Dependencies and generate django secret key
+      - name: install Dependencies, generate django secret key and create media directory to store test artifacts
         run: |
           python -m pip install -r requirements.txt
+          mkdir media
           DJANGO_DEV_SECRET_KEY=$(python3 -c 'import django.utils.crypto; print(django.utils.crypto.get_random_string(50, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-="))')
                     echo "DJANGO_DEV_SECRET_KEY=$DJANGO_DEV_SECRET_KEY" >> $GITHUB_ENV
 
